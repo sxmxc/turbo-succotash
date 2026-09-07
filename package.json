@@ -1,0 +1,52 @@
+{
+  "name": "social-room",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24.20.0 <25"
+  },
+  "packageManager": "npm@12.0.2",
+  "scripts": {
+    "dev": "node --env-file=.env scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p apps/web/tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "tsx --test tests/*.test.ts",
+    "test:browser": "playwright test",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "db:up": "docker compose --env-file .env -f infra/compose/compose.yml -f infra/compose/dev.yml up -d --wait postgres",
+    "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
+    "compose:build": "node scripts/compose.mjs build",
+    "compose:up": "node scripts/compose.mjs up",
+    "compose:down": "node scripts/compose.mjs down",
+    "smoke": "node --import tsx scripts/smoke.ts",
+    "release:check": "node scripts/release.mjs validate",
+    "release:manifest": "node scripts/release.mjs manifest",
+    "deploy": "node scripts/release.mjs deploy",
+    "env:init": "node scripts/init-env.mjs",
+    "test:database": "node scripts/test-database.mjs",
+    "test:dependencies": "node scripts/test-dependencies.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.13.3",
+    "@types/pg": "8.23.1",
+    "eslint": "10.10.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-vue": "10.11.0",
+    "prettier": "3.9.6",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.69.0",
+    "vue-tsc": "3.3.11"
+  }
+}

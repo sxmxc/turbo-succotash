@@ -1,0 +1,79 @@
+name: Bootstrap CI and release
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install --global npm@12.0.2
+      - run: npm ci
+      - run: npm run check
+      - run: npm run env:init
+      - run: npm run compose:build
+      - run: npm run compose:up
+      - run: npm run smoke
+      - run: npm run test:database
+      - run: npm run test:dependencies
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: npm run release:manifest && npm run deploy
+      - name: Validate release tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: npm run release:check
+      - name: Export tested images once
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: docker save social-room-identity:dev social-room-api:dev social-room-realtime:dev social-room-web:dev social-room-migrate:dev -o artifacts/images.tar
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: tested-release
+          path: artifacts/
+          retention-days: 7
+      - name: Container logs
+        if: failure()
+        run: docker compose --env-file .env -f infra/compose/compose.yml logs --no-color
+      - name: Clean ephemeral deployment
+        if: always()
+        run: docker compose --env-file .env -f infra/compose/compose.yml down -v
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      packages: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+      - name: Download tested artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name tested-release --dir artifacts
+      - run: docker load -i artifacts/images.tar
+      - name: Authenticate to GHCR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Publish the tested images
+        run: node scripts/publish.mjs
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-manifest
+          path: artifacts/release.json

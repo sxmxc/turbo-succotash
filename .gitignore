@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Social Room bootstrap
+.env
+.env.*
+!.env.example
+dist/
+artifacts/
+playwright-report/
+test-results/
+.playwright-mcp/

@@ -1,0 +1,13 @@
+{
+  "name": "@social/realtime",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@colyseus/core": "0.18.11",
+    "@colyseus/schema": "5.0.27",
+    "@colyseus/ws-transport": "0.18.2",
+    "express": "5.2.1",
+    "fastify": "5.12.3",
+    "zod": "4.5.4"
+  }
+}
