@@ -35,6 +35,11 @@ test("canvas loads, preview responds, and panel remains reachable", async ({
     const resized = await panel.boundingBox();
     expect(resized!.x + resized!.width).toBeLessThanOrEqual(700);
     expect(resized!.y + resized!.height).toBeLessThanOrEqual(600);
+    await page.setViewportSize({ width: 900, height: 300 });
+    const short = await panel.boundingBox();
+    expect(short!.y + short!.height).toBeLessThanOrEqual(300);
+    await page.getByLabel("Preview tint").scrollIntoViewIfNeeded();
+    await expect(page.getByLabel("Preview tint")).toBeVisible();
   } else {
     await panel.scrollIntoViewIfNeeded();
     const bounds = await panel.boundingBox();

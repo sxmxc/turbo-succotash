@@ -1,4 +1,4 @@
-FROM node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS build
+FROM node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS dependencies
 WORKDIR /app
 RUN npm install --global npm@12.0.2
 COPY package.json package-lock.json .npmrc ./
@@ -9,12 +9,13 @@ COPY services/realtime/package.json services/realtime/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
 COPY packages/service-runtime/package.json packages/service-runtime/package.json
 RUN npm ci
+FROM dependencies AS build
 COPY . .
 ARG BUILD_COMMIT=development
 ENV BUILD_COMMIT=$BUILD_COMMIT
 RUN npm run build
-FROM build AS production-deps
-RUN npm prune --omit=dev
+FROM dependencies AS production-deps
+RUN npm prune --omit=dev --no-audit --no-fund
 FROM node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS service
 WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0

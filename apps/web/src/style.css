@@ -112,6 +112,8 @@ h1 {
   font-size: 9px;
 }
 .floating-panel {
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
   position: fixed;
   z-index: 10;
   width: 290px;
@@ -211,6 +213,8 @@ code {
   }
   .floating-panel {
     position: relative;
+    max-height: none;
+    overflow: visible;
     left: auto !important;
     top: auto !important;
     width: 100%;
