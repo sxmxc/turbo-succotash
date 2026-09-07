@@ -62,7 +62,7 @@ Database/browser checks require the full Compose stack. `test:dependencies` deli
 ## Troubleshooting
 
 - `Invalid … configuration`: fix named fields in `.env`; do not paste credentials into issues. `env:init` intentionally fails if `.env` exists.
-- Port conflict: stop the conflicting local process or adjust `WEB_PORT`; development DB uses 5432. Do not run two host dev processes.
+- Port conflict: stop the conflicting local process or adjust `WEB_PORT` and set `SMOKE_URL=http://localhost:<port>` for smoke/browser/deployment checks; development DB uses 5432. Do not run two host dev processes.
 - Readiness 503: inspect `docker compose --env-file .env -f infra/compose/compose.yml logs migrate api identity realtime`; check database readiness, migration success and internal URLs.
 - Password changes after volume creation do not update PostgreSQL roles. Rotate the role password and matching env values deliberately. For disposable local data only, `docker compose --env-file .env -f infra/compose/compose.yml down -v` deletes the database and permits fresh initialization.
 - `npm ci` engine error: use `.nvmrc` and the pinned npm; the preinstalled Node 25 is outside this project's tested LTS runtime.

@@ -1,14 +1,15 @@
 # Active tasks
 
-## Milestone 0 — Bootstrap (verification in progress)
+## Milestone 0 — Bootstrap (complete)
 
 Acceptance: mounted Vue/Phaser orthographic placeholder; draggable desktop/docked mobile panel; independent service foundations; validated diagnostics/config; PostgreSQL migrations and role isolation; reproducible dependency/container inputs; CI checks and immutable artifact deployment; accurate agent continuity.
 
 - [x] Read supplied design fully and preserve existing files.
 - [x] Resolve stable dependencies and explain compatibility tradeoff.
 - [x] Implement shell, services, migrations, containers and release path.
-- [ ] Complete checks, browser/container/database verification and final diff review.
-- [ ] Update final handoff with exact results and limitations.
+- [x] Complete checks, browser/container/database verification and final diff review.
+- [x] Update final handoff with exact results and limitations.
+- [x] Commit the reproducible lockfile and deploy tested immutable images locally; remote publishing remains an explicit connection step.
 
 ## Next — Milestone 1 identity slice
 
