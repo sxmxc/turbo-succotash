@@ -52,9 +52,7 @@ test("packages Tiled JSON and PNG data for Phaser and realtime", () => {
     assert.deepEqual(result.server.obstacles, [
       { x: 16, y: 16, width: 32, height: 16 },
     ]);
-    const packaged = JSON.parse(
-      readFileSync(join(output, "map.json"), "utf8"),
-    );
+    const packaged = JSON.parse(readFileSync(join(output, "map.json"), "utf8"));
     assert.equal(packaged.tilesets[0].image, "tilesets/interior.png");
   } finally {
     rmSync(temporary, { recursive: true, force: true });
