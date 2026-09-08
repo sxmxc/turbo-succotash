@@ -165,14 +165,14 @@ onMounted(async () => {
       ><span class="milestone">Milestone 1 <i /> {{ connectionStatus }}</span>
     </header>
 
-    <section class="intro">
+    <!--   <section class="intro">
       <p class="eyebrow">THE LOBBY</p>
       <h1>A little room.<br />A shared beginning.</h1>
       <p v-if="user">
         Signed in as {{ user.name }}. Choose an avatar color, then join.
       </p>
       <p v-else>Sign in to enter the shared room.</p>
-    </section>
+    </section> -->
 
     <template v-if="user && connection">
       <div class="room-frame">
