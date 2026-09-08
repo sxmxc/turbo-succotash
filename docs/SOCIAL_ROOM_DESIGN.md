@@ -1,4 +1,4 @@
-# Social Room Game — Working Design — revision 4
+# Social Room Game — Working Design — revision 5
 
 Status: buildable draft. Product name undecided.
 Prepared: 2026-09-07.
@@ -19,7 +19,7 @@ A browser-based social chat game where people enter shared 2D rooms, move pixel-
 
 Confirmed:
 - Floating draggable windows.
-- 16 × 16 pixel-art people.
+- Universal LPC spritesheets are the initial character asset source, superseding the original 16 × 16 character requirement and placeholder character-art direction. Preserve selected sprites’ native frame dimensions and inspect each animation layout.
 - Keyboard and click/tap movement; environment collisions, no character-to-character collisions.
 - Accounts required; no guests.
 - Email/password and social login. Social providers remain open.
@@ -40,6 +40,12 @@ Proposed first-release coverage: account flows, beta registration, basic avatar 
 Room decorating and custom layouts are future work. Minigames, commerce, trading, user asset uploads and elaborate analytics are not confirmed scope.
 
 Proposed initial avatar editor: choose a supplied body appearance, hair and clothing colors. All initial choices are available without purchases. This is a starting recommendation because customization details remain open; economy and upload behavior remain undecided.
+
+## Character art
+
+Confirmed: use [Universal LPC spritesheets](https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/tree/master/spritesheets). Begin with a small compatible body, hair and clothing selection; standing poses and four-direction walking must keep layers aligned and animation synchronized. Keep appearance selections data-driven for the planned editor; full customization is deferred. Separate source frame dimensions, display scale and collision footprint; render crisp pixels and anchor characters at their feet. Serve selected assets locally and record the upstream commit, imported paths, animation metadata, licenses and accessible credits. Orthographic projection remains confirmed.
+
+Initial implementation: five modular layers (including the required separate head), native 64 × 64 frames in individual 576 × 256 walk sheets. See [asset integration](LPC_ASSETS.md). These inspected dimensions describe this selection only, not the entire upstream catalog.
 
 ## Registration and authentication
 
@@ -260,6 +266,9 @@ Keep release credentials scoped to publishing/deployment jobs. Untrusted change 
 
 ### Milestone 0 — Bootstrap
 Resolve current stable dependencies and validate a Vue/Phaser integration. Establish repository, root AGENTS.md, agents/ memory and task files, service skeletons, Compose, migrations, contracts, initial semantic version and CI/CD workflow. Deliver a running shell, documented start commands, passing build/check jobs, container smoke tests and a documented release/deployment path. Remote deployment can be connected when a target exists.
+
+### LPC integration — after completed bootstrap, before identity
+Adapt the existing preview incrementally using a minimal compatible LPC catalog. Verify standing, four-direction walking, layer alignment, local asset loading and accessible credits against a production build. Preserve completed Milestone 0 work and the identity slice as the next gameplay dependency.
 
 ### Milestone 1 — First playable experience
 Password registration/login with beta gating, basic avatar choice, one predefined room, both movement controls, collision checks, chat log and speech bubbles.

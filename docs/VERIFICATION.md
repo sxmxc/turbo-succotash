@@ -29,3 +29,23 @@ Resolved during verification: Phaser 4 removed the old texture generation helper
 Known non-failures: Vite reports a ~1.44 MB raw / 384 KB gzip Phaser-containing bundle. npm 12 blocks unapproved optional install scripts; required builds/tests work without them. The browser tool's software WebGL emits ReadPixels performance warnings; no application exceptions were observed. A missing favicon request was fixed. A final short-desktop-viewport regression was fixed with bounded panel scrolling, while mobile keeps document-flow docking. Production dependency layers are cached separately from source builds.
 
 Remote GitHub Actions execution, GHCR publishing, production deployment and Kubernetes have not been run. Mobile verification is Chromium device emulation, not a physical phone or software-keyboard test (no chat input yet). No authentication flows, gameplay, multiplayer capacity or chat behavior are claimed.
+
+## LPC integration — 2026-09-07
+
+Preserved completed bootstrap; applied design revision 5. Checks used the same pinned Node 24.20.0/npm 12.0.2 runtime. No dependencies, lockfile, service contracts, migrations or CI workflow changed.
+
+- `npm run check`: passed formatting, lint (no warnings), service/Vue types, all five unit tests and production build. Added import SHA-256/native PNG-grid/frame-cycle/credit checks.
+- `npm run compose:build`: all five targets passed. `npm run compose:up`: migration exited 0 and PostgreSQL/web/identity/API/realtime healthy, preserving the existing database.
+- `npm run smoke`: passed against the final nginx build at localhost:8080, including session adapter and closed signup.
+- `npm run test:browser`: all six cases passed in 8.2 seconds on desktop/mobile Chromium. Existing tint/panel/short-viewport checks remain; new cases verify five local PNG responses, four-direction walking differs from standing, stopping restores the exact standing capture, navigable credits with five downloads, and failed asset loading never reports ready.
+- Visual inspection: inspected a native composite of all 36 frames, then production captures of north/west/south/east standing and walking. Head/hair/shirt/pants remain aligned with the body and foot anchor; pixels retain hard edges. Captures are temporary inspection artifacts in `/tmp/lpc-*.png`, not golden test fixtures.
+- `npm run release:check`: passed for the unchanged 0.1.0 root version. Feature notes remain Unreleased with 0.2.0 planned under existing policy. HTTP/realtime protocol 1 is unchanged.
+- `git diff --check`: passed. Final documentation formatting check passed.
+
+Resolved during this change: NodeNext required a JSON import attribute and explicit test import extension. The first browser run caught a missing footer link to the already-served credits page; added the link and reran the full production browser suite successfully. The shell sandbox initially failed to initialize its loopback namespace; authorized escalated commands completed the work, so no check remained blocked.
+
+The local Compose deployment now runs the uncommitted LPC working tree (dirty source label). Previous ignored immutable release/deployment manifests still identify the original bootstrap images, not this update; no new release manifest, tag, publication or remote CI run is claimed. Database isolation/outage tests and clean install were not repeated for this client-only change; their bootstrap evidence above remains historical. The existing Phaser bundle-size warning remains (~1.45 MB raw / 387 KB gzip). Mobile coverage is emulation. Walking is a local in-place art preview, not gameplay; collision footprint is provisional metadata and full customization remains deferred.
+
+## Remote development port exposure — 2026-09-07
+
+Compose now uses the existing `HOST` setting for the published nginx address while retaining `127.0.0.1` in `.env.example`. This local ignored `.env` sets `HOST=0.0.0.0`; only nginx is published by Compose, while backend containers remain internal. `docker compose config --quiet` passed and resolved the web mapping to `0.0.0.0:8080->80`. `npm run compose:up` recreated web healthy; `npm run smoke` passed; `ss` showed `0.0.0.0:8080`; HTTP returned 200 through both loopback and host address `172.30.0.101`. `git diff --check` passed. No image rebuild, dependency, contract, database, HTTP protocol or realtime protocol change was required.

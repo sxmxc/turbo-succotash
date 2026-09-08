@@ -1,6 +1,6 @@
 # Social Room bootstrap
 
-Milestone 0 foundation for the [social game design](docs/SOCIAL_ROOM_DESIGN.md). The working title is provisional. The UI shows an orthographic room with a generated 16×16 placeholder person and a draggable panel; on mobile the panel docks into document flow. Tint selection demonstrates the Vue/Phaser interface. Accounts, movement, saved avatars, chat and multiplayer are **not implemented**.
+Milestone 0 foundation for the [social game design](docs/SOCIAL_ROOM_DESIGN.md). The working title is provisional. The UI shows an orthographic room with a layered LPC character using native 64×64 frames and a draggable panel; on mobile the panel docks into document flow. Shirt tint, facing and walking-in-place controls demonstrate the Vue/Phaser interface. [Character asset metadata and credits](docs/LPC_ASSETS.md) document the selected source art; attribution is also available from the app footer. Accounts, movement, saved avatars, chat and multiplayer are **not implemented**.
 
 ## Quick start
 
@@ -14,7 +14,7 @@ npm run compose:up
 npm run smoke
 ```
 
-Open **http://localhost:8080**. `env:init` creates ignored `.env` with random local secrets, refusing to overwrite an existing file. `.env.example` documents every value. Local ports bind to loopback. Stop with `npm run compose:down`; the database volume is retained.
+Open **http://localhost:8080**. `env:init` creates ignored `.env` with random local secrets, refusing to overwrite an existing file. `.env.example` documents every value. Network listeners bind to loopback by default; set `HOST=0.0.0.0` in `.env` only when the host firewall or development environment controls external access. Stop with `npm run compose:down`; the database volume is retained.
 
 ## Fast iteration
 
@@ -63,6 +63,7 @@ Database/browser checks require the full Compose stack. `test:dependencies` deli
 
 - `Invalid … configuration`: fix named fields in `.env`; do not paste credentials into issues. `env:init` intentionally fails if `.env` exists.
 - Port conflict: stop the conflicting local process or adjust `WEB_PORT` and set `SMOKE_URL=http://localhost:<port>` for smoke/browser/deployment checks; development DB uses 5432. Do not run two host dev processes.
+- Remote development: set `HOST=0.0.0.0` in `.env`, recreate Compose with `npm run compose:up`, and connect through the development environment's forwarded/public port. Compose exposes only the web proxy; `npm run dev` also binds identity, API and realtime to every host interface. Use host firewall and port-access controls, and set the deployment's public origin before enabling account or realtime browser flows.
 - Readiness 503: inspect `docker compose --env-file .env -f infra/compose/compose.yml logs migrate api identity realtime`; check database readiness, migration success and internal URLs.
 - Password changes after volume creation do not update PostgreSQL roles. Rotate the role password and matching env values deliberately. For disposable local data only, `docker compose --env-file .env -f infra/compose/compose.yml down -v` deletes the database and permits fresh initialization.
 - `npm ci` engine error: use `.nvmrc` and the pinned npm; the preinstalled Node 25 is outside this project's tested LTS runtime.

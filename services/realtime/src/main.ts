@@ -11,6 +11,7 @@ import {
   dependencyReady,
   shutdown,
 } from "../../../packages/service-runtime/src/server.js";
+import { createLobbyRoom } from "./lobby.js";
 const config = configFor("realtime");
 let listening = false;
 matchMaker.controller.DEFAULT_CORS_HEADERS["Access-Control-Allow-Origin"] =
@@ -23,6 +24,7 @@ const realtime = new Server({
   gracefullyShutdown: false,
   greet: false,
 });
+realtime.define("lobby", createLobbyRoom(config.IDENTITY_INTERNAL_URL));
 realtime.router = createRouter({
   health: createEndpoint("/healthz", { method: "GET" }, async () =>
     Response.json(diagnostic("realtime", "ok")),

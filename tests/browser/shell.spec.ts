@@ -1,24 +1,30 @@
 import { test, expect } from "@playwright/test";
-test("canvas loads, preview responds, and panel remains reachable", async ({
+import { loginAndJoin } from "./helpers.js";
+
+test("canvas loads, movement responds, and panel remains reachable", async ({
   page,
   isMobile,
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await loginAndJoin(page, "Soft lilac");
   await expect(page.getByText("Scene ready", { exact: true })).toBeVisible();
   await expect(page.locator("canvas")).toBeVisible();
+  await page.locator(".room-canvas").focus();
   const before = await page.locator("canvas").screenshot();
-  await page.getByLabel("Preview tint").selectOption({ label: "Soft lilac" });
-  await page.waitForTimeout(100);
+  await page.keyboard.down("ArrowRight");
+  await expect
+    .poll(async () => before.equals(await page.locator("canvas").screenshot()))
+    .toBe(false);
+  await page.keyboard.up("ArrowRight");
   const after = await page.locator("canvas").screenshot();
   expect(before.equals(after)).toBe(false);
-  const panel = page.getByRole("region", { name: "Preview panel" });
+  const panel = page.getByRole("region", { name: "Room panel" });
   const initial = await panel.boundingBox();
   expect(initial).toBeTruthy();
   if (!isMobile && initial) {
     const handle = page.getByRole("button", {
-      name: "Move preview panel with arrow keys or drag",
+      name: "Move room panel with arrow keys or drag",
     });
     const box = await handle.boundingBox();
     if (!box) throw new Error("Missing handle");
@@ -38,8 +44,8 @@ test("canvas loads, preview responds, and panel remains reachable", async ({
     await page.setViewportSize({ width: 900, height: 300 });
     const short = await panel.boundingBox();
     expect(short!.y + short!.height).toBeLessThanOrEqual(300);
-    await page.getByLabel("Preview tint").scrollIntoViewIfNeeded();
-    await expect(page.getByLabel("Preview tint")).toBeVisible();
+    await page.getByLabel("Message the room").scrollIntoViewIfNeeded();
+    await expect(page.getByLabel("Message the room")).toBeVisible();
   } else {
     await panel.scrollIntoViewIfNeeded();
     const bounds = await panel.boundingBox();

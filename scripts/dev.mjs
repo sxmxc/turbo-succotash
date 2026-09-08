@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { execFileSync } from "node:child_process";
 const env = {
   ...process.env,
+  PUBLIC_ORIGIN: "http://localhost:5173",
   BUILD_COMMIT:
     execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim() +
     "-dev",

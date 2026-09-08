@@ -3,6 +3,13 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { cp, mkdtemp, writeFile, rm } from "node:fs/promises";
 import { migrate } from "./dist/scripts/migrate.js";
+import {
+  createPasswordAccount,
+  issueBetaKey,
+  revokeBetaKey,
+  setBetaGate,
+  SignupError,
+} from "./dist/services/identity/src/accounts.js";
 const admin = new pg.Client({
   connectionString: process.env.MIGRATION_DATABASE_URL,
 });
@@ -30,7 +37,7 @@ try {
         "SELECT count(*)::int AS n FROM identity.schema_migrations",
       )
     ).rows[0].n,
-    1,
+    2,
   );
   assert.equal(
     (
@@ -40,6 +47,77 @@ try {
     ).rows[0].n,
     1,
   );
+  const identityPool = new pg.Pool({
+    connectionString: url.toString(),
+    options: "-c search_path=identity,public",
+  });
+  const sharedKey = await issueBetaKey(identityPool);
+  const concurrent = await Promise.allSettled([
+    createPasswordAccount(identityPool, {
+      email: "winner-a@example.test",
+      name: "Winner A",
+      password: "correct horse battery staple",
+      betaKey: sharedKey.key,
+    }),
+    createPasswordAccount(identityPool, {
+      email: "winner-b@example.test",
+      name: "Winner B",
+      password: "correct horse battery staple",
+      betaKey: sharedKey.key,
+    }),
+  ]);
+  assert.equal(
+    concurrent.filter((result) => result.status === "fulfilled").length,
+    1,
+  );
+  assert.equal(
+    concurrent.filter((result) => result.status === "rejected").length,
+    1,
+  );
+  await assert.rejects(
+    createPasswordAccount(identityPool, {
+      email: "reuse@example.test",
+      name: "Reuse",
+      password: "correct horse battery staple",
+      betaKey: sharedKey.key,
+    }),
+    (error) =>
+      error instanceof SignupError && error.code === "BETA_KEY_INVALID",
+  );
+  const revoked = await issueBetaKey(identityPool);
+  assert.equal(await revokeBetaKey(identityPool, revoked.id), true);
+  await assert.rejects(
+    createPasswordAccount(identityPool, {
+      email: "revoked@example.test",
+      name: "Revoked",
+      password: "correct horse battery staple",
+      betaKey: revoked.key,
+    }),
+    (error) =>
+      error instanceof SignupError && error.code === "BETA_KEY_INVALID",
+  );
+  await setBetaGate(identityPool, false);
+  await createPasswordAccount(identityPool, {
+    email: "open@example.test",
+    name: "Open Gate",
+    password: "correct horse battery staple",
+  });
+  await setBetaGate(identityPool, true);
+  assert.equal(
+    (await identityPool.query('SELECT count(*)::int AS n FROM "user"')).rows[0]
+      .n,
+    2,
+  );
+  assert.equal(
+    (
+      await identityPool.query(
+        "SELECT count(*)::int AS n FROM beta_key WHERE encode(key_hash, 'hex') = encode($1::bytea, 'hex')",
+        [Buffer.from(sharedKey.key)],
+      )
+    ).rows[0].n,
+    0,
+  );
+  await identityPool.end();
   for (const [role, own, foreign] of [
     ["identity", 'identity."user"', "application.bootstrap"],
     ["application", "application.bootstrap", 'identity."user"'],

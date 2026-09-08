@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/browser",
+  globalSetup: "./tests/browser/global-setup.ts",
+  workers: 1,
   use: { baseURL: process.env.SMOKE_URL || "http://localhost:8080" },
   reporter: "list",
   projects: [

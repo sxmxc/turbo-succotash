@@ -23,10 +23,13 @@ for (const [prefix, service] of [
 const session = await request("/identity/auth/get-session");
 assert.equal(session.status, 200);
 assert.equal(await session.json(), null);
+const registration = await request("/identity/registration");
+assert.equal(registration.status, 200);
+assert.equal(typeof (await registration.json()).betaGateEnabled, "boolean");
 assert.equal(
   (await request("/identity/auth/sign-up/email", "POST")).status,
-  501,
+  400,
 );
 console.log(
-  "Compose smoke passed: web, API, realtime dependency readiness, Better Auth session adapter, and closed signup.",
+  "Compose smoke passed: web, service readiness, anonymous session, and beta registration status.",
 );

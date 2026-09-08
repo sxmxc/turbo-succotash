@@ -14,6 +14,7 @@
     "src/**/*.ts",
     "src/**/*.vue",
     "vite.config.ts",
-    "../../packages/contracts/**/*.ts"
+    "../../packages/contracts/**/*.ts",
+    "../../packages/room-data/**/*.ts"
   ]
 }

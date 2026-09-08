@@ -32,6 +32,7 @@ export function buildServer(
       redact: [
         "req.headers.authorization",
         "req.headers.cookie",
+        "req.headers.x-admin-token",
         'res.headers["set-cookie"]',
       ],
       serializers: {
@@ -78,12 +79,13 @@ export function databasePool(url: string, schema: "identity" | "application") {
   });
   return pool;
 }
-export async function databaseReady(pool: pg.Pool) {
+export async function databaseReady(pool: pg.Pool, requiredVersion = "001") {
   const result = await pool.query(
     "SELECT version FROM schema_migrations WHERE version = $1",
-    ["001"],
+    [requiredVersion],
   );
-  if (result.rowCount !== 1) throw new Error("Required migration 001 missing");
+  if (result.rowCount !== 1)
+    throw new Error(`Required migration ${requiredVersion} missing`);
 }
 export async function dependencyReady(
   url: string,

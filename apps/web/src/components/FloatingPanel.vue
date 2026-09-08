@@ -54,11 +54,11 @@ onBeforeUnmount(() => window.removeEventListener("resize", clamp));
     ref="panel"
     class="floating-panel"
     :style="{ left: x + 'px', top: y + 'px' }"
-    aria-label="Preview panel"
+    aria-label="Room panel"
   >
     <button
       class="panel-handle"
-      aria-label="Move preview panel with arrow keys or drag"
+      aria-label="Move room panel with arrow keys or drag"
       @pointerdown="start"
       @pointermove="move"
       @pointerup="stop"

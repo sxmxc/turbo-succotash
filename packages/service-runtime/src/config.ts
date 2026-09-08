@@ -46,6 +46,13 @@ const schemas = {
         (v) => !v.includes("REPLACE"),
         "Generate a random secret with npm run env:init",
       ),
+    ADMIN_API_TOKEN: z
+      .string()
+      .min(32)
+      .refine(
+        (v) => !v.includes("REPLACE"),
+        "Generate a random token with npm run env:init",
+      ),
   }),
   realtime: base.extend({
     REALTIME_PORT: port.default(3003),
