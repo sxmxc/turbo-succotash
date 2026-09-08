@@ -26,6 +26,11 @@ jobs:
       - run: npm run test:database
       - run: npm run test:dependencies
       - run: npx playwright install --with-deps chromium
+      # Smoke and browser acceptance intentionally exercise nine signup requests
+      # from the runner IP; reset the in-memory eight-per-minute production
+      # limiter between those independently valid verification stages.
+      - name: Reset identity rate-limit window for browser acceptance
+        run: docker compose --env-file .env -f infra/compose/compose.yml up -d --no-deps --force-recreate --wait --wait-timeout 120 identity
       - run: npm run test:browser
       - run: npm run release:manifest && npm run deploy
       - name: Validate release tag

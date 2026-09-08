@@ -15,6 +15,7 @@ Completed Milestone 1 work:
 
 Current/remaining work:
 
+- CI now recreates only identity between smoke/dependency checks and browser acceptance because those stages intentionally exceed the per-IP signup limit when combined; the full post-reset browser matrix passes.
 - Implement Milestone 2 persistent room records and concurrency-safe Floor 1+ address allocation as the first working boundary.
 - Review the remaining draggable-panel UX separately; it is not being redesigned inside this movement/Tiled correction.
 
