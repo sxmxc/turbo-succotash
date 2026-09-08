@@ -44,6 +44,7 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 
 ## Milestone 2 — Rooms and social features (started)
 
+- [x] Establish nested, empty-safe Tiled starter-template source directories without changing the unique `floor_0_lobby`.
 - [ ] Add persistent room records with immutable IDs and separate public floor/room addresses.
 - [ ] Add concurrency-safe automatic Floor 1+ allocation with at most 500 addresses per floor.
 - [ ] Add authenticated room creation, navigator basics and private-room entry enforcement.

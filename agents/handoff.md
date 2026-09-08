@@ -2,6 +2,10 @@
 
 The owner confirmed Panverse Plaza as the product name. Source/UI copy, npm metadata, the Compose project, local OCI image tags, CI export, release defaults, and generated builds now use `Panverse Plaza` / `panverse-plaza`. The rename does not alter HTTP or realtime compatibility, database names, or persisted room identifiers. The orphaned `social-room` Compose containers and network were explicitly removed after the rename; its PostgreSQL volume and cached images were preserved to avoid deleting data or recoverable build artifacts.
 
+The room-source pipeline now supports the owner-created `assets/rooms/templates` hierarchy. Empty template placeholders are tracked and ignored until authored; nested themed maps receive path-namespaced IDs. `floor_0_lobby` remains the unique existing map. Confirmed creation rules are recorded, but floor/account/room instantiation and random lobby-theme selection are not implemented yet.
+
+Tiled XML tilesets under `assets/**/*.tsx` remain excluded from Prettier and are associated with XML in VS Code so they do not produce TypeScript/React diagnostics. Room-build-owned JSON and `rooms.generated.ts` are also excluded so `npm run rooms:build` does not immediately make `npm run format:check` fail on generator serialization.
+
 Milestone 0 is complete. Milestone 1 has its one-room vertical slice implemented, its automated acceptance matrix passes, and the owner-facing external-origin play check is accepted. Release 0.2.0 marks its completion. Milestone 2 is active, beginning with persistent room identity and concurrency-safe address allocation.
 
 Completed Milestone 1 work:

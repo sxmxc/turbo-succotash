@@ -5,6 +5,12 @@
 - The confirmed product name is Panverse Plaza, replacing the working name Social Room.
 - The npm/Compose identifier is `panverse-plaza`; local OCI images use `panverse-plaza-<service>:dev`. This rename changes deployment artifact names but does not change HTTP, realtime protocol, database schemas, or persisted room identifiers.
 
+## 2026-09-08 — Starter room templates
+
+- `floor_0_lobby` remains unique. New floors use a lobby starter; new accounts receive a template-based apartment; user-created rooms use the applicable small, medium or large starter.
+- Reusable Tiled sources live under `assets/rooms/templates`. Empty placeholders are permitted until maps are authored, and nested theme paths provide collision-free template IDs.
+- Multiple lobby themes are planned. Floor creation will randomly choose an available theme server-side when that behavior is implemented.
+
 ## 2026-09-07 — Bootstrap implementation
 
 - Accepted npm workspaces, coordinated software version 0.1.0 and GitHub Actions matching the detected remote.

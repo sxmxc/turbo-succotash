@@ -5,7 +5,7 @@ Room templates are authored as TMX maps with external TSX tilesets and PNG tiles
 - `apps/web/public/assets/rooms/manifest.json` plus each room’s `map.json` and PNGs for Phaser Loader/Tilemap APIs.
 - `packages/room-data/src/rooms.generated.ts` for server-authoritative dimensions, bounds, spawns and environment collision.
 
-The current source is `assets/rooms/floor_0_lobby/floor-0-lobby.tmx`; its stable template ID is the directory name `floor_0_lobby`. Generated files are committed and are not edited by hand.
+The current source is `assets/rooms/floor_0_lobby/floor-0-lobby.tmx`; its stable ID is `floor_0_lobby`. It is a unique official destination, not one of the reusable starter templates. Reusable sources live below `assets/rooms/templates`; empty placeholder directories are ignored until their maps are authored. Generated files are committed, are not edited by hand, and are excluded from Prettier because the room build owns their exact serialization.
 
 ## Tooling
 
@@ -20,8 +20,8 @@ The exporter writes to a staging directory and replaces generated outputs only a
 
 ## Authoring contract
 
-- Each room directory name is its stable template ID.
-- Maps are finite, orthogonal and contain exactly one TMX entry map.
+- A map's path relative to `assets/rooms` is its stable template ID; nested themed templates are supported.
+- Maps are finite and orthogonal. A directory may contain at most one TMX entry map; empty placeholder directories are ignored.
 - External TSX files are encouraged for authoring; each tileset uses one PNG sheet.
 - Visible tile layers render in Tiled order. Grouped layers retain their Tiled hierarchy/name.
 - At least one point object on a map object layer has class or legacy type `spawn`.

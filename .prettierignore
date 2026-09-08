@@ -8,3 +8,5 @@ test-results
 artifacts
 .playwright-mcp
 assets/**/*.tsx
+apps/web/public/assets/rooms
+packages/room-data/src/rooms.generated.ts

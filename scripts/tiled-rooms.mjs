@@ -10,7 +10,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -203,22 +203,24 @@ export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
   };
 }
 
-function findMaps() {
-  if (!existsSync(sourceRoot)) return [];
-  return readdirSync(sourceRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => {
-      const directory = join(sourceRoot, entry.name);
-      const maps = readdirSync(directory).filter((file) =>
-        file.toLowerCase().endsWith(".tmx"),
-      );
-      if (maps.length !== 1)
-        fail(
-          `${entry.name}: expected exactly one .tmx file, found ${maps.length}`,
-        );
-      return { id: entry.name, source: join(directory, maps[0]) };
-    })
-    .sort((a, b) => a.id.localeCompare(b.id));
+export function discoverTiledMaps(root = sourceRoot) {
+  if (!existsSync(root)) return [];
+  const discovered = [];
+  function visit(directory) {
+    const entries = readdirSync(directory, { withFileTypes: true });
+    const maps = entries.filter(
+      (entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".tmx"),
+    );
+    const id = relative(root, directory).split(sep).join("/");
+    if (maps.length > 1)
+      fail(`${id}: expected at most one .tmx file, found ${maps.length}`);
+    if (maps.length === 1)
+      discovered.push({ id, source: join(directory, maps[0].name) });
+    for (const entry of entries.filter((entry) => entry.isDirectory()))
+      visit(join(directory, entry.name));
+  }
+  visit(root);
+  return discovered.sort((a, b) => a.id.localeCompare(b.id));
 }
 
 function tiledCommand() {
@@ -258,7 +260,7 @@ function exportMap(source, destination) {
 }
 
 export function buildRooms() {
-  const maps = findMaps();
+  const maps = discoverTiledMaps();
   mkdirSync(dirname(webRoot), { recursive: true });
   const stagingRoot = mkdtempSync(join(dirname(webRoot), ".rooms-"));
   const stagingWebRoot = join(stagingRoot, "web");
@@ -268,7 +270,7 @@ export function buildRooms() {
   try {
     mkdirSync(stagingWebRoot, { recursive: true });
     for (const room of maps) {
-      const exportedMap = join(stagingRoot, `${room.id}.json`);
+      const exportedMap = join(stagingRoot, `${slug(room.id)}.json`);
       exportMap(room.source, exportedMap);
       const data = JSON.parse(readFileSync(exportedMap, "utf8"));
       const packaged = packageTiledMap(

@@ -1,11 +1,17 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 // The production pipeline intentionally stays plain Node so it can run before TypeScript build tooling.
 // @ts-expect-error The JavaScript build script has no declaration file.
-import { packageTiledMap } from "../scripts/tiled-rooms.mjs";
+import { discoverTiledMaps, packageTiledMap } from "../scripts/tiled-rooms.mjs";
 
 function exportedMap(image: string) {
   return {
@@ -95,6 +101,43 @@ test("rejects external tilesets that were not embedded", () => {
       () => packageTiledMap("lobby", map, "lobby.json", temporary),
       /external after export/,
     );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("discovers nested templates and ignores empty placeholder directories", () => {
+  const temporary = mkdtempSync(join(tmpdir(), "tiled-room-discovery-"));
+  try {
+    mkdirSync(join(temporary, "floor_0_lobby"));
+    mkdirSync(join(temporary, "templates", "appartment_template"), {
+      recursive: true,
+    });
+    mkdirSync(join(temporary, "templates", "lobby_template", "garden"), {
+      recursive: true,
+    });
+    writeFileSync(join(temporary, "floor_0_lobby", "lobby.tmx"), "");
+    writeFileSync(
+      join(temporary, "templates", "lobby_template", "garden", "map.tmx"),
+      "",
+    );
+
+    assert.deepEqual(discoverTiledMaps(temporary), [
+      {
+        id: "floor_0_lobby",
+        source: join(temporary, "floor_0_lobby", "lobby.tmx"),
+      },
+      {
+        id: "templates/lobby_template/garden",
+        source: join(
+          temporary,
+          "templates",
+          "lobby_template",
+          "garden",
+          "map.tmx",
+        ),
+      },
+    ]);
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }

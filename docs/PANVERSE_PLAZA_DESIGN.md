@@ -98,6 +98,14 @@ On desktop, keep floating windows draggable and constrained within the viewport.
 
 ## Rooms and movement
 
+Confirmed starter-template rules:
+
+- `floor_0_lobby` remains a unique authored official destination and is not used as a reusable starter template.
+- A newly created floor starts from a lobby template.
+- A newly created account receives an apartment created from the apartment template.
+- A user-created room starts from the applicable small, medium or large room template.
+- Multiple themed lobby templates are planned; when they exist, floor creation chooses a starter theme randomly. Selection remains server-owned so clients cannot substitute an unauthorized layout.
+
 Persist an immutable internal room ID independently from the public floor/room address. Persist owner, template, capacity class and privacy settings with the room record. A room record, a reusable room template and a temporary running room instance are distinct concepts.
 
 Confirmed floor/address rules:
@@ -342,6 +350,6 @@ Do not claim room capacity or scalability from framework choice alone; measure i
 
 ## Open decisions that do not block the first build
 
-Product name; OAuth providers; verification policy; avatar catalog details; concurrent player capacity values; level names/thresholds/XP rules; ownership limits; deleted-address reuse; room-owner powers; audience policy; report retention; store catalog/payment provider; creator terms/payouts; optional product analytics.
+OAuth providers; verification policy; avatar catalog details; concurrent player capacity values; level names/thresholds/XP rules; ownership limits; deleted-address reuse; room-owner powers; audience policy; report retention; store catalog/payment provider; creator terms/payouts; optional product analytics.
 
 Keep these listed as open. Ask only when a decision is needed for the milestone being implemented.

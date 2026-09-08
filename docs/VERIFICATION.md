@@ -80,3 +80,9 @@ Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Mi
 - `docker compose ... config --images`: resolved only the five `panverse-plaza-*` application images plus the unchanged pinned PostgreSQL image.
 - A full source/generated-output scan found the former name only in migration-history notes that explain what Panverse Plaza replaced. The authoritative design was renamed to `docs/PANVERSE_PLAZA_DESIGN.md`.
 - This changes local Compose resource and OCI image names. It does not change HTTP, realtime protocol 2, dependencies, database schemas, migrations, or persistent room identifiers. Existing ignored release/deployment manifests remain historical and were not rewritten to claim verification against the new uncommitted source.
+
+## Starter template source hierarchy — 2026-09-08
+
+- `npm run rooms:build`: passed and built only `floor_0_lobby`; the five empty tracked template placeholders were ignored as intended.
+- `npm run check`: passed repository/format/lint/type checks, all 14 tests, and production build. The added discovery regression covers a unique top-level map, an empty apartment placeholder, and a nested themed lobby template ID.
+- No HTTP, realtime protocol, dependency, database, migration, or running-room behavior changed. This change establishes source discovery and confirmed creation rules only; instance creation and random theme selection remain future server work.

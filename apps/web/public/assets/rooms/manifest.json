@@ -36,8 +36,40 @@
           "depth": 4
         },
         {
-          "name": "Detail Decoration",
+          "name": "Doors",
           "depth": 5
+        },
+        {
+          "name": "Detail Decoration",
+          "depth": 6
+        }
+      ]
+    },
+    {
+      "id": "templates/lobby_template/default",
+      "mapKey": "room:templates/lobby_template/default:map",
+      "mapUrl": "/assets/rooms/templates/lobby_template/default/map.json",
+      "width": 960,
+      "height": 640,
+      "tilesets": [
+        {
+          "name": "castle-inside",
+          "key": "room:templates/lobby_template/default:tileset:castle-inside",
+          "url": "/assets/rooms/templates/lobby_template/default/tilesets/castle-inside.png"
+        }
+      ],
+      "layers": [
+        {
+          "name": "Background Solid",
+          "depth": 0
+        },
+        {
+          "name": "Floor and Walls",
+          "depth": 1
+        },
+        {
+          "name": "Doors",
+          "depth": 2
         }
       ]
     }
