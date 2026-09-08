@@ -1,3 +1,5 @@
+[![Bootstrap CI and release](https://github.com/sxmxc/turbo-succotash/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sxmxc/turbo-succotash/actions/workflows/ci.yml)
+
 # Social Room
 
 Milestone 0 is complete; the project is implementing the Milestone 1 one-room playable slice from the [working design](docs/SOCIAL_ROOM_DESIGN.md). Authenticated users can enter the Tiled lobby with layered LPC characters, move by arrows/WASD or click/tap, collide with the environment, see realtime presence, and use live-only room chat and speech bubbles. Vue owns DOM UI and Phaser owns the game surface. [LPC metadata/credits](docs/LPC_ASSETS.md), [Tiled authoring](docs/TILED_ROOMS.md), and [Phaser guardrails](docs/PHASER.md) describe those pipelines.
