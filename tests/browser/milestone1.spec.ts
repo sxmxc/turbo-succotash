@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 
 const adminHeaders = { "x-admin-token": process.env.ADMIN_API_TOKEN ?? "" };
 const authHeaders = {
@@ -6,7 +6,7 @@ const authHeaders = {
 };
 const password = "correct horse battery staple";
 
-async function registerAndJoin(page: Page, email: string, name: string) {
+/* async function registerAndJoin(page: Page, email: string, name: string) {
   await page.goto("/");
   await page.getByRole("button", { name: "Need an account? Register" }).click();
   await page.getByLabel("Display name").fill(name);
@@ -20,7 +20,7 @@ async function registerAndJoin(page: Page, email: string, name: string) {
   await expect(page.locator(".milestone")).toContainText("connected");
   await expect(page.locator("canvas")).toBeVisible();
 }
-
+ */
 test("beta gate invariants hold through the common-origin identity API", async ({
   request,
   isMobile,
