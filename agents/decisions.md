@@ -1,5 +1,10 @@
 # Decisions
 
+## 2026-09-08 — Product name
+
+- The confirmed product name is Panverse Plaza, replacing the working name Social Room.
+- The npm/Compose identifier is `panverse-plaza`; local OCI images use `panverse-plaza-<service>:dev`. This rename changes deployment artifact names but does not change HTTP, realtime protocol, database schemas, or persisted room identifiers.
+
 ## 2026-09-07 — Bootstrap implementation
 
 - Accepted npm workspaces, coordinated software version 0.1.0 and GitHub Actions matching the detected remote.

@@ -40,7 +40,7 @@ jobs:
         run: npm run release:check
       - name: Export tested images once
         if: startsWith(github.ref, 'refs/tags/v')
-        run: docker save social-room-identity:dev social-room-api:dev social-room-realtime:dev social-room-web:dev social-room-migrate:dev -o artifacts/images.tar
+        run: docker save panverse-plaza-identity:dev panverse-plaza-api:dev panverse-plaza-realtime:dev panverse-plaza-web:dev panverse-plaza-migrate:dev -o artifacts/images.tar
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: startsWith(github.ref, 'refs/tags/v')
         with:

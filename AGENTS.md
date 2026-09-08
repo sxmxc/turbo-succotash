@@ -1,6 +1,6 @@
-# Social Room
+# Panverse Plaza
 
-Read [agents/README.md](agents/README.md), the current handoff and active tasks first. Inspect actual code and scripts: memory can be stale. Product authority is [the working design](docs/SOCIAL_ROOM_DESIGN.md); confirmed requirements, proposals and open decisions are distinct. Memory creates no new requirements.
+Read [agents/README.md](agents/README.md), the current handoff and active tasks first. Inspect actual code and scripts: memory can be stale. Product authority is [the working design](docs/PANVERSE_PLAZA_DESIGN.md); confirmed requirements, proposals and open decisions are distinct. Memory creates no new requirements.
 
 - Preserve user edits, keep changes scoped, avoid unrelated rewrites. Never weaken security or tests to obtain a passing result.
 - Use stable dependencies; verify official release/peer/runtime metadata before updates, pin exact versions and maintain the lockfile. See [dependency evidence](docs/DEPENDENCIES.md).

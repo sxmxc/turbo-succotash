@@ -70,3 +70,13 @@ Compose now uses the existing `HOST` setting for the published nginx address whi
 - After owner approval to prepare the recovery release, root `package.json` and the lockfile were bumped to `0.2.2` and the changelog records the publication-only compatibility impact. Focused publication tests again passed 3/3; `npm run release:check -- v0.2.2` passed; final `npm run check` passed all stages and 13 tests with the same Vite large-chunk warning. No tag or publication was performed.
 
 Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Milestone 1 completion; patch release 0.2.1 adds only CI rate-limit isolation. Protocol 2 remains the coordinated realtime contract; dependencies did not change.
+
+## Panverse Plaza product rename — 2026-09-08
+
+- Cleanup follow-up: `docker compose -p social-room ... down --remove-orphans` removed all six old-project containers and `social-room_default`. `docker compose ls --all`, filtered container, and filtered network checks show no remaining `social-room` stack. `social-room_pgdata` and cached old image tags were intentionally preserved because stack cleanup does not imply deleting database data or recoverable images.
+
+- `npm run check`: passed repository/format/lint/type checks, all 13 tests, and production build. The generated web output uses Panverse Plaza; the existing Vite large-chunk warning remains.
+- `npm run compose:build`: built all five renamed local images: `panverse-plaza-{identity,api,realtime,web,migrate}:dev`. Image inspection confirmed software version 0.2.2 and the current dirty source revision labels.
+- `docker compose ... config --images`: resolved only the five `panverse-plaza-*` application images plus the unchanged pinned PostgreSQL image.
+- A full source/generated-output scan found the former name only in migration-history notes that explain what Panverse Plaza replaced. The authoritative design was renamed to `docs/PANVERSE_PLAZA_DESIGN.md`.
+- This changes local Compose resource and OCI image names. It does not change HTTP, realtime protocol 2, dependencies, database schemas, migrations, or persistent room identifiers. Existing ignored release/deployment manifests remain historical and were not rewritten to claim verification against the new uncommitted source.

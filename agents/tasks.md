@@ -1,5 +1,9 @@
 # Active tasks
 
+## Product identity
+
+- [x] Rename the product, npm package, Compose project, local OCI images, CI export, release defaults, UI copy, and generated build output from Social Room to Panverse Plaza.
+
 ## Milestone 0 — Bootstrap (complete)
 
 Acceptance: mounted Vue/Phaser orthographic shell; responsive floating/docked panel; independent service foundations; validated diagnostics/configuration; PostgreSQL migrations and role isolation; reproducible dependency/container inputs; CI checks and immutable artifact deployment; accurate agent continuity.

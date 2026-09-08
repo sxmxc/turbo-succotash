@@ -1,6 +1,6 @@
 # Durable context
 
-Self-hosted browser social game; product name undecided. [Design revision 6](../docs/SOCIAL_ROOM_DESIGN.md) is the product authority. Software is 0.2.1 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
+Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.2 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
 
 One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 
@@ -12,4 +12,4 @@ Future confirmed architecture: persistent rooms use immutable internal IDs separ
 
 Git remote is GitHub `sxmxc/turbo-succotash`. Compose is the working deployment target; Kubernetes and remote deployment are later integration work. See [setup](../README.md), [Tiled pipeline](../docs/TILED_ROOMS.md), [Phaser approach](../docs/PHASER.md), [decisions](decisions.md) and [verification](../docs/VERIFICATION.md).
 
-Open decisions include product name, OAuth providers, verification policy, broader avatar catalog, concurrent capacity values, level names/thresholds/earning and hosting values, ownership limits, deleted-address reuse, room-owner powers, audience policy, retention, store/payment details, creator terms/payouts and optional analytics.
+Open decisions include OAuth providers, verification policy, broader avatar catalog, concurrent capacity values, level names/thresholds/earning and hosting values, ownership limits, deleted-address reuse, room-owner powers, audience policy, retention, store/payment details, creator terms/payouts and optional analytics.

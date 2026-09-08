@@ -160,8 +160,7 @@ onMounted(async () => {
   <main>
     <header>
       <a href="/" class="brand"
-        ><span class="brand-mark">▦</span> Social Room
-        <span class="tag">WORKING TITLE</span></a
+        ><span class="brand-mark">▦</span> Panverse Plaza</a
       ><span class="milestone">Milestone 1 <i /> {{ connectionStatus }}</span>
     </header>
 

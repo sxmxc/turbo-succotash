@@ -1,7 +1,7 @@
 node_modules
 dist
 package-lock.json
-docs/SOCIAL_ROOM_DESIGN.md
+docs/PANVERSE_PLAZA_DESIGN.md
 docs/dependency-metadata.json
 playwright-report
 test-results

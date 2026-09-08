@@ -1,6 +1,6 @@
-# Social Room Game — Working Design — revision 6
+# Panverse Plaza — Working Design — revision 6
 
-Status: buildable draft. Product name undecided.
+Status: buildable draft. Product name confirmed.
 Prepared: 2026-09-08.
 
 ## Decision policy

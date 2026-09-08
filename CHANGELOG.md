@@ -4,6 +4,8 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
+The product is now named Panverse Plaza. User-facing copy, repository metadata, Compose project naming, local OCI image names, CI image export, and release tooling use the new name. Existing `social-room-*` local image tags and Compose resources are not reused; rebuild under the `panverse-plaza-*` names. No HTTP, realtime protocol, dependency or database migration changes.
+
 ## [0.2.2] - 2026-09-08
 
 GHCR publication now retries transient pushes with bounded backoff and safely resumes partial releases only when existing version and commit tags exactly match the tested image config digest. Mismatched tags remain immutable and hard-fail. Publishing still promotes tested images without rebuilding and records registry-qualified immutable digests. No HTTP, realtime protocol, dependency or database migration changes; coordinated protocol 2 compatibility is unchanged.

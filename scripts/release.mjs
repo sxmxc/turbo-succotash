@@ -24,7 +24,7 @@ if (command === "validate") {
     services.map((service) => {
       const name =
         process.env[`${service.toUpperCase()}_IMAGE`] ||
-        `social-room-${service}:dev`;
+        `panverse-plaza-${service}:dev`;
       const info = JSON.parse(
         execFileSync("docker", ["image", "inspect", name], {
           encoding: "utf8",
