@@ -10,6 +10,7 @@ export default [
       "artifacts/**",
       "test-results/**",
       "playwright-report/**",
+      "assets/**/*.tsx",
     ],
   },
   js.configs.recommended,
