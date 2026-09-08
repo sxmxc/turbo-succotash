@@ -46,6 +46,13 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [ ] Add friends/presence, online cross-room whispers and saved appearance.
 - [ ] Add the selected social provider after the provider decision is made.
 
+## Release tooling follow-up
+
+- [x] Make GHCR publication retry bounded transient push failures and safely resume exact tested-image matches.
+- [x] Reject existing version/commit tags whose remote config digest differs from the tested local image ID.
+- [x] With owner approval, prepare version `0.2.2` containing the publication fix; do not move `v0.2.1` or overwrite mismatched GHCR tags.
+- [ ] Create and publish `v0.2.2` only after separate explicit approval.
+
 ## Future roadmap — record now, implement when required
 
 - [ ] Milestone 3: useful Floor 0 destinations, apartment/navigation foundations, discovery/bookmarks/events, blocks/reports, layered moderation, administrator controls, visible system bots and level permissions.

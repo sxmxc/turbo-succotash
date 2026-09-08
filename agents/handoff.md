@@ -16,9 +16,11 @@ Completed Milestone 1 work:
 Current/remaining work:
 
 - CI now recreates only identity between smoke/dependency checks and browser acceptance because those stages intentionally exceed the per-IP signup limit when combined; the full post-reset browser matrix passes.
+- The tagged `v0.2.1` verification succeeded and exported tested images, but GHCR publication stopped on an `unknown blob` push after some tags may have landed. The publisher now checks version and commit tags independently, resumes only exact remote-config/local-image-ID matches, rejects mismatches, retries pushes with bounded backoff, and records registry digest references without rebuilding.
+- Rerunning the existing tag still uses its old commit. Version `0.2.2` contains this fix; never move `v0.2.1` or overwrite mismatched GHCR tags. No tag or publication was performed in this checkpoint.
 - Implement Milestone 2 persistent room records and concurrency-safe Floor 1+ address allocation as the first working boundary.
 - Review the remaining draggable-panel UX separately; it is not being redesigned inside this movement/Tiled correction.
 
 Product decisions recorded for later milestones include immutable room IDs with separate floor/room addresses, concurrency-safe Floor 1+ allocation, official Floor 0 destinations, personal apartments, discovery, the official store, curated creator marketplace, visible system bots and layered moderation. No speculative schema or empty service was added for them.
 
-See [verification](../docs/VERIFICATION.md) for command results and [active tasks](tasks.md) for acceptance status. The source version is 0.2.1. Tag v0.2.0 was published before the CI isolation fix; v0.2.1 is not yet tagged or published, and no remote deployment is claimed.
+See [verification](../docs/VERIFICATION.md) for command results and [active tasks](tasks.md) for acceptance status. The source version is 0.2.2. Tag `v0.2.1` is immutable and its publication is incomplete; `v0.2.2` has not been tagged or published, and no remote deployment is claimed.

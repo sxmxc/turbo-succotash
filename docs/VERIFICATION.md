@@ -59,4 +59,14 @@ Compose now uses the existing `HOST` setting for the published nginx address whi
 - `SMOKE_URL=http://docker01.voidmoose.local:8080 npm run test:browser`: 8 passed and 2 intentional mobile skips. The restored desktop acceptance case covered two authenticated sessions, presence, authoritative movement, typing suppression, live-only chat and late-join no-history behavior; beta gating covered concurrent redemption, reuse, revocation and winner login.
 - Browser verification must use the configured `PUBLIC_ORIGIN`; localhost is rejected as `INVALID_ORIGIN` when the deployment trusts the external hostname. Smoke and the browser suite are separate rate-limited stages because together they intentionally exceed the eight-signups-per-minute per-IP production limit. CI force-recreates only the identity container and waits for health before browser acceptance, resetting transient in-memory limiter state without weakening the production limit.
 
+## GHCR publication recovery — 2026-09-08
+
+- Focused `node --import tsx --test tests/publish.test.ts`: 3 passed. Coverage proves bounded retry/backoff after `unknown blob`-style push failures, no push for an exact existing config-digest match, and hard failure without push for mismatched existing content.
+- `npm run release:check -- v0.2.1`: passed; package version, tag spelling and changelog entry match.
+- `npm run check`: passed repository/format/lint/type checks, all 13 tests and the production build. Vite retained the existing large-chunk warning (1,705.33 kB raw / 463.85 kB gzip).
+- No Docker build, image publication, Git tag creation/movement, or GHCR mutation was performed. The publication implementation invokes only manifest inspection, local tagging and push operations.
+- Recovery assessment: rerunning the tagged `v0.2.1` workflow checks out its old publisher and cannot use this fix. The safest immutable recovery is a new patch release containing the fix after owner approval; do not move `v0.2.1` or overwrite any mismatched version/commit tag.
+- The required `apply_patch` helper was attempted but its nested filesystem sandbox failed before reading the workspace (`bwrap: loopback: Failed RTM_NEWADDR`). Changes were applied as unified diffs with the system `patch` fallback and then fully checked.
+- After owner approval to prepare the recovery release, root `package.json` and the lockfile were bumped to `0.2.2` and the changelog records the publication-only compatibility impact. Focused publication tests again passed 3/3; `npm run release:check -- v0.2.2` passed; final `npm run check` passed all stages and 13 tests with the same Vite large-chunk warning. No tag or publication was performed.
+
 Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Milestone 1 completion; patch release 0.2.1 adds only CI rate-limit isolation. Protocol 2 remains the coordinated realtime contract; dependencies did not change.
