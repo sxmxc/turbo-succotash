@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@advanced-chat/components": "3.0.0-rc.3",
     "@colyseus/sdk": "0.18.2",
     "@vitejs/plugin-vue": "6.0.8",
     "phaser": "4.2.1",

@@ -4,6 +4,10 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-09-08
+
+The lobby chat now uses the Advanced Chat v3 `Layout` and standalone `Chat` composition inside Panverse Plaza's existing draggable panel. A narrow Vue adapter projects live Colyseus events into the component while keeping transport, bounded in-memory delivery, authorization, message IDs, timestamps and speech bubbles under the existing owners. Unsupported files, formatting, links, reactions, replies, edits and history pagination remain disabled. The owner explicitly approved the exactly pinned `@advanced-chat/components` 3.0.0-rc.3 prerelease to adopt the documented v3 API directly and avoid a later v2 migration. No HTTP, realtime protocol, database or migration changes; coordinated protocol 2 compatibility is unchanged.
+
 ## [0.2.3] - 2026-09-08
 
 The product is now named Panverse Plaza. User-facing copy, repository metadata, Compose project naming, local OCI image names, CI image export, and release tooling use the new name. The Colyseus client now tracks replicated player membership and nested changes with the supported callback API, and Phaser retains its active scene so late and rejoining players render reliably. Phaser movement keys are no longer globally captured, allowing focused chat and account fields to accept WASD and spaces while movement remains suspended. No HTTP, realtime protocol, dependency, database or migration changes; coordinated protocol 2 compatibility is unchanged.

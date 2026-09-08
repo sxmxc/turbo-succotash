@@ -1,16 +1,19 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { composeArgs, docker, services } from "./compose.mjs";
+
 const version = JSON.parse(readFileSync("package.json", "utf8")).version;
 const commit = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
+
 export function validateTag(tag, expectedVersion, changelog) {
   if (!/^\d+\.\d+\.\d+$/.test(expectedVersion) || tag !== `v${expectedVersion}`)
     throw new Error("Release tag must match package.json version");
   if (!changelog.includes(`## [${expectedVersion}]`))
     throw new Error("Missing versioned changelog entry");
 }
+
 const command = process.argv[2];
 if (command === "validate") {
   validateTag(

@@ -171,7 +171,7 @@ test("two authenticated sessions move and exchange live-only room chat", async (
     expect(await firstRoom.getAttribute("data-player-x")).toBe(stableX);
     expect(await firstRoom.getAttribute("data-player-y")).toBe(stableY);
     await chat.fill("hello from one");
-    await first.getByRole("button", { name: "Send" }).click();
+    await chat.press("Enter");
     await expect(
       second.getByText("hello from one", { exact: true }),
     ).toBeVisible();
@@ -196,7 +196,7 @@ test("two authenticated sessions move and exchange live-only room chat", async (
       0,
     );
     await second.getByPlaceholder("Say hello…").fill("welcome late");
-    await second.getByRole("button", { name: "Send" }).click();
+    await second.getByPlaceholder("Say hello…").press("Enter");
     await expect(late.getByText("welcome late", { exact: true })).toBeVisible();
   } finally {
     await Promise.all([

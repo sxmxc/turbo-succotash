@@ -59,6 +59,8 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [ ] Create and publish `v0.2.2` only after separate explicit approval.
 - [x] Prepare version `0.2.3` with the Panverse Plaza rename, Colyseus/Phaser presence fixes and focused-chat keyboard fix.
 - [ ] Create and publish `v0.2.3` only after separate explicit approval.
+- [x] Prepare version `0.2.4` with the owner-approved Advanced Chat v3 RC standalone room-chat UI.
+- [ ] Create and publish `v0.2.4` only after separate explicit approval.
 
 ## Future roadmap — record now, implement when required
 

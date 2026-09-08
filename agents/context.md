@@ -1,10 +1,12 @@
 # Durable context
 
-Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.3 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
+Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.4 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
 
 One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 
 The current playable slice is one authenticated Colyseus lobby: LPC avatar layers, Tiled map, keyboard/click movement, environment collision, presence, live-only room chat and speech bubbles. `scripts/tiled-rooms.mjs` turns source TMX/TSX/PNG into Phaser assets and generated shared room data. The unique source lobby layout ID is `floor_0_lobby`. Collision comes primarily from tile-attached Tiled objectgroups with class/type `collision`; spawn remains a map point object.
+
+Lobby chat presentation uses exactly pinned Advanced Chat v3 RC `Layout` plus standalone `Chat` behind `RoomChat.vue`. This owner-approved prerelease exception avoids the legacy v2 API. The adapter only projects current users and accepted live messages; Colyseus retains transport/lifecycle ownership, and files, rich formatting, links, reactions, replies, edits and history loading remain disabled until supported end to end.
 
 `floor_0_lobby` is unique. Reusable authored starters live under `assets/rooms/templates`: `appartment_template`, `lobby_template`, and small/medium/large room templates. New floors use a lobby starter, new accounts receive a template-based apartment, and user rooms use their size-class template. Empty template directories are valid before their TMX files exist; nested theme paths become namespaced template IDs. Future floor creation randomly selects from available themed lobby starters on the server.
 

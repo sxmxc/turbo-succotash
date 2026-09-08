@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import RoomCanvas from "./components/RoomCanvas.vue";
 import FloatingPanel from "./components/FloatingPanel.vue";
+import RoomChat from "./components/RoomChat.vue";
 import {
   connectLobby,
   type ChatEvent,
@@ -29,7 +30,6 @@ const connectionStatus = ref<"Offline" | "Connecting" | "Connected" | "Failed">(
 );
 const messages = ref<ChatEvent[]>([]);
 const bubbles = ref<Record<string, string>>({});
-const chatText = ref("");
 const version = __BUILD_VERSION__;
 const commit = __BUILD_COMMIT__;
 
@@ -126,11 +126,8 @@ function receiveChat(message: ChatEvent) {
     }
   }, 4500);
 }
-function sendChat() {
-  const text = chatText.value.trim();
-  if (!text || !connection.value) return;
-  connection.value.sendChat(text);
-  chatText.value = "";
+function sendChat(text: string) {
+  connection.value?.sendChat(text);
 }
 async function logout() {
   await connection.value?.leave();
@@ -201,29 +198,14 @@ onMounted(async () => {
         />
         <div class="room-caption">ARROW KEYS / WASD · CLICK OR TAP TO MOVE</div>
       </div>
-      <FloatingPanel>
+      <FloatingPanel class="room-chat-panel">
         <span class="tag">LIVE ROOM CHAT</span>
-        <h2>Lobby conversation</h2>
-        <ol class="chat-log" aria-live="polite">
-          <li v-if="!messages.length" class="small">
-            Messages are live-only. Nothing from before you joined is shown.
-          </li>
-          <li v-for="message in messages" :key="message.serverMessageId">
-            <strong>{{ message.senderName }}</strong>
-            <span>{{ message.text }}</span>
-          </li>
-        </ol>
-        <form class="chat-form" @submit.prevent="sendChat">
-          <!-- <label for="chat">Message the room</label> -->
-          <input
-            id="chat"
-            v-model="chatText"
-            maxlength="280"
-            autocomplete="off"
-            placeholder="Say hello…"
-          />
-          <button type="submit">Send</button>
-        </form>
+        <RoomChat
+          :current-user="user"
+          :players="players"
+          :messages="messages"
+          @send="sendChat"
+        />
         <button class="text-button" type="button" @click="logout">
           Sign out
         </button>

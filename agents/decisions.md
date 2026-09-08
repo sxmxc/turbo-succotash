@@ -1,5 +1,11 @@
 # Decisions
 
+## 2026-09-08 — Advanced Chat v3 UI
+
+- Release 0.2.4 uses exactly pinned `@advanced-chat/components` 3.0.0-rc.3 by explicit owner decision, as an exception to the normal stable-only dependency policy. Adopting the documented v3 rewrite now avoids integrating legacy v2 and migrating later.
+- Use `Layout` with standalone `Chat` for the current one-conversation lobby. Add `Chats` when multiple room/whisper conversations exist; do not replace Panverse's draggable panel with the all-in-one `AdvancedChat` composition.
+- Advanced Chat owns presentation only. `RoomChat.vue` projects accepted Colyseus events and users; Colyseus continues to own transport, membership and live delivery. Unsupported files, rich formatting, links, reactions, replies, edits and history pagination are disabled.
+
 ## 2026-09-08 — Product name
 
 - The confirmed product name is Panverse Plaza, replacing the working name Social Room.

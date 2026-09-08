@@ -4,6 +4,7 @@ Resolved official npm registry `/latest` metadata before installation; the captu
 
 | Component                             | Selected stable release              |
 | ------------------------------------- | ------------------------------------ |
+| Advanced Chat                         | 3.0.0-rc.3 (approved prerelease)     |
 | Node                                  | 24.20.0 LTS (latest current: 26.8.1) |
 | npm                                   | 12.0.2                               |
 | Vue / Phaser                          | 3.5.42 / 4.2.1                       |
@@ -29,3 +30,5 @@ Official integration references: [Vue changelog](https://github.com/vuejs/core/b
 When upgrading, recheck current stable metadata, engine/peer compatibility, regenerate lockfile deliberately, run all checks and update this evidence. Document revisions are independent of software versions.
 
 Runtime evidence: `@colyseus/ws-transport` 0.18.2 declares Express optional but unconditionally imports it in `build/WebSocketTransport.mjs`; selected stable Express 5.2.1 explicitly. Colyseus 0.18 owns its HTTP router, so realtime uses `createRouter`/`createEndpoint` instead of attaching a competing Fastify request listener. API/identity retain Fastify. `eslint-config-prettier` disables only overlapping style rules; Prettier enforces formatting while ESLint retains correctness checks.
+
+Approved exception for release 0.2.4: the owner selected exactly pinned `@advanced-chat/components` 3.0.0-rc.3 instead of legacy stable `vue-advanced-chat` 2.1.2. The v3 package is a rewrite rather than a drop-in update, its current documentation targets v3, and using it now avoids a planned v2-to-v3 migration. Its declared Node range (`^20.19.0 || >=22.14.0`) and Vue peer (`^3.5.0`) accept the selected Node 24.20.0 and Vue 3.5.42. It is MIT licensed. The integration uses `Layout` plus standalone `Chat`; Colyseus remains the realtime owner, and unsupported library capabilities are disabled. Reassess and update the exact pin when v3 reaches a stable release.

@@ -198,8 +198,7 @@ button:not(.panel-handle):not(.text-button) {
   margin-top: 14px;
   cursor: pointer;
 }
-.auth-form button,
-.chat-form button {
+.auth-form button {
   width: 100%;
 }
 .text-button {
@@ -213,28 +212,41 @@ button:not(.panel-handle):not(.text-button) {
 .form-error {
   color: #9b302d !important;
 }
-.chat-log {
-  list-style: none;
-  margin: 12px 0;
-  padding: 0;
-  max-height: 230px;
-  overflow-y: auto;
-  border-block: 1px solid #263c3420;
+.floating-panel.room-chat-panel {
+  width: min(390px, calc(100vw - 16px));
 }
-.chat-log li {
-  padding: 8px 2px;
-  font-size: 12px;
-  line-height: 1.4;
+.room-chat-panel .panel-content {
+  padding: 16px 0 10px;
 }
-.chat-log strong {
-  display: block;
-  color: #354e46;
+.room-chat-panel .panel-content > .tag,
+.room-chat-panel .panel-content > .text-button {
+  margin-inline: 16px;
 }
-.chat-log span {
-  overflow-wrap: anywhere;
+.room-chat-panel .panel-content > .text-button {
+  margin-top: 6px;
 }
-.chat-form label {
-  margin-top: 10px;
+.room-chat-note {
+  margin: 8px 16px 12px;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+.room-chat {
+  margin-top: 8px;
+  --chat-container-border: 1px solid #263c3420;
+  --chat-container-border-radius: 0;
+  --chat-container-box-shadow: none;
+  --chat-header-bg-color: #e5e1d4;
+  --chat-header-color-name: #273934;
+  --chat-content-bg-color: #f7f4eb;
+  --chat-footer-bg-color: #e5e1d4;
+  --chat-bg-color-input: #fffdf7;
+  --chat-border-style-input: 1px solid #71827455;
+  --chat-color: #273934;
+  --chat-color-button: #f4f1e7;
+  --chat-bg-color-button: #29473f;
+  --chat-message-bg-color: #dedbd0;
+  --chat-message-bg-color-me: #b9d8ca;
+  --chat-room-color-username: #354e46;
 }
 .panel-content .small {
   font-size: 10px;

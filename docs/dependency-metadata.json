@@ -1,4 +1,14 @@
 {
+  "@advanced-chat/components": {
+    "version": "3.0.0-rc.3",
+    "license": "MIT",
+    "engines": {
+      "node": "^20.19.0 || >=22.14.0"
+    },
+    "peerDependencies": {
+      "vue": "^3.5.0"
+    }
+  },
   "vue": {
     "version": "3.5.42",
     "peerDependencies": {
