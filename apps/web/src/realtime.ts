@@ -1,4 +1,4 @@
-import { Client, type Room } from "@colyseus/sdk";
+import { Callbacks, Client, type Room } from "@colyseus/sdk";
 import { protocolVersion } from "../../../packages/contracts/src/index";
 
 export type RoomPlayer = {
@@ -20,6 +20,8 @@ export type ChatEvent = {
   channel: "room";
   text: string;
 };
+
+type SynchronizedPlayer = Omit<RoomPlayer, "sessionId">;
 
 export type RoomConnection = {
   sessionId: string;
@@ -54,26 +56,32 @@ export async function connectLobby(
     shirtTint,
     protocol: protocolVersion,
   });
-  const publishPlayers = () => {
-    const players: RoomPlayer[] = [];
-    room.state.players.forEach(
-      (player: Omit<RoomPlayer, "sessionId">, sessionId: string) => {
-        players.push({
-          sessionId,
-          userId: player.userId,
-          name: player.name,
-          x: player.x,
-          y: player.y,
-          direction: player.direction,
-          walking: player.walking,
-          shirtTint: player.shirtTint,
-        });
-      },
+  const synchronizedPlayers = new Map<string, SynchronizedPlayer>();
+  const publishPlayers = () =>
+    onPlayers(
+      Array.from(synchronizedPlayers, ([sessionId, player]) => ({
+        sessionId,
+        userId: player.userId,
+        name: player.name,
+        x: player.x,
+        y: player.y,
+        direction: player.direction,
+        walking: player.walking,
+        shirtTint: player.shirtTint,
+      })),
     );
-    onPlayers(players);
-  };
-  room.onStateChange(publishPlayers);
-  if (room.state?.players) publishPlayers();
+  const callbacks = Callbacks.get(room);
+  callbacks.onAdd("players", (decodedPlayer, decodedSessionId) => {
+    const player = decodedPlayer as SynchronizedPlayer;
+    const sessionId = decodedSessionId as string;
+    synchronizedPlayers.set(sessionId, player);
+    callbacks.onChange(player, publishPlayers);
+    publishPlayers();
+  });
+  callbacks.onRemove("players", (_player, decodedSessionId) => {
+    synchronizedPlayers.delete(decodedSessionId as string);
+    publishPlayers();
+  });
   room.onMessage("chat", onChat);
   return {
     sessionId: room.sessionId,

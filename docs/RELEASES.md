@@ -14,7 +14,7 @@ npm run smoke
 npm run test:database
 npm run test:dependencies
 npm run test:browser
-npm run release:check -- v0.2.2
+npm run release:check -- v0.2.3
 npm run release:manifest
 npm run deploy -- artifacts/release.json
 ```
@@ -25,7 +25,7 @@ Build scripts inject the Git commit and root version; service diagnostics and OC
 
 The GitHub Actions workflow runs locked install, formatting/lint, types, tests, production/container builds, fresh Compose startup, migration/database integration tests, browser checks and immutable local promotion. Tag builds additionally validate release metadata and export **the tested images**. The separate `release` environment job loads those artifacts and publishes version/commit tags to GHCR, recording digest references. Publishing never rebuilds. Each version and commit tag is independently resumable after partial publication: an existing tag is accepted only when its remote image config digest exactly matches the tested local image ID; different content hard-fails and is never overwritten. Missing tags use bounded push retries, and the final manifest records registry-qualified immutable digest references. Configure the GitHub `release` environment and package access before first tag; protected tags and environment reviewers are recommended repository settings. Untrusted PR verification receives only read access and no deployment credentials. Publishing job alone gets `packages: write`.
 
-The tagged `v0.2.1` CI verification ran remotely, but GHCR publication stopped partway through and no production deployment is claimed. Because rerunning that workflow uses the old tagged publisher, version `0.2.2` contains the recovery fix; never move the existing tag or overwrite a mismatched GHCR tag. Creating or publishing `v0.2.2` still requires explicit owner approval. For an approved release, download the published release manifest. On an authorized target, authenticate for image pulls, provision `.env`/database, and run the reusable deployment entry point with that manifest. Keep the root checkout/scripts at the release version. Kubernetes packaging, TLS, production secret management and realtime room draining are later target-specific work.
+The tagged `v0.2.1` CI verification ran remotely, but GHCR publication stopped partway through and no production deployment is claimed. Because rerunning that workflow uses the old tagged publisher, version `0.2.2` contains the recovery fix and version `0.2.3` is the next prepared release; never move an existing tag or overwrite a mismatched GHCR tag. Creating or publishing a tag still requires explicit owner approval. For an approved release, download the published release manifest. On an authorized target, authenticate for image pulls, provision `.env`/database, and run the reusable deployment entry point with that manifest. Keep the root checkout/scripts at the release version. Kubernetes packaging, TLS, production secret management and realtime room draining are later target-specific work.
 
 ## Migrations and rollback
 

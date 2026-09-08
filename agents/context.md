@@ -1,6 +1,6 @@
 # Durable context
 
-Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.2 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
+Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.3 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
 
 One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 

@@ -12,18 +12,22 @@ import {
   shutdown,
 } from "../../../packages/service-runtime/src/server.js";
 import { createLobbyRoom } from "./lobby.js";
+
 const config = configFor("realtime");
+
 let listening = false;
 matchMaker.controller.DEFAULT_CORS_HEADERS["Access-Control-Allow-Origin"] =
   config.PUBLIC_ORIGIN;
 matchMaker.controller.getCorsHeaders = () => ({
   "Access-Control-Allow-Origin": config.PUBLIC_ORIGIN,
 });
+
 const realtime = new Server({
   transport: new WebSocketTransport(),
   gracefullyShutdown: false,
   greet: false,
 });
+
 realtime.define("lobby", createLobbyRoom(config.IDENTITY_INTERNAL_URL));
 realtime.router = createRouter({
   health: createEndpoint("/healthz", { method: "GET" }, async () =>
@@ -50,6 +54,7 @@ shutdown(async () => {
   listening = false;
   await realtime.gracefullyShutdown(false);
 });
+
 await realtime.listen(config.REALTIME_PORT, config.HOST);
 listening = true;
 console.log(

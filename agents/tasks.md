@@ -57,6 +57,8 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [x] Reject existing version/commit tags whose remote config digest differs from the tested local image ID.
 - [x] With owner approval, prepare version `0.2.2` containing the publication fix; do not move `v0.2.1` or overwrite mismatched GHCR tags.
 - [ ] Create and publish `v0.2.2` only after separate explicit approval.
+- [x] Prepare version `0.2.3` with the Panverse Plaza rename, Colyseus/Phaser presence fixes and focused-chat keyboard fix.
+- [ ] Create and publish `v0.2.3` only after separate explicit approval.
 
 ## Future roadmap — record now, implement when required
 

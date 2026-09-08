@@ -86,3 +86,22 @@ Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Mi
 - `npm run rooms:build`: passed and built only `floor_0_lobby`; the five empty tracked template placeholders were ignored as intended.
 - `npm run check`: passed repository/format/lint/type checks, all 14 tests, and production build. The added discovery regression covers a unique top-level map, an empty apartment placeholder, and a nested themed lobby template ID.
 - No HTTP, realtime protocol, dependency, database, migration, or running-room behavior changed. This change establishes source discovery and confirmed creation rules only; instance creation and random theme selection remain future server work.
+
+## Colyseus presence and Phaser entity synchronization — 2026-09-08
+
+- Replaced the web client's coarse room-level state listener with the Colyseus 0.18 `Callbacks.get(room)` API: `onAdd` and `onRemove` track player membership, and per-player `onChange` publishes movement/property updates. The immediate `onAdd` behavior covers players already present when a client joins.
+- Fixed the separate Phaser lifecycle race by retaining the active `LobbyScene`; later `setPlayers` calls can now create missing game objects instead of only updating or removing entities created during scene startup.
+- Strengthened the two-session browser acceptance test to require `data-rendered-player-count="2"` on both Phaser hosts after both replicated online counts reach two, then reload/rejoin the first client and require symmetric state and rendering again.
+- `npm run check`: passed repository/format/lint/type checks, all 14 unit tests and the production build. Vite retained the existing large-chunk warning (1,712.47 kB raw / 465.55 kB gzip).
+- `npm run compose:build` and `npm run compose:up`: all five images built; migration completed; PostgreSQL and all four services became healthy.
+- `SMOKE_URL=http://docker01.voidmoose.local:8080 npm run test:browser -- tests/browser/milestone1.spec.ts --project=desktop --grep "two authenticated sessions"`: final run passed in 17.0 seconds. This exercised two authenticated clients, symmetric replicated membership and rendering, first-client page reload/rejoin, movement, chat, and late join against the rebuilt Compose deployment.
+- The client behavior and agent guardrails changed without changing realtime protocol 2, HTTP compatibility, dependencies, database schema or migrations.
+
+## Release 0.2.3 focused-input regression — 2026-09-08
+
+- Confirmed the chat defect was caused by Phaser's global key capture: movement polling was correctly suppressed for focused DOM controls, but the KeyboardManager had already prevented WASD and Space from reaching the input. Movement keys now remain registered for Phaser polling without browser capture; the selective unfocused-arrow handler still prevents page scrolling.
+- Browser acceptance now types `wasd with spaces`, verifies the exact chat input value, and verifies that the avatar coordinates remain unchanged. It also follows the renamed server-status selector.
+- `npm run check`: passed repository/format/lint/type checks, all 14 unit tests and the production build. Vite retained the existing large-chunk warning (1,712.78 kB raw / 465.67 kB gzip).
+- `npm run compose:build` and `npm run compose:up`: rebuilt all five version 0.2.3 images; migration completed and all services became healthy.
+- `npm run test:browser -- tests/browser/milestone1.spec.ts --project=desktop --grep "two authenticated sessions"`: passed 1/1 in 16.5 seconds against the rebuilt Compose stack. An initial run reached the app's connected state but failed because the renamed status text is CSS-capitalized; the assertion was corrected to be case-insensitive before the passing run.
+- Version 0.2.3 changes no HTTP/realtime protocol, dependency, database or migration contract. Protocol 2 remains coordinated across the web and realtime services. No tag, publication or remote deployment was performed.

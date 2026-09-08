@@ -17,7 +17,7 @@ async function registerAndJoin(page: Page, email: string, name: string) {
     page.getByRole("heading", { name: `Hello, ${name}.` }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Enter the Lobby" }).click();
-  await expect(page.locator(".milestone")).toContainText("connected");
+  await expect(page.locator(".server-connection")).toContainText(/connected/i);
   await expect(page.locator("canvas")).toBeVisible();
 }
 test("beta gate invariants hold through the common-origin identity API", async ({
@@ -130,6 +130,32 @@ test("two authenticated sessions move and exchange live-only room chat", async (
     await expect(
       second.getByText("2 online now", { exact: true }),
     ).toBeVisible();
+    await expect(first.locator(".room-canvas")).toHaveAttribute(
+      "data-rendered-player-count",
+      "2",
+    );
+    await expect(second.locator(".room-canvas")).toHaveAttribute(
+      "data-rendered-player-count",
+      "2",
+    );
+
+    await first.reload();
+    await expect(
+      first.getByRole("heading", { name: "Hello, One." }),
+    ).toBeVisible();
+    await first.getByRole("button", { name: "Enter the Lobby" }).click();
+    await expect(first.locator(".server-connection")).toContainText(
+      /connected/i,
+    );
+    for (const page of [first, second]) {
+      await expect(
+        page.getByText("2 online now", { exact: true }),
+      ).toBeVisible();
+      await expect(page.locator(".room-canvas")).toHaveAttribute(
+        "data-rendered-player-count",
+        "2",
+      );
+    }
 
     const chat = first.getByPlaceholder("Say hello…");
     const firstRoom = first.locator(".room-canvas");
@@ -139,7 +165,8 @@ test("two authenticated sessions move and exchange live-only room chat", async (
     const stableX = await firstRoom.getAttribute("data-player-x");
     const stableY = await firstRoom.getAttribute("data-player-y");
     await chat.click();
-    await first.keyboard.type("dddd");
+    await first.keyboard.type("wasd with spaces");
+    await expect(chat).toHaveValue("wasd with spaces");
     await first.waitForTimeout(450);
     expect(await firstRoom.getAttribute("data-player-x")).toBe(stableX);
     expect(await firstRoom.getAttribute("data-player-y")).toBe(stableY);

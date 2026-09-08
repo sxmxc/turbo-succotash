@@ -24,8 +24,8 @@ const betaKey = ref("");
 const shirtTint = ref(0xefd6a2);
 const players = ref<RoomPlayer[]>([]);
 const connection = ref<RoomConnection>();
-const connectionStatus = ref<"offline" | "connecting" | "connected" | "failed">(
-  "offline",
+const connectionStatus = ref<"Offline" | "Connecting" | "Connected" | "Failed">(
+  "Offline",
 );
 const messages = ref<ChatEvent[]>([]);
 const bubbles = ref<Record<string, string>>({});
@@ -52,7 +52,7 @@ async function jsonRequest(path: string, init?: Parameters<typeof fetch>[1]) {
 }
 function readable(message: string) {
   const labels: Record<string, string> = {
-    BETA_KEY_REQUIRED: "A beta key is required while registration is gated.",
+    BETA_KEY_REQUIRED: "A beta key is required during closed beta.",
     BETA_KEY_INVALID: "That beta key is invalid, revoked, or already used.",
     EMAIL_IN_USE: "An account already uses that email.",
     RATE_LIMITED: "Too many attempts. Please wait a minute.",
@@ -100,7 +100,7 @@ async function submitAuth() {
 }
 async function joinRoom() {
   if (!user.value || connection.value) return;
-  connectionStatus.value = "connecting";
+  connectionStatus.value = "Connecting";
   error.value = "";
   try {
     connection.value = await connectLobby(
@@ -108,9 +108,9 @@ async function joinRoom() {
       (next) => (players.value = next),
       receiveChat,
     );
-    connectionStatus.value = "connected";
+    connectionStatus.value = "Connected";
   } catch (caught) {
-    connectionStatus.value = "failed";
+    connectionStatus.value = "Failed";
     error.value =
       caught instanceof Error ? caught.message : "Could not join the room.";
   }
@@ -138,7 +138,7 @@ async function logout() {
   players.value = [];
   messages.value = [];
   bubbles.value = {};
-  connectionStatus.value = "offline";
+  connectionStatus.value = "Offline";
   await jsonRequest("/identity/auth/sign-out", { method: "POST" });
   user.value = undefined;
 }
@@ -161,17 +161,18 @@ onMounted(async () => {
     <header>
       <a href="/" class="brand"
         ><span class="brand-mark">▦</span> Panverse Plaza</a
-      ><span class="milestone">Milestone 1 <i /> {{ connectionStatus }}</span>
+      ><span class="server-connection"
+        >Server <i /> {{ connectionStatus }}</span
+      >
     </header>
 
-    <!--   <section class="intro">
-      <p class="eyebrow">THE LOBBY</p>
-      <h1>A little room.<br />A shared beginning.</h1>
+    <section class="intro">
+      <p class="eyebrow">Plaza Lobby</p>
       <p v-if="user">
         Signed in as {{ user.name }}. Choose an avatar color, then join.
       </p>
       <p v-else>Sign in to enter the shared room.</p>
-    </section> -->
+    </section>
 
     <template v-if="user && connection">
       <div class="room-frame">

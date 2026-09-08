@@ -45,6 +45,11 @@ export function mountRoom(
   let wasdKeys:
     Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key> | undefined;
   let lastIntent = { dx: 0, dy: 0, sentAt: 0 };
+  let activeScene: Phaser.Scene | undefined;
+
+  function rememberScene(scene: Phaser.Scene) {
+    activeScene = scene;
+  }
 
   function keyboardBlocked() {
     const active = parent.ownerDocument.activeElement as HTMLElement | null;
@@ -91,7 +96,7 @@ export function mountRoom(
       }
   }
 
-  function synchronize(currentScene?: Phaser.Scene) {
+  function synchronize(scene = activeScene) {
     const active = new Set(players.map((player) => player.sessionId));
     for (const [sessionId, entity] of entities)
       if (!active.has(sessionId)) {
@@ -103,8 +108,8 @@ export function mountRoom(
     for (const player of players) {
       let entity = entities.get(player.sessionId);
       if (!entity) {
-        if (!currentScene) continue;
-        const container = currentScene.add.container(player.x, player.y);
+        if (!scene) continue;
+        const container = scene.add.container(player.x, player.y);
         const layers = [
           initialAppearance.body,
           initialAppearance.head,
@@ -113,7 +118,7 @@ export function mountRoom(
           initialAppearance.hair,
         ].map((id) => {
           const asset = catalog.find((entry) => entry.id === id)!;
-          const sprite = currentScene.add
+          const sprite = scene.add
             .sprite(0, 0, asset.id)
             .setOrigin(
               asset.anchor.x / asset.frameWidth,
@@ -127,7 +132,7 @@ export function mountRoom(
         entity = {
           container,
           layers,
-          label: currentScene.add
+          label: scene.add
             .text(player.x, player.y + 5, player.name, {
               fontFamily: "sans-serif",
               fontSize: "9px",
@@ -137,7 +142,7 @@ export function mountRoom(
               padding: { x: 3, y: 1 },
             })
             .setOrigin(0.5, 0),
-          bubble: currentScene.add
+          bubble: scene.add
             .text(player.x, player.y - 58, "", {
               fontFamily: "sans-serif",
               fontSize: "10px",
@@ -184,6 +189,7 @@ export function mountRoom(
         .setText(bubble ?? "")
         .setVisible(Boolean(bubble));
     }
+    parent.dataset.renderedPlayerCount = String(entities.size);
   }
 
   class LobbyScene extends Phaser.Scene {
@@ -197,6 +203,7 @@ export function mountRoom(
       if (tiledLobby) preloadRoom(this, tiledLobby);
     }
     create() {
+      rememberScene(this);
       if (catalog.some((asset) => !this.textures.exists(asset.id))) {
         onError();
         return;
@@ -244,6 +251,9 @@ export function mountRoom(
         "W" | "A" | "S" | "D",
         Phaser.Input.Keyboard.Key
       >;
+      // Phaser captures registered keys globally by default, which prevents
+      // focused DOM inputs from receiving them even though movement is blocked.
+      keyboard.removeCapture("W,A,S,D,SPACE,UP,DOWN,LEFT,RIGHT");
       keyboard.on("keydown", (event: KeyboardEvent) => {
         if (
           !keyboardBlocked() &&
@@ -256,7 +266,7 @@ export function mountRoom(
       this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
         if (pointer.primaryDown) onMoveTo(pointer.worldX, pointer.worldY);
       });
-      synchronize(this);
+      synchronize();
       onReady();
     }
     update(time: number) {
@@ -278,7 +288,10 @@ export function mountRoom(
     banner: false,
   });
   return {
-    destroy: () => game.destroy(true),
+    destroy: () => {
+      activeScene = undefined;
+      game.destroy(true);
+    },
     setPlayers: (nextPlayers, nextLocalSessionId) => {
       players = nextPlayers;
       localSessionId = nextLocalSessionId;

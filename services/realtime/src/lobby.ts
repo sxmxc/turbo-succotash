@@ -71,8 +71,8 @@ export function createLobbyRoom(identityUrl: string) {
     }
 
     onCreate() {
-      this.setState(new LobbyState());
-      this.setSimulationInterval((delta) => this.simulate(delta), 50);
+      this.state = new LobbyState();
+      this.setTimestep((delta) => this.simulate(delta), 50);
       this.onMessage("move", (client, message) => {
         const parsed = moveSchema.safeParse(message);
         if (!parsed.success) return;

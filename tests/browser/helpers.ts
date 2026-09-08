@@ -15,7 +15,7 @@ export async function loginAndJoin(
   ).toBeVisible();
   await page.getByLabel("Shirt color").selectOption({ label: shirt });
   await page.getByRole("button", { name: "Enter the Lobby" }).click();
-  await expect(page.locator(".milestone")).toContainText("connected");
+  await expect(page.locator(".server-connection")).toContainText(/connected/i);
   if (expectReady)
     await expect(page.getByText("Scene ready", { exact: true })).toBeVisible();
 }

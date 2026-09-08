@@ -4,7 +4,9 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
-The product is now named Panverse Plaza. User-facing copy, repository metadata, Compose project naming, local OCI image names, CI image export, and release tooling use the new name. Existing `social-room-*` local image tags and Compose resources are not reused; rebuild under the `panverse-plaza-*` names. No HTTP, realtime protocol, dependency or database migration changes.
+## [0.2.3] - 2026-09-08
+
+The product is now named Panverse Plaza. User-facing copy, repository metadata, Compose project naming, local OCI image names, CI image export, and release tooling use the new name. The Colyseus client now tracks replicated player membership and nested changes with the supported callback API, and Phaser retains its active scene so late and rejoining players render reliably. Phaser movement keys are no longer globally captured, allowing focused chat and account fields to accept WASD and spaces while movement remains suspended. No HTTP, realtime protocol, dependency, database or migration changes; coordinated protocol 2 compatibility is unchanged.
 
 ## [0.2.2] - 2026-09-08
 
