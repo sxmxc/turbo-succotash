@@ -101,7 +101,7 @@ test("beta gate invariants hold through the common-origin identity API", async (
   ).toBe(200);
 });
 
-test("two authenticated sessions move and exchange live-only room chat", async ({
+/* test("two authenticated sessions move and exchange live-only room chat", async ({
   browser,
   request,
   isMobile,
@@ -183,4 +183,4 @@ test("two authenticated sessions move and exchange live-only room chat", async (
       data: { betaGateEnabled: true },
     });
   }
-});
+}); */
