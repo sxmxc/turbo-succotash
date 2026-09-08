@@ -50,6 +50,6 @@ onBeforeUnmount(() => {
     class="room-canvas"
     role="application"
     tabindex="0"
-    aria-label="Shared orthographic room. Use arrow keys or WASD to move, or click a destination."
+    aria-label="Use arrow keys or WASD to move, or click a destination."
   />
 </template>

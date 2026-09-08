@@ -182,7 +182,7 @@ onMounted(async () => {
             failed
               ? "Assets failed to load"
               : ready
-                ? `${players.length} online`
+                ? `${players.length} online now`
                 : "Loading…"
           }}</span>
         </div>
@@ -199,9 +199,7 @@ onMounted(async () => {
           @move="(dx, dy) => connection?.sendMove(dx, dy)"
           @move-to="(x, y) => connection?.moveTo(x, y)"
         />
-        <div class="room-caption">
-          ARROW KEYS / WASD · CLICK OR TAP · SERVER-AUTHORITATIVE COLLISION
-        </div>
+        <div class="room-caption">ARROW KEYS / WASD · CLICK OR TAP TO MOVE</div>
       </div>
       <FloatingPanel>
         <span class="tag">LIVE ROOM CHAT</span>
@@ -216,7 +214,7 @@ onMounted(async () => {
           </li>
         </ol>
         <form class="chat-form" @submit.prevent="sendChat">
-          <label for="chat">Message the room</label>
+          <!-- <label for="chat">Message the room</label> -->
           <input
             id="chat"
             v-model="chatText"
