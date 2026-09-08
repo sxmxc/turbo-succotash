@@ -21,4 +21,4 @@ Current/remaining work:
 
 Product decisions recorded for later milestones include immutable room IDs with separate floor/room addresses, concurrency-safe Floor 1+ allocation, official Floor 0 destinations, personal apartments, discovery, the official store, curated creator marketplace, visible system bots and layered moderation. No speculative schema or empty service was added for them.
 
-See [verification](../docs/VERIFICATION.md) for command results and [active tasks](tasks.md) for acceptance status. The source version is 0.2.0; no tag, publication or remote deployment is claimed.
+See [verification](../docs/VERIFICATION.md) for command results and [active tasks](tasks.md) for acceptance status. The source version is 0.2.1. Tag v0.2.0 was published before the CI isolation fix; v0.2.1 is not yet tagged or published, and no remote deployment is claimed.

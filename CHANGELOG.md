@@ -4,6 +4,10 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-08
+
+CI now resets the identity service’s transient in-memory signup limiter between smoke and browser acceptance. This preserves the production eight-signups-per-minute limit while preventing the independent verification stages from sharing rate-limit state. No HTTP, realtime protocol, dependency or database migration changes.
+
 ## [0.2.0] - 2026-09-08
 
 Milestone 1 adds gated password accounts, atomic hashed single-use beta-key redemption, administrator gate/key controls, authenticated LPC avatar choice, one authoritative shared lobby, keyboard/click movement with environment collision, and live-only room chat/bubbles. Database migration `identity/002` is required. Realtime protocol 2 is coordinated across the 0.2.0 web and realtime builds; 0.1.x clients and services are not compatible.
