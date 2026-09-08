@@ -21,7 +21,7 @@ try {
   ])
     probe(service, port, 503);
 } finally {
-  docker([...composeArgs, "start", "--wait", "postgres"]);
+  docker([...composeArgs, "up", "-d", "--wait", "postgres"]);
 }
 for (const [service, port] of [
   ["identity", 3001],
