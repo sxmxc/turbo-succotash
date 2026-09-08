@@ -2,7 +2,7 @@
 
 Root `package.json.version` is the single authoritative product version. Workspaces are private and deliberately have no duplicate product version. `CHANGELOG.md` carries release notes; document revisions and SQL migration revisions are independent. Follow [Semantic Versioning](https://semver.org/): during 0.x this project uses minor increments for features or breaking contracts and patches for compatible fixes. After 1.0, incompatible public changes require a major increment.
 
-HTTP and realtime schemas are compatibility contracts. Bootstrap diagnostics use protocol 1; only coordinated 0.1.x builds are tested together. New client/server messages must have validated version negotiation and explicit rejection of unsupported versions before join; currently no rooms or gameplay protocol are exposed. Document supported combinations and migration compatibility in every release; deploy coordinated services until independent compatibility is tested.
+HTTP and realtime schemas are compatibility contracts. Release 0.2.0 uses protocol 2; only coordinated 0.2.x web, identity, API and realtime builds are supported. Realtime joins validate the protocol version and reject unsupported clients. Document supported combinations and migration compatibility in every release; deploy coordinated services until independent compatibility is tested.
 
 ## Build once and promote
 
@@ -14,7 +14,7 @@ npm run smoke
 npm run test:database
 npm run test:dependencies
 npm run test:browser
-npm run release:check -- v0.1.0
+npm run release:check -- v0.2.0
 npm run release:manifest
 npm run deploy -- artifacts/release.json
 ```

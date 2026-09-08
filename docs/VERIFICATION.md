@@ -49,3 +49,14 @@ The local Compose deployment now runs the uncommitted LPC working tree (dirty so
 ## Remote development port exposure — 2026-09-07
 
 Compose now uses the existing `HOST` setting for the published nginx address while retaining `127.0.0.1` in `.env.example`. This local ignored `.env` sets `HOST=0.0.0.0`; only nginx is published by Compose, while backend containers remain internal. `docker compose config --quiet` passed and resolved the web mapping to `0.0.0.0:8080->80`. `npm run compose:up` recreated web healthy; `npm run smoke` passed; `ss` showed `0.0.0.0:8080`; HTTP returned 200 through both loopback and host address `172.30.0.101`. `git diff --check` passed. No image rebuild, dependency, contract, database, HTTP protocol or realtime protocol change was required.
+
+## Milestone 1 final verification — 2026-09-08
+
+- `npm run check`: passed repository guard, formatting, lint, TypeScript/Vue type checks, 10 unit tests and production build. The existing Phaser bundle-size warning remains.
+- `npm run compose:build` and `npm run compose:up`: all application images built; migration completed; PostgreSQL and all services became healthy.
+- `npm run test:database`: passed concurrent fresh migration, repeat, upgrade preservation, role isolation, rollback and checksum rejection.
+- `npm run smoke`: passed after service readiness against the Compose deployment.
+- `SMOKE_URL=http://docker01.voidmoose.local:8080 npm run test:browser`: 8 passed and 2 intentional mobile skips. The restored desktop acceptance case covered two authenticated sessions, presence, authoritative movement, typing suppression, live-only chat and late-join no-history behavior; beta gating covered concurrent redemption, reuse, revocation and winner login.
+- Browser verification must use the configured `PUBLIC_ORIGIN`; localhost is rejected as `INVALID_ORIGIN` when the deployment trusts the external hostname. Smoke and the browser suite are separate rate-limited stages because together they intentionally exceed the eight-signups-per-minute per-IP production limit.
+
+Owner-facing external-origin play sign-off was accepted. The root release version is now 0.2.0 and protocol 2 remains the coordinated realtime contract; dependencies did not change.

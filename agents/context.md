@@ -1,6 +1,6 @@
 # Durable context
 
-Self-hosted browser social game; product name undecided. [Design revision 6](../docs/SOCIAL_ROOM_DESIGN.md) is the product authority. Software remains 0.1.0 independently of document revisions. Milestone 0 is complete and Milestone 1 is active.
+Self-hosted browser social game; product name undecided. [Design revision 6](../docs/SOCIAL_ROOM_DESIGN.md) is the product authority. Software is 0.2.0 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
 
 One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 
