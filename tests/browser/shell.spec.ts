@@ -10,15 +10,33 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
   await loginAndJoin(page, "Soft lilac");
   await expect(page.getByText("Scene ready", { exact: true })).toBeVisible();
   await expect(page.locator("canvas")).toBeVisible();
-  await page.locator(".room-canvas").focus();
-  const before = await page.locator("canvas").screenshot();
+  const room = page.locator(".room-canvas");
+  await room.focus();
+  await expect
+    .poll(async () => Number(await room.getAttribute("data-player-x")))
+    .toBeGreaterThan(0);
+  const beforeX = Number(await room.getAttribute("data-player-x"));
   await page.keyboard.down("ArrowRight");
   await expect
-    .poll(async () => before.equals(await page.locator("canvas").screenshot()))
-    .toBe(false);
+    .poll(async () => Number(await room.getAttribute("data-player-x")))
+    .toBeGreaterThan(beforeX);
   await page.keyboard.up("ArrowRight");
-  const after = await page.locator("canvas").screenshot();
-  expect(before.equals(after)).toBe(false);
+  const afterKeyboardX = Number(await room.getAttribute("data-player-x"));
+  const afterKeyboardY = Number(await room.getAttribute("data-player-y"));
+  const canvas = page.locator("canvas");
+  const canvasBox = await canvas.boundingBox();
+  if (!canvasBox) throw new Error("Missing canvas bounds");
+  const canvasSize = await canvas.evaluate((element) => {
+    const surface = element as HTMLCanvasElement;
+    return { width: surface.width, height: surface.height };
+  });
+  await page.mouse.click(
+    canvasBox.x + ((afterKeyboardX + 24) / canvasSize.width) * canvasBox.width,
+    canvasBox.y + (afterKeyboardY / canvasSize.height) * canvasBox.height,
+  );
+  await expect
+    .poll(async () => Number(await room.getAttribute("data-player-x")))
+    .toBeGreaterThan(afterKeyboardX);
   const panel = page.getByRole("region", { name: "Room panel" });
   const initial = await panel.boundingBox();
   expect(initial).toBeTruthy();
@@ -44,8 +62,8 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
     await page.setViewportSize({ width: 900, height: 300 });
     const short = await panel.boundingBox();
     expect(short!.y + short!.height).toBeLessThanOrEqual(300);
-    await page.getByLabel("Message the room").scrollIntoViewIfNeeded();
-    await expect(page.getByLabel("Message the room")).toBeVisible();
+    await page.getByPlaceholder("Say hello…").scrollIntoViewIfNeeded();
+    await expect(page.getByPlaceholder("Say hello…")).toBeVisible();
   } else {
     await panel.scrollIntoViewIfNeeded();
     const bounds = await panel.boundingBox();

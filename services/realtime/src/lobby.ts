@@ -127,17 +127,18 @@ export function createLobbyRoom(identityUrl: string) {
     onJoin(client: Client, options: { shirtTint?: unknown }) {
       const auth = client.auth as Authenticated;
       const index = this.state.players.size;
-      const player = new PlayerState();
       const spawn = roomLayout.spawns[index % roomLayout.spawns.length]!;
-      player.userId = auth.user.id;
-      player.name = auth.user.name;
-      player.x = spawn.x;
-      player.y = spawn.y;
-      player.shirtTint =
-        typeof options?.shirtTint === "number" &&
-        allowedTints.has(options.shirtTint)
-          ? options.shirtTint
-          : 0xefd6a2;
+      const player = new PlayerState().assign({
+        userId: auth.user.id,
+        name: auth.user.name,
+        x: spawn.x,
+        y: spawn.y,
+        shirtTint:
+          typeof options?.shirtTint === "number" &&
+          allowedTints.has(options.shirtTint)
+            ? options.shirtTint
+            : 0xefd6a2,
+      });
       this.state.players.set(client.sessionId, player);
     }
 

@@ -15,16 +15,41 @@ function exportedMap(image: string) {
     height: 3,
     tilewidth: 16,
     tileheight: 16,
-    tilesets: [{ firstgid: 1, name: "Interior", image }],
+    tilesets: [
+      {
+        firstgid: 1,
+        name: "Interior",
+        image,
+        tiles: [
+          {
+            id: 0,
+            objectgroup: {
+              objects: [
+                {
+                  class: "collision",
+                  x: 0,
+                  y: 0,
+                  width: 16,
+                  height: 16,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ],
     layers: [
-      { type: "tilelayer", name: "Ground", visible: true, data: [] },
+      {
+        type: "tilelayer",
+        name: "Ground",
+        visible: true,
+        width: 4,
+        data: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+      },
       {
         type: "objectgroup",
         name: "Gameplay",
-        objects: [
-          { class: "spawn", point: true, x: 24, y: 32 },
-          { class: "collision", x: 16, y: 16, width: 32, height: 16 },
-        ],
+        objects: [{ class: "spawn", point: true, x: 24, y: 32 }],
       },
     ],
   };
@@ -50,7 +75,7 @@ test("packages Tiled JSON and PNG data for Phaser and realtime", () => {
     });
     assert.deepEqual(result.server.spawns, [{ x: 24, y: 32 }]);
     assert.deepEqual(result.server.obstacles, [
-      { x: 16, y: 16, width: 32, height: 16 },
+      { x: 16, y: 16, width: 16, height: 16 },
     ]);
     const packaged = JSON.parse(readFileSync(join(output, "map.json"), "utf8"));
     assert.equal(packaged.tilesets[0].image, "tilesets/interior.png");
@@ -59,18 +84,18 @@ test("packages Tiled JSON and PNG data for Phaser and realtime", () => {
   }
 });
 
-// test("rejects external tilesets that were not embedded", () => {
-//   const temporary = mkdtempSync(join(tmpdir(), "tiled-room-test-"));
-//   try {
-//     const image = join(temporary, "interior.png");
-//     writeFileSync(image, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
-//     const map = exportedMap("interior.png");
-//     map.tilesets = [{ firstgid: 1, name: "Interior", image: "interior.png" }];
-//     assert.throws(
-//       () => packageTiledMap("lobby", map, "lobby.json", temporary),
-//       /external after export/,
-//     );
-//   } finally {
-//     rmSync(temporary, { recursive: true, force: true });
-//   }
-// });
+test("rejects external tilesets that were not embedded", () => {
+  const temporary = mkdtempSync(join(tmpdir(), "tiled-room-test-"));
+  try {
+    const map = {
+      ...exportedMap("interior.png"),
+      tilesets: [{ firstgid: 1, source: "interior.tsx" }],
+    };
+    assert.throws(
+      () => packageTiledMap("lobby", map, "lobby.json", temporary),
+      /external after export/,
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});

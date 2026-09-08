@@ -50,6 +50,68 @@ function propertyValue(properties, name) {
   return properties?.find((property) => property.name === name)?.value;
 }
 
+function rectangleObstacle(roomId, object, offsetX = 0, offsetY = 0) {
+  if (
+    object.ellipse ||
+    object.gid ||
+    object.polygon ||
+    object.polyline ||
+    object.rotation ||
+    !Number.isFinite(object.x) ||
+    !Number.isFinite(object.y) ||
+    !Number.isFinite(object.width) ||
+    !Number.isFinite(object.height) ||
+    object.width <= 0 ||
+    object.height <= 0
+  )
+    fail(`${roomId}: collision objects must be axis-aligned rectangles`);
+  return {
+    x: offsetX + object.x,
+    y: offsetY + object.y,
+    width: object.width,
+    height: object.height,
+  };
+}
+
+function tileCollisionObstacles(roomId, map, layers) {
+  const tilesets = [...(map.tilesets ?? [])].sort(
+    (left, right) => right.firstgid - left.firstgid,
+  );
+  const obstacles = [];
+  for (const layer of layers.filter((entry) => entry.type === "tilelayer")) {
+    if (!Array.isArray(layer.data))
+      fail(`${roomId}: tile layers must export as finite JSON arrays`);
+    for (const [index, rawGid] of layer.data.entries()) {
+      const unsignedGid = rawGid >>> 0;
+      const gid = unsignedGid & 0x0fffffff;
+      if (!gid) continue;
+      const tileset = tilesets.find((entry) => gid >= entry.firstgid);
+      if (!tileset) fail(`${roomId}: tile GID ${gid} has no tileset`);
+      const tile = tileset.tiles?.find(
+        (entry) => entry.id === gid - tileset.firstgid,
+      );
+      const collisionObjects = (tile?.objectgroup?.objects ?? []).filter(
+        (object) => objectKind(object) === "collision",
+      );
+      if (!collisionObjects.length) continue;
+      if (unsignedGid !== gid)
+        fail(`${roomId}: flipped collision tiles are not supported yet`);
+      const column = index % layer.width;
+      const row = Math.floor(index / layer.width);
+      const tileX =
+        ((layer.x ?? 0) + column) * map.tilewidth + (layer.offsetx ?? 0);
+      const tileY =
+        ((layer.y ?? 0) + row) * map.tileheight + (layer.offsety ?? 0);
+      obstacles.push(
+        ...collisionObjects.map((object) =>
+          rectangleObstacle(roomId, object, tileX, tileY),
+        ),
+      );
+    }
+  }
+  return obstacles;
+}
+
 export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
   if (map.orientation !== "orthogonal")
     fail(`${roomId}: only orthogonal maps are supported`);
@@ -102,29 +164,12 @@ export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
   const gameplayObjects = layers
     .filter((layer) => layer.type === "objectgroup")
     .flatMap((layer) => layer.objects ?? []);
-  const obstacles = gameplayObjects
-    .filter((object) => objectKind(object) === "collision")
-    .map((object) => {
-      if (
-        object.ellipse ||
-        object.gid ||
-        object.polygon ||
-        object.polyline ||
-        !Number.isFinite(object.x) ||
-        !Number.isFinite(object.y) ||
-        !Number.isFinite(object.width) ||
-        !Number.isFinite(object.height) ||
-        object.width <= 0 ||
-        object.height <= 0
-      )
-        fail(`${roomId}: collision objects must be axis-aligned rectangles`);
-      return {
-        x: object.x,
-        y: object.y,
-        width: object.width,
-        height: object.height,
-      };
-    });
+  const obstacles = [
+    ...tileCollisionObstacles(roomId, map, layers),
+    ...gameplayObjects
+      .filter((object) => objectKind(object) === "collision")
+      .map((object) => rectangleObstacle(roomId, object)),
+  ];
   const spawns = gameplayObjects
     .filter((object) => objectKind(object) === "spawn")
     .map((object) => ({ x: object.x, y: object.y }));
@@ -135,7 +180,7 @@ export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
   const height = map.height * map.tileheight;
   const packagedMap = join(roomOutput, "map.json");
   mkdirSync(roomOutput, { recursive: true });
-  writeFileSync(packagedMap, `${JSON.stringify(map)}\n`);
+  writeFileSync(packagedMap, `${JSON.stringify(map, null, 2)}\n`);
 
   return {
     web: {

@@ -2,41 +2,47 @@
 
 ## Milestone 0 — Bootstrap (complete)
 
-Acceptance: mounted Vue/Phaser orthographic placeholder; draggable desktop/docked mobile panel; independent service foundations; validated diagnostics/config; PostgreSQL migrations and role isolation; reproducible dependency/container inputs; CI checks and immutable artifact deployment; accurate agent continuity.
+Acceptance: mounted Vue/Phaser orthographic shell; responsive floating/docked panel; independent service foundations; validated diagnostics/configuration; PostgreSQL migrations and role isolation; reproducible dependency/container inputs; CI checks and immutable artifact deployment; accurate agent continuity.
 
-- [x] Read supplied design fully and preserve existing files.
-- [x] Resolve stable dependencies and explain compatibility tradeoff.
+- [x] Preserve the supplied design and establish repository/service boundaries.
+- [x] Resolve and pin stable dependencies with compatibility evidence.
 - [x] Implement shell, services, migrations, containers and release path.
-- [x] Complete checks, browser/container/database verification and final diff review.
-- [x] Update final handoff with exact results and limitations.
-- [x] Commit the reproducible lockfile and deploy tested immutable images locally; remote publishing remains an explicit connection step.
+- [x] Verify checks, browser/container/database behavior and final diff.
+- [x] Import the confirmed LPC selection with native metadata, provenance and accessible credits.
+- [x] Make Compose external binding use the single configured public origin.
 
-## LPC integration — immediate follow-up to bootstrap
+## Milestone 1 — First playable experience (in progress)
 
-- [x] Record confirmed art change without reopening completed bootstrap.
-- [x] Import minimal compatible body/head/hair/clothing with native dimensions, per-file provenance and accessible credits.
-- [x] Adapt local preview with synchronized standing/four-direction walking and data-driven appearance.
-- [x] Verify production rendering, alignment, loading, existing checks and update handoff. See docs/VERIFICATION.md for results.
+Acceptance remains: two authenticated browser sessions join the same room, see movement and exchange live-only messages; walls block movement; players do not block one another; typing never moves the avatar; late joiners see no earlier chat; beta-key reuse/revocation fails; disabling the gate permits signup without a key.
 
-## Operations
-
-- [x] Make the Compose web bind address follow the existing `HOST` setting; keep the example loopback-safe and verify external host-address access.
-
-## Milestone 1 — Shared lobby (complete)
-
-Implement email/password signup/login and administrator-controlled beta-key gate in identity. Consume a hashed, single-use beta key atomically with account creation; gate-off permits signup, existing login is unaffected. Do not expose social signup until its first-account path obeys the same invariant.
-
-Acceptance: integration tests prove concurrent redemption has exactly one winner, reuse/revoked keys fail, gate-off works, existing login works with gate enabled, and sessions work through common-origin proxy. Then build avatar selection, one authoritative room, keyboard/click movement, environment collision and live-only chat/bubbles; full M1 acceptance remains in the design.
+### Completed implementation
 
 - [x] Atomic gated password signup/login and administrator gate/key controls.
-- [x] Authenticated avatar choice and one authoritative shared lobby.
-- [x] Keyboard/click movement, environment collision, and non-colliding players.
-- [x] Live-only room chat/log/bubbles and two-session browser acceptance.
+- [x] Authenticated avatar choice using maintained LPC layers and inspected native frame metadata.
+- [x] One server-authoritative Colyseus lobby with replicated presence.
+- [x] Phaser Scene input for arrows/WASD and pointer/tap world coordinates; movement is suppressed while DOM controls have focus.
+- [x] Phaser Containers/Game Objects and AnimationManager/AnimationState for synchronized LPC layers.
+- [x] Server-authoritative environment collision with non-colliding players.
+- [x] Live-only room chat/log/speech bubbles and secure browser-compatible request IDs.
+- [x] Tiled TMX/TSX/PNG build pipeline producing Phaser JSON/assets and shared server bounds/spawns/collision.
+- [x] Render the `floor_0_lobby` Tiled map instead of the graphics fallback.
+- [x] Import tile-attached objectgroup collision shapes with class/type `collision`.
+- [x] Restore Tiled regression coverage and add prototype-backed Colyseus movement coverage.
+- [x] Browser regression proves the replicated spawn, keyboard movement and click-to-move using authoritative coordinates.
+- [x] Add repository guard against `.orig` and `.rej` patch artifacts.
 
-## Phaser engine alignment — active
+### Current verification and remaining acceptance
 
-- [ ] Move keyboard intent polling/capture from Vue window listeners and timers into the Phaser Scene InputPlugin.
-- [ ] Represent each layered player with Phaser Game Objects/Containers instead of a parallel custom entity layout.
-- [ ] Replace the manual animation clock/frame loop with Phaser AnimationManager/AnimationState while keeping LPC layers synchronized.
-- [ ] Use Phaser pointer/world-coordinate and ScaleManager facilities for click/tap movement.
-- [ ] Keep realtime authoritative collision on the server; use Phaser physics only where it does not create a competing authority.
+- [ ] Run `npm run check` on the final formatted tree.
+- [ ] Rebuild/restart Compose, then run smoke and database integration checks.
+- [ ] Run the complete desktop/mobile browser suite, including two-session chat, typing suppression, no history and collision.
+- [ ] Owner-facing external-origin play check and Milestone 1 sign-off.
+
+## Future roadmap — record now, implement when required
+
+- [ ] Milestone 2: persistent room records with immutable IDs, separate public addresses, concurrency-safe automatic Floor 1+ allocation, private-room entry, navigator, friends/presence, cross-room whispers and saved appearance.
+- [ ] Milestone 3: useful Floor 0 destinations, apartment/navigation foundations, discovery/bookmarks/events, blocks/reports, layered moderation, administrator controls, visible system bots and level permissions.
+- [ ] Milestone 4: apartment customization, official store/entitlements, reconnect and capacity validation, multi-realtime coordination.
+- [ ] Milestone 5: curated creator submissions, provenance/licensing, moderation, marketplace transactions and payouts.
+
+Do not add speculative schemas or empty services for future milestones. Add the smallest working boundary when its milestone begins.

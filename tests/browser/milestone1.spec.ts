@@ -125,17 +125,25 @@ test("two authenticated sessions move and exchange live-only room chat", async (
       registerAndJoin(first, `one-${suffix}@example.test`, "One"),
       registerAndJoin(second, `two-${suffix}@example.test`, "Two"),
     ]);
-    await expect(first.getByText("2 online", { exact: true })).toBeVisible();
-    await expect(second.getByText("2 online", { exact: true })).toBeVisible();
+    await expect(
+      first.getByText("2 online now", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      second.getByText("2 online now", { exact: true }),
+    ).toBeVisible();
 
-    const chat = first.getByLabel("Message the room");
-    const stableBefore = await first.locator("canvas").screenshot();
+    const chat = first.getByPlaceholder("Say hello…");
+    const firstRoom = first.locator(".room-canvas");
+    await expect
+      .poll(async () => Number(await firstRoom.getAttribute("data-player-x")))
+      .toBeGreaterThan(0);
+    const stableX = await firstRoom.getAttribute("data-player-x");
+    const stableY = await firstRoom.getAttribute("data-player-y");
     await chat.click();
     await first.keyboard.type("dddd");
     await first.waitForTimeout(450);
-    expect(
-      stableBefore.equals(await first.locator("canvas").screenshot()),
-    ).toBe(true);
+    expect(await firstRoom.getAttribute("data-player-x")).toBe(stableX);
+    expect(await firstRoom.getAttribute("data-player-y")).toBe(stableY);
     await chat.fill("hello from one");
     await first.getByRole("button", { name: "Send" }).click();
     await expect(
@@ -143,18 +151,25 @@ test("two authenticated sessions move and exchange live-only room chat", async (
     ).toBeVisible();
 
     const remoteBefore = await second.locator("canvas").screenshot();
-    await first.locator("canvas").click({ position: { x: 600, y: 350 } });
-    await first.waitForTimeout(700);
-    expect(
-      remoteBefore.equals(await second.locator("canvas").screenshot()),
-    ).toBe(false);
+    await firstRoom.focus();
+    const movementStart = Number(await firstRoom.getAttribute("data-player-x"));
+    await first.keyboard.down("ArrowRight");
+    await expect
+      .poll(async () => Number(await firstRoom.getAttribute("data-player-x")))
+      .toBeGreaterThan(movementStart);
+    await first.keyboard.up("ArrowRight");
+    await expect
+      .poll(async () =>
+        remoteBefore.equals(await second.locator("canvas").screenshot()),
+      )
+      .toBe(false);
 
     const late = await lateContext.newPage();
     await registerAndJoin(late, `late-${suffix}@example.test`, "Late");
     await expect(late.getByText("hello from one", { exact: true })).toHaveCount(
       0,
     );
-    await second.getByLabel("Message the room").fill("welcome late");
+    await second.getByPlaceholder("Say hello…").fill("welcome late");
     await second.getByRole("button", { name: "Send" }).click();
     await expect(late.getByText("welcome late", { exact: true })).toBeVisible();
   } finally {

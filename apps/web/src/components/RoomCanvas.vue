@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { mountRoom, type RoomView } from "../game/mount";
 import type { RoomPlayer } from "../realtime";
 
@@ -15,6 +15,9 @@ const emit = defineEmits<{
   moveTo: [x: number, y: number];
 }>();
 const host = ref<HTMLDivElement>();
+const localPlayer = computed(() =>
+  props.players.find((player) => player.sessionId === props.localSessionId),
+);
 let view: RoomView | undefined;
 
 onMounted(() => {
@@ -47,6 +50,8 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="host"
+    :data-player-x="localPlayer?.x"
+    :data-player-y="localPlayer?.y"
     class="room-canvas"
     role="application"
     tabindex="0"

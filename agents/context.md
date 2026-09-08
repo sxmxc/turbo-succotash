@@ -1,9 +1,15 @@
 # Durable context
 
-Self-hosted browser social game; product name undecided. [Design revision 5](../docs/SOCIAL_ROOM_DESIGN.md) is the working specification. Software starts at 0.1.0, independently of document revisions.
+Self-hosted browser social game; product name undecided. [Design revision 6](../docs/SOCIAL_ROOM_DESIGN.md) is the product authority. Software remains 0.1.0 independently of document revisions. Milestone 0 is complete and Milestone 1 is active.
 
-One npm workspace repository; four deployable services plus a migration image. Vue UI communicates with Phaser via `mountRoom`; no game objects in application state. PostgreSQL has separate identity/application roles and schemas, DDL performed by controlled migrations. Colyseus has no joinable rooms yet. Better Auth is configured, with only session inspection exposed. The shell is a clearly labeled local visual prototype. LPC character art replaces the original 16×16 placeholder; its small data-driven catalog and native-frame metadata are documented in docs/LPC_ASSETS.md.
+One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 
-Git remote is GitHub `sxmxc/turbo-succotash`; GitHub Actions is selected accordingly. Compose is the working deployment target; Kubernetes and remote deployment are later integration work. Shared room-data package is deferred until a walkability contract is implemented in Milestone 1.
+The current playable slice is one authenticated Colyseus lobby: LPC avatar layers, Tiled map, keyboard/click movement, environment collision, presence, live-only room chat and speech bubbles. `scripts/tiled-rooms.mjs` turns source TMX/TSX/PNG into Phaser assets and generated shared room data. The source lobby template ID is `floor_0_lobby`. Collision comes primarily from tile-attached Tiled objectgroups with class/type `collision`; spawn remains a map point object.
 
-Open: product name, OAuth providers, verification policy, avatar catalog, capacity/ownership limits, leveling/XP, room-owner powers, audience policy, report retention, optional analytics. None blocks bootstrap. See [architecture/setup](../README.md) and [releases](../docs/RELEASES.md).
+Phaser core currently covers the needed scene lifecycle, Loader/Tilemap APIs, keyboard/pointer input, Containers, animations and ScaleManager. The Rex catalog was reviewed as an extension source, but no plugin is justified for this slice; adopted plugins must solve a concrete missing capability, be license-compatible, pinned and documented.
+
+Future confirmed architecture: persistent rooms use immutable internal IDs separate from public floor/room addresses; API owns room records/allocation and realtime owns running instances. Floor 0 is official, user rooms auto-allocate from Floor 1, and a floor has at most 500 registered addresses. Apartments, discovery, store/economy, curated creator marketplace, visible backend system bots and layered moderation are roadmap items, not present schemas/services.
+
+Git remote is GitHub `sxmxc/turbo-succotash`. Compose is the working deployment target; Kubernetes and remote deployment are later integration work. See [setup](../README.md), [Tiled pipeline](../docs/TILED_ROOMS.md), [Phaser approach](../docs/PHASER.md), [decisions](decisions.md) and [verification](../docs/VERIFICATION.md).
+
+Open decisions include product name, OAuth providers, verification policy, broader avatar catalog, concurrent capacity values, level names/thresholds/earning and hosting values, ownership limits, deleted-address reuse, room-owner powers, audience policy, retention, store/payment details, creator terms/payouts and optional analytics.

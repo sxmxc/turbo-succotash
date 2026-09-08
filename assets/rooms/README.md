@@ -1,27 +1,17 @@
 # Tiled room sources
 
-Put each room in its own directory:
+Put each room template in its own directory:
 
 ```text
 assets/rooms/
-  lobby/
-    lobby.tmx
-    interior.tsx
-    interior.png
+  floor_0_lobby/
+    floor-0-lobby.tmx
+    castle-inside.tsx
+    castle-inside.png
 ```
 
-Each directory must contain exactly one finite, orthogonal `.tmx` map. External
-`.tsx` tilesets are encouraged for authoring, but each tileset must use one PNG
-spritesheet rather than a collection of per-tile images.
+Each directory contains exactly one finite orthogonal TMX map. External TSX tilesets are encouraged for authoring, and each tileset uses one PNG sheet.
 
-Add these standard Tiled objects to any object layer:
+Author at least one map point object with class (or legacy type) `spawn`. Author environment collision primarily as rectangle objects in each colliding tile’s TSX objectgroup, with object class/type `collision`. When the tile is placed, the pipeline translates its local collision rectangles into world obstacles. Standalone map rectangle objects with class/type `collision` are also supported.
 
-- at least one point object with class `spawn`;
-- zero or more axis-aligned rectangle objects with class `collision`.
-
-Run `npm run rooms:build`. The official Tiled CLI exports embedded-tileset JSON,
-then the repository script validates and packages the JSON and PNGs for Phaser
-and generates the matching authoritative collision/spawn data for realtime.
-Generated files under `apps/web/public/assets/rooms` and
-`packages/room-data/src/rooms.generated.ts` must be committed. Do not edit them
-by hand.
+Run `npm run rooms:build`. The official Tiled CLI exports embedded-tileset JSON; the repository script validates and packages JSON/PNGs for Phaser and generates matching server bounds, spawn and collision data. Commit generated files under `apps/web/public/assets/rooms` and `packages/room-data/src/rooms.generated.ts`; never edit them manually.

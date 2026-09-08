@@ -1,4 +1,7 @@
-import { roomLayouts } from "../../../packages/room-data/src/rooms.generated.js";
+import {
+  lobbyTemplateId,
+  roomLayouts,
+} from "../../../packages/room-data/src/index.js";
 
 interface RoomLayout {
   width: number;
@@ -28,7 +31,8 @@ const placeholderRoomLayout = {
 } as const;
 
 const generatedRooms = roomLayouts as Record<string, RoomLayout>;
-export const roomLayout = generatedRooms.lobby ?? placeholderRoomLayout;
+export const roomLayout =
+  generatedRooms[lobbyTemplateId] ?? placeholderRoomLayout;
 
 export type Position = { x: number; y: number };
 
@@ -61,7 +65,7 @@ export function moveWithCollision(
   velocity: Position,
   deltaSeconds: number,
 ) {
-  const next = { ...position };
+  const next = { x: position.x, y: position.y };
   const distance = Math.hypot(velocity.x, velocity.y) * deltaSeconds;
   const steps = Math.max(1, Math.ceil(distance / 4));
   const stepSeconds = deltaSeconds / steps;

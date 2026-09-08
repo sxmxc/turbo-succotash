@@ -73,6 +73,7 @@ export async function connectLobby(
     onPlayers(players);
   };
   room.onStateChange(publishPlayers);
+  if (room.state?.players) publishPlayers();
   room.onMessage("chat", onChat);
   return {
     sessionId: room.sessionId,

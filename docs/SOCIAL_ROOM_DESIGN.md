@@ -1,7 +1,7 @@
-# Social Room Game — Working Design — revision 5
+# Social Room Game — Working Design — revision 6
 
 Status: buildable draft. Product name undecided.
-Prepared: 2026-09-07.
+Prepared: 2026-09-08.
 
 ## Decision policy
 
@@ -17,6 +17,8 @@ Use current stable dependencies only. At bootstrap, verify official release chan
 
 A browser-based social chat game where people enter shared 2D rooms, move pixel-art characters, and chat through a floating chat window and avatar speech bubbles. Hanging out and chatting is the first goal. Desktop and mobile are required.
 
+The confirmed longer-term setting is a digital hotel/mall multiverse: floors organize persistent destinations and apartments while rooms remain the unit of realtime play.
+
 Confirmed:
 - Floating draggable windows.
 - Universal LPC spritesheets are the initial character asset source, superseding the original 16 × 16 character requirement and placeholder character-art direction. Preserve selected sprites’ native frame dimensions and inspect each animation layout.
@@ -30,14 +32,20 @@ Confirmed:
 - Leveling system required; capacity values, level thresholds and earning rules are open.
 - Self-hosted, modular and containerized. Local development first, Docker testing next, Kubernetes later.
 - Semantic Versioning for software releases. CI/CD established during bootstrap and maintained throughout development.
+- Persistent rooms have an immutable internal room ID. Their public floor/room address is a separate mutable field, displayed in a form such as `F003-R287`.
+- A floor holds at most 500 registered room addresses. User rooms begin on Floor 1 and are allocated automatically; Floor 0 is reserved for official destinations.
+- Every account has a personal apartment. Apartment customization and in-world access to account settings are later features; essential settings must remain reachable outside the game world.
+- Later discovery includes directory/search, bookmarks, events, featured rooms, occupancy, and friend presence without revealing protected-room access.
+- Later commerce includes an official store and a curated creator marketplace.
+- System bots are visibly identified, backend-driven actors with reserved, non-impersonable identities. They are not fake users or hidden browser connections.
 
 Confirmed: use orthographic projection for the 2D room, consistent with the original top-down direction. Render without perspective foreshortening. Keep movement and environment collision coordinates consistent with the room view.
 
 ## Working release scope
 
-Proposed first-release coverage: account flows, beta registration, basic avatar selection/customization, room navigation and creation, movement, chat/whispers, friends/presence, blocks/reports, administration and level-based room permissions.
+The current Milestone 1 vertical slice is deliberately one room: account authentication, atomic beta gating, basic avatar choice, movement, environment collision, realtime presence, room chat and speech bubbles.
 
-Room decorating and custom layouts are future work. Minigames, commerce, trading, user asset uploads and elaborate analytics are not confirmed scope.
+Proposed later release coverage: room navigation and creation, private entry, whispers, friends/presence, blocks/reports, administration, level-based room permissions, Floor 0 destinations, apartments, discovery, the store, creator marketplace and visible system bots. Room decorating, custom layouts, minigames, commerce operations and user asset submission are future milestone work, not Milestone 1 foundations.
 
 Proposed initial avatar editor: choose a supplied body appearance, hair and clothing colors. All initial choices are available without purchases. This is a starting recommendation because customization details remain open; economy and upload behavior remain undecided.
 
@@ -90,7 +98,17 @@ On desktop, keep floating windows draggable and constrained within the viewport.
 
 ## Rooms and movement
 
-Persist room identity, owner, template, capacity class and privacy settings. Separate persistent room records from temporary running room instances.
+Persist an immutable internal room ID independently from the public floor/room address. Persist owner, template, capacity class and privacy settings with the room record. A room record, a reusable room template and a temporary running room instance are distinct concepts.
+
+Confirmed floor/address rules:
+
+- Floor 0 contains official destinations only: lobby, directory, elevator, cafe, store, help, events and an apartment entry point.
+- User rooms begin on Floor 1. The service allocates the next available address automatically and safely under concurrent creation.
+- A floor exposes at most 500 registered room slots; this is not the same as concurrent player capacity.
+- Private-room authorization still applies when an address or internal ID is known.
+- Whether a deleted room address can be reused remains open.
+
+The Milestone 1 lobby uses a stable room template identifier shared by Phaser and realtime. Persistent room records and public address allocation are introduced only when a milestone needs working multi-room behavior; do not pre-create speculative schemas.
 
 Server checks on creation: authenticated user, selected template validity, permitted capacity class and configured ownership limit. Numbers stay configuration-driven.
 
@@ -138,6 +156,10 @@ Proposed minimal behavior:
 - Keep audit records for administrative actions.
 - Reports enter an administrator review queue.
 
+Future moderation is layered: deterministic server rules enforce permissions and safety invariants; AI may assist classification or prioritization; human moderators retain review, override and appeal responsibility. AI does not receive direct administrative authority. A room assistant is separate from platform moderation and cannot disable it.
+
+System bots use reserved backend identities and are always visibly marked as automated. Their actions pass through the same server authorization and audit boundaries as other system actions.
+
 Audience/age policy remains open for public launch. It does not prevent local development.
 
 ## Levels and permissions
@@ -149,8 +171,20 @@ Proposed implementation:
 - Define level thresholds and room permissions in data/configuration.
 - Implement permission checks and an administrator test override before choosing earning rules.
 - Keep XP awards idempotent and attributable to an event.
-- Recommendation: avoid awarding XP solely for raw message count because it encourages spam.
+- Do not award XP solely for raw message count because it encourages spam.
 - Public leveling rules and anti-idle behavior remain open; initial permission testing can use seeded levels.
+
+Level names, thresholds, earning rules and hosting values remain open. The server remains authoritative for all of them.
+
+## Future economy and creator marketplace
+
+Confirmed direction, deferred until a milestone requires working behavior:
+
+- The official store sells server-owned products and grants inventory/entitlements through idempotent orders and payment transactions. Equipped state and refunds must reconcile with entitlements.
+- A curated creator marketplace may accept assets only with explicit license/provenance, technical-format validation, moderation and payout rules.
+- Client receipts or callbacks never grant inventory directly.
+
+Do not add empty economy, marketplace or payout services and do not speculate their database schemas during Milestone 1.
 
 ## Recommended stack and service boundaries
 
@@ -168,6 +202,8 @@ The following is a proposal, not a claim that the owner approved every dependenc
 Recommended starting arrangement: these deployable boundaries in one repository, with friends, levels and reports as API modules. Service extraction remains possible as deployment and scaling needs become concrete. This provides independent scaling for live connections while keeping ordinary business transactions manageable.
 
 Proposed data ownership: one PostgreSQL instance initially, separate identity/application schemas and credentials. Identity owns beta-key redemption alongside account creation. Other services must not mutate identity tables. Realtime obtains authoritative permissions through internal APIs and uses bounded caches with revocation/invalidation behavior.
+
+When persistent rooms arrive, API owns room records and public address allocation while realtime owns running instances. Store, marketplace and moderation boundaries should be introduced with their first working milestone rather than as empty services.
 
 Analytics is an anticipated service area; its initial scope is open. Recommended first instrumentation: connected users, active rooms, join failures, message delivery latency and service errors. These explain whether the game works. Product analytics such as return rates can be added when there is a concrete question; chat contents are not analytics payloads.
 
@@ -275,22 +311,28 @@ Password registration/login with beta gating, basic avatar choice, one predefine
 
 Acceptance: two authenticated browser sessions join the same room, see movement and exchange messages. Walls block movement; players do not block one another. Typing never moves the avatar. Late joiners see no earlier chat. Reusing a beta key fails; disabling the gate permits signup without a key.
 
-Use provisional capacity/test settings explicitly marked as development values. Prototype visuals must use the confirmed orthographic projection.
+Use the maintained LPC sheets with inspected per-asset frame metadata and native dimensions; no 16 × 16 character assumptions remain. Author the lobby in Tiled and generate the Phaser tilemap plus matching authoritative collision data from the same source. Use provisional capacity/test settings explicitly marked as development values. Prototype visuals must use the confirmed orthographic projection.
 
 ### Milestone 2 — Rooms and social features
-Navigator, user-created template rooms, private-room entry, friends/presence, online cross-room whispers and saved avatar configuration. Add selected social provider once chosen.
+Introduce persistent room records with immutable internal IDs, separate floor/room addresses and concurrency-safe automatic allocation beginning on Floor 1. Add navigator/directory basics, user-created template rooms, private-room entry, friends/presence, online cross-room whispers and saved avatar configuration. Add selected social provider once chosen.
 
 Acceptance: private rooms never appear in public results; knowing a room ID cannot bypass its password. Whisper contents never arrive at bystander clients. Offline recipients do not receive queued messages.
 
 ### Milestone 3 — Controlled alpha features
-Blocks, reports, moderation, administrator controls and level-based room permissions. Implement agreed XP rules when chosen.
+Build the useful Floor 0 destinations (lobby/directory/elevator/help first), personal apartment creation and navigation foundations, bookmarks/events/featured discovery, blocks, reports, layered moderation, administrator controls, visibly identified system bots and level-based room permissions. Implement agreed XP rules when chosen.
 
 Acceptance: unauthorized moderation and capacity upgrades fail server-side. Blocks prevent whispers. OAuth account creation cannot bypass beta gating. Reports are reviewable and moderation actions are audited.
 
 ### Milestone 4 — Expanded deployment and capacity validation
-Extend the Docker and CI/CD flow established at bootstrap with representative mobile checks, reconnect behavior and measured capacity testing. Introduce shared coordination before testing multiple realtime replicas.
+Add apartment customization and the official store with server-authoritative entitlements and idempotent transactions. Extend Docker and CI/CD with representative mobile checks, reconnect behavior and measured capacity testing. Introduce shared coordination before testing multiple realtime replicas.
 
 Acceptance: no duplicate membership after reconnect, no chat replay, clean failure when a room is full, and cross-room whispers route correctly across replicas.
+
+### Milestone 5 — Curated creator marketplace
+
+Introduce creator submission, provenance/license and technical validation, moderation, catalog publishing, purchases and payout accounting. Expand Floor 0 store/events experiences as working product behavior requires.
+
+Acceptance: unreviewed assets cannot publish; purchases grant exactly one reconciled entitlement; refunds and moderation withdrawal produce auditable outcomes.
 
 ## Meaningful verification
 
@@ -300,6 +342,6 @@ Do not claim room capacity or scalability from framework choice alone; measure i
 
 ## Open decisions that do not block the first build
 
-Product name; OAuth providers; verification policy; avatar catalog details; capacity values; level thresholds/XP rules; ownership limits; room-owner powers; audience policy; report retention; optional product analytics.
+Product name; OAuth providers; verification policy; avatar catalog details; concurrent player capacity values; level names/thresholds/XP rules; ownership limits; deleted-address reuse; room-owner powers; audience policy; report retention; store catalog/payment provider; creator terms/payouts; optional product analytics.
 
 Keep these listed as open. Ask only when a decision is needed for the milestone being implemented.

@@ -1,9 +1,24 @@
-# Latest checkpoint — Milestone 1 complete
+# Latest checkpoint — Milestone 1 in progress
 
-Milestone 0 was reverified, and Milestone 1 is implemented in the current uncommitted working tree. Identity owns atomic password-account creation, hashed single-use beta keys, the administrator-controlled registration gate, sessions and login. Migration `identity/002` is required. Signup is gated by default; gate-off signup and existing login are covered.
+Milestone 0 is complete. Milestone 1 now has its one-room vertical slice implemented in the working tree, but remains the active milestone until the final verification and owner-facing play check are accepted.
 
-Authenticated users choose an LPC shirt color and enter one Colyseus lobby. The server owns movement and environment collision; players do not collide with one another. The Vue/Phaser client supports WASD/arrows and click/tap, suppresses movement while typing, renders all live players, and provides live-only room chat logs and speech bubbles. Realtime protocol is 2; this tree is not compatible with 0.1.x realtime clients/services.
+Completed Milestone 1 work:
 
-Final verification on 2026-09-08: formatting, lint, TypeScript/Vue type-check, seven unit tests and production build passed; all five images built and Compose became healthy; smoke passed; database integration including concurrent beta redemption passed; browser suite passed 8 tests with 2 intentional mobile skips. The two-session desktop case proves shared movement/chat, typing suppression and no chat history for a late joiner. The stack remains at **http://localhost:8080**.
+- Identity owns email/password accounts, sessions, administrator registration gating, and atomic hashed single-use beta-key redemption.
+- Authenticated users select an LPC shirt color and join one Colyseus lobby. LPC sheets use inspected native 64 × 64 frame metadata; no 16 × 16 character assumption remains.
+- Phaser owns tilemap rendering, layered player containers, AnimationManager/AnimationState, keyboard input, pointer world coordinates, and responsive canvas scaling. Vue owns DOM account/chat/panel UI and forwards realtime state and commands.
+- `npm run rooms:build` exports the source TMX/TSX/PNG lobby into Phaser-ready Tiled JSON and shared server room data. Tile-attached collision objects whose class/type is `collision` produce authoritative obstacles.
+- Realtime owns movement, environment collision, non-colliding player presence, live-only room chat, and speech-bubble events.
+- The movement defect was fixed: `moveWithCollision` now copies `x` and `y` explicitly from Colyseus schema instances. Object spread omitted prototype-backed schema fields, turning the first simulation tick into invalid coordinates. A unit regression and browser assertions cover this.
+- The browser publishes the already-decoded initial Colyseus state as well as subsequent state changes, avoiding an initial subscription timing gap.
+- Client chat request IDs use a secure `getRandomValues` fallback where `crypto.randomUUID` is unavailable.
 
-No release/tag/publication is claimed. Root version remains 0.1.0 pending planned 0.2.0 release preparation. Full avatar customization, persistence, moderation and later gameplay remain out of scope. Preserve the current user-authored LPC/design edits when continuing.
+Current/remaining Milestone 1 work:
+
+- Run the complete check, smoke, database and desktop/mobile browser matrix against the final formatted tree.
+- Confirm the external-origin login/play path manually after the final deployment refresh.
+- Review the remaining draggable-panel UX separately; it is not being redesigned inside this movement/Tiled correction.
+
+Product decisions recorded for later milestones include immutable room IDs with separate floor/room addresses, concurrency-safe Floor 1+ allocation, official Floor 0 destinations, personal apartments, discovery, the official store, curated creator marketplace, visible system bots and layered moderation. No speculative schema or empty service was added for them.
+
+See [verification](../docs/VERIFICATION.md) for command results and [active tasks](tasks.md) for acceptance status. No release, tag, publication or protocol-version change is claimed.

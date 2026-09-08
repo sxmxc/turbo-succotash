@@ -8,6 +8,7 @@ import {
   type Direction,
 } from "./appearance";
 import type { RoomPlayer } from "../realtime";
+import { lobbyTemplateId } from "../../../../packages/room-data/src/index";
 import { createRoom, preloadRoom, roomAsset } from "./tiledRoom";
 
 export interface RoomView {
@@ -39,7 +40,7 @@ export function mountRoom(
       motion: string;
     }
   >();
-  const tiledLobby = roomAsset("lobby");
+  const tiledLobby = roomAsset(lobbyTemplateId);
   let cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
   let wasdKeys:
     Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key> | undefined;
@@ -266,8 +267,8 @@ export function mountRoom(
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
-    width: 480,
-    height: 312,
+    width: tiledLobby?.width ?? 480,
+    height: tiledLobby?.height ?? 312,
     pixelArt: true,
     backgroundColor: "#192b32",
     scene: LobbyScene,
