@@ -7,6 +7,7 @@ for (const marker of [
   "REPLACE_WITH_RANDOM_API_PASSWORD",
   "REPLACE_WITH_AT_LEAST_32_RANDOM_CHARACTERS",
   "REPLACE_WITH_RANDOM_ADMIN_API_TOKEN",
+  "REPLACE_WITH_RANDOM_REALTIME_INTERNAL_TOKEN",
 ])
   text = text.replaceAll(marker, randomBytes(32).toString("hex"));
 writeFileSync(".env", text, { flag: "wx", mode: 0o600 });

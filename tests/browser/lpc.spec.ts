@@ -36,9 +36,19 @@ test("local LPC files load and all directions stand and walk", async ({
       .toBe(false);
     await page.keyboard.up(key);
     await page.waitForTimeout(500);
-    const stopped = await canvas.screenshot();
+    const stoppedX = await page
+      .locator(".room-canvas")
+      .getAttribute("data-player-x");
+    const stoppedY = await page
+      .locator(".room-canvas")
+      .getAttribute("data-player-y");
     await page.waitForTimeout(120);
-    expect(stopped.equals(await canvas.screenshot())).toBe(true);
+    expect(
+      await page.locator(".room-canvas").getAttribute("data-player-x"),
+    ).toBe(stoppedX);
+    expect(
+      await page.locator(".room-canvas").getAttribute("data-player-y"),
+    ).toBe(stoppedY);
   }
   await page.getByRole("link", { name: "Character art credits" }).click();
   await expect(

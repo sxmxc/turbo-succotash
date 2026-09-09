@@ -35,6 +35,7 @@ const schemas = {
     API_PORT: port.default(3002),
     API_DATABASE_URL: database,
     IDENTITY_INTERNAL_URL: origin,
+    REALTIME_INTERNAL_TOKEN: z.string().min(32),
   }),
   identity: base.extend({
     IDENTITY_PORT: port.default(3001),
@@ -60,6 +61,7 @@ const schemas = {
     PUBLIC_ORIGIN: origin,
     API_INTERNAL_URL: origin,
     IDENTITY_INTERNAL_URL: origin,
+    REALTIME_INTERNAL_TOKEN: z.string().min(32),
   }),
 };
 export function configFor<T extends keyof typeof schemas>(

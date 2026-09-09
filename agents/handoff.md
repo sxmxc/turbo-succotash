@@ -1,4 +1,12 @@
-# Latest checkpoint — Milestone 2 gameplay-shell presentation
+# Latest checkpoint — Milestone 2 social and direct-message implementation
+
+Saved appearance is API-owned (`avatar_appearance`) and now reports save success/failure. Friendship requests/acceptance and presence are application-owned (`friendship`, `user_presence`); realtime updates presence through a dedicated internal token and checks accepted friendship before delivering live-only cross-room DMs. Room and DM messages support live reactions; delivery checks render only on sent DMs.
+
+The full Advanced Chat surface now owns the conversation list/search, its native collapse control, composer mentions, emoji picker, linkification and reactions. It is a responsive Vue dock instead of a squeezed draggable panel. Explicit Add, Request sent, Accept and Message controls expose the friendship-to-DM workflow. `player_appartment` is a server-side alias that lazily creates one hidden, owner-only apartment from the authored template; direct address admission rejects other users.
+
+Phaser ScaleManager still owns fullscreen, but its `fullscreenTarget` is the outer `.play-layout`, so the Vue chat and Phaser canvas stay together in fullscreen. Phaser's DOM helpers were evaluated but not used to re-parent the Vue application into the canvas overlay.
+
+`npm run typecheck` and `npm run build` pass. `npm run test:database` passes fresh/upgrade/isolation checks. The focused appearance browser persistence test passes. The expanded multi-session chat test reached and exposed a raw mention token; the send adapter was corrected to emit readable `@Name` text and awaits its final focused rerun. OAuth/SSO remains deferred; Better Auth's generic identity-owned account linkage already holds provider data.
 
 The room view now uses a stable 720 × 480 Phaser logical viewport rather than using each Tiled map's dimensions as the canvas size. Tiled dimensions remain camera bounds; the main camera follows the replicated local player with a deadzone, so small rooms remain comfortably framed and larger rooms scroll. This is a web-only presentation change: no HTTP or realtime schema/protocol behavior changed, and server-authoritative movement is unchanged.
 
@@ -6,7 +14,7 @@ The web shell now makes the game stage primary, with compact room/status control
 
 Follow-up presentation refinement: a `ResizeObserver` now supplies Phaser's ScaleManager with the settled stage dimensions, so FIT fills the CSS 3:2 stage instead of leaving a native-resolution canvas in a large frame. Chat now presents one visible Advanced Chat card; its draggable grip and Hide/Open control are a narrow rail above the card, and the emoji picker has a smaller surface above all chat chrome. The elevator dialog uses a bounded, independently scrolling room list.
 
-For Milestone 2's remaining work, add saved appearance through the existing avatar setup/control surface, and project the existing Colyseus player adapter into a People panel before adding friends/presence and cross-room whisper actions. Keep friendship/presence state API-owned and cross-room delivery in realtime; neither feature should add a second browser connection or store.
+For Milestone 2's remaining work, add saved appearance through the existing avatar setup/control surface, and project the existing Colyseus player adapter into a People panel before adding friends/presence and cross-room whisper actions. Keep friendship/presence state API-owned and cross-room delivery in realtime; neither feature should add a second browser connection or store. Multi-provider OAuth/SSO is deferred: Better Auth's existing identity-owned `account` linkage schema already has the generic provider/account/token fields, so do not add parallel speculative fields.
 
 # Previous checkpoint — 0.2.5 Milestone 2 room navigation
 

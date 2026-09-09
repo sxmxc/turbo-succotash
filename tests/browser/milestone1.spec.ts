@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { browserAccount } from "./global-setup.js";
 
 const adminHeaders = { "x-admin-token": process.env.ADMIN_API_TOKEN ?? "" };
 const authHeaders = {
@@ -104,11 +105,41 @@ test("beta gate invariants hold through the common-origin identity API", async (
   ).toBe(200);
 });
 
-test("two authenticated sessions move and exchange live-only room chat", async ({
+test("saved appearance survives a new page load", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Appearance persistence is exercised once on desktop.");
+  await page.goto("/");
+  await page.getByLabel("Email").fill(browserAccount.email);
+  await page.getByLabel("Password").fill(browserAccount.password);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(
+    page.getByRole("heading", { name: `Hello, ${browserAccount.name}.` }),
+  ).toBeVisible();
+  const shirt = page.getByLabel("Shirt color");
+  try {
+    await shirt.selectOption({ label: "Garden mint" });
+    await page.getByRole("button", { name: "Save appearance" }).click();
+    await expect(
+      page.getByText("Appearance saved.", { exact: true }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(shirt).toHaveValue(String(0xaadbc4));
+  } finally {
+    if (await shirt.isVisible().catch(() => false)) {
+      await shirt.selectOption({ label: "Warm sand" });
+      await page.getByRole("button", { name: "Save appearance" }).click();
+    }
+  }
+});
+
+test("two sessions use mentions, reactions, friendship, and cross-room DMs", async ({
   browser,
   request,
   isMobile,
 }) => {
+  test.setTimeout(60_000);
   test.skip(
     isMobile,
     "Two-session flow is exercised once by the desktop project.",
@@ -178,6 +209,79 @@ test("two authenticated sessions move and exchange live-only room chat", async (
     await chat.press("Enter");
     await expect(
       second.getByText("hello from one", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      first
+        .locator(".acc-message-row-me")
+        .filter({ hasText: "hello from one" })
+        .locator(".acc-message-meta svg"),
+    ).toHaveCount(0);
+
+    const mentionedChat = first.getByPlaceholder("Say hello…");
+    await mentionedChat.fill("@Tw");
+    await first.locator(".acc-tags-username", { hasText: "Two" }).click();
+    await mentionedChat.pressSequentially("come say hello");
+    await mentionedChat.press("Enter");
+    await expect(second.getByText(/@Two come say hello/)).toBeVisible();
+
+    const receivedMessage = second
+      .locator(".acc-message-row")
+      .filter({ hasText: "hello from one" });
+    await receivedMessage.hover();
+    await receivedMessage.getByRole("button", { name: "Add reaction" }).click();
+    await second.getByRole("menuitem", { name: "React with 👍" }).click();
+    await expect(
+      first.getByRole("button", { name: /👍 reaction from 1 person/ }),
+    ).toBeVisible();
+
+    await first.getByRole("button", { name: "Add" }).click();
+    await expect(
+      first.getByText("Request sent", { exact: true }),
+    ).toBeVisible();
+    await second.getByRole("button", { name: "Refresh" }).click();
+    await second.getByRole("button", { name: "Accept" }).click();
+    await first.getByRole("button", { name: "Refresh" }).click();
+    await expect(first.getByRole("button", { name: "Message" })).toBeVisible();
+
+    const secondRoom = second.locator(".room-canvas");
+    const secondCanvas = second.locator("canvas");
+    const secondBox = await secondCanvas.boundingBox();
+    if (!secondBox) throw new Error("Missing second canvas bounds");
+    const secondSize = await secondCanvas.evaluate((element) => {
+      const surface = element as HTMLCanvasElement;
+      return { width: surface.width, height: surface.height };
+    });
+    const secondScrollX = Number(
+      await secondRoom.getAttribute("data-camera-scroll-x"),
+    );
+    const secondScrollY = Number(
+      await secondRoom.getAttribute("data-camera-scroll-y"),
+    );
+    await second.mouse.click(
+      secondBox.x +
+        ((624 - secondScrollX) / secondSize.width) * secondBox.width,
+      secondBox.y +
+        ((192 - secondScrollY) / secondSize.height) * secondBox.height,
+    );
+    await expect(secondRoom).toHaveAttribute("data-active-interaction", "13", {
+      timeout: 10_000,
+    });
+    await secondRoom.focus();
+    await second.keyboard.press("E");
+    await expect(second.locator(".room-label")).toContainText("Apartment");
+
+    await first.getByRole("button", { name: "Open Two" }).click();
+    await first.getByPlaceholder("Say hello…").fill("private hello");
+    await first.getByPlaceholder("Say hello…").press("Enter");
+    await second.getByRole("button", { name: "Open One" }).click();
+    await expect(
+      second.getByText("private hello", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      first
+        .locator(".acc-message-row-me")
+        .filter({ hasText: "private hello" })
+        .locator(".acc-message-meta svg"),
     ).toBeVisible();
 
     const remoteBefore = await second.locator("canvas").screenshot();

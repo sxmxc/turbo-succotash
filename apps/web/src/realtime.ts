@@ -20,6 +20,16 @@ export type ChatEvent = {
   channel: "room";
   text: string;
 };
+export type DirectMessageEvent = Omit<ChatEvent, "channel"> & {
+  recipientId: string;
+  channel: "direct";
+};
+export type MessageReactionEvent = {
+  messageId: string;
+  emoji: string;
+  userId: string;
+  active: boolean;
+};
 
 type SynchronizedPlayer = Omit<RoomPlayer, "sessionId">;
 
@@ -28,6 +38,13 @@ export type RoomConnection = {
   sendMove(dx: number, dy: number): void;
   moveTo(x: number, y: number): void;
   sendChat(text: string): void;
+  sendDirectMessage(recipientId: string, text: string): void;
+  sendReaction(
+    messageId: string,
+    emoji: string,
+    active: boolean,
+    recipientId?: string,
+  ): void;
   leave(): Promise<void>;
 };
 
@@ -56,6 +73,8 @@ export async function connectLobby(
   shirtTint: number,
   onPlayers: (players: RoomPlayer[]) => void,
   onChat: (message: ChatEvent) => void,
+  onDirectMessage: (message: DirectMessageEvent) => void = () => {},
+  onReaction: (reaction: MessageReactionEvent) => void = () => {},
 ): Promise<RoomConnection> {
   return connectRoom(
     {
@@ -66,6 +85,8 @@ export async function connectLobby(
     shirtTint,
     onPlayers,
     onChat,
+    onDirectMessage,
+    onReaction,
   );
 }
 
@@ -74,6 +95,8 @@ export async function connectRoom(
   shirtTint: number,
   onPlayers: (players: RoomPlayer[]) => void,
   onChat: (message: ChatEvent) => void,
+  onDirectMessage: (message: DirectMessageEvent) => void = () => {},
+  onReaction: (reaction: MessageReactionEvent) => void = () => {},
 ): Promise<RoomConnection> {
   const client = new Client({
     hostname: window.location.hostname,
@@ -114,12 +137,27 @@ export async function connectRoom(
     publishPlayers();
   });
   room.onMessage("chat", onChat);
+  room.onMessage("direct-message", onDirectMessage);
+  room.onMessage("message-reaction", onReaction);
   return {
     sessionId: room.sessionId,
     sendMove: (dx, dy) => room.send("move", { dx, dy }),
     moveTo: (x, y) => room.send("move-to", { x, y }),
     sendChat: (text) =>
       room.send("chat", { clientRequestId: clientRequestId(), text }),
+    sendDirectMessage: (recipientId, text) =>
+      room.send("direct-message", {
+        clientRequestId: clientRequestId(),
+        recipientId,
+        text,
+      }),
+    sendReaction: (messageId, emoji, active, recipientId) =>
+      room.send("message-reaction", {
+        messageId,
+        emoji,
+        active,
+        ...(recipientId ? { recipientId } : {}),
+      }),
     leave: async () => {
       await room.leave(true);
       onPlayers([]);

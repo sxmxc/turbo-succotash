@@ -994,7 +994,7 @@
             {
               "name": "destination",
               "type": "string",
-              "value": "lobby_0"
+              "value": "floor_0_lobby"
             },
             {
               "name": "destination_spawn",

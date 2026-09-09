@@ -15,11 +15,12 @@ const config = configFor("api");
 const pool = databasePool(config.API_DATABASE_URL, "application");
 const app = buildServer(
   "api",
-  () => databaseReady(pool, "004"),
+  () => databaseReady(pool, "006"),
   config.LOG_LEVEL,
 );
 app.addHook("onClose", () => pool.end());
 type User = { id: string; name: string };
+const allowedTints = new Set([0xefd6a2, 0xaadbc4, 0xc3b3e5]);
 async function requireUser(cookie?: string): Promise<User> {
   if (!cookie)
     throw Object.assign(new Error("UNAUTHENTICATED"), { statusCode: 401 });
@@ -44,6 +45,202 @@ function view(row: Record<string, unknown>) {
     capacity: row.capacity,
   };
 }
+function pair(left: string, right: string) {
+  return left < right ? ([left, right] as const) : ([right, left] as const);
+}
+function requireRealtime(request: { headers: Record<string, unknown> }) {
+  if (
+    request.headers["x-realtime-internal-token"] !==
+    config.REALTIME_INTERNAL_TOKEN
+  )
+    throw Object.assign(new Error("UNAUTHENTICATED"), { statusCode: 401 });
+}
+async function socialView(userId: string) {
+  const result = await pool.query(
+    `SELECT CASE WHEN user_low_id=$1 THEN user_high_id ELSE user_low_id END AS user_id,
+            status, requested_by_user_id, display_name, online, room_address
+       FROM friendship
+       LEFT JOIN user_presence ON user_presence.user_id=CASE WHEN user_low_id=$1 THEN user_high_id ELSE user_low_id END
+      WHERE user_low_id=$1 OR user_high_id=$1
+      ORDER BY friendship.updated_at DESC`,
+    [userId],
+  );
+  return result.rows.map((row) => ({
+    userId: row.user_id,
+    name: row.display_name ?? "Unknown player",
+    status: row.status,
+    requestedByUserId: row.requested_by_user_id,
+    online: row.online === true,
+    roomAddress: row.online === true ? row.room_address : undefined,
+  }));
+}
+async function allocateApartment(user: User) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(285001)");
+    const existing = await client.query(
+      "SELECT * FROM room WHERE owner_user_id=$1 AND is_apartment=true",
+      [user.id],
+    );
+    if (existing.rowCount) {
+      await client.query("COMMIT");
+      return existing.rows[0];
+    }
+    const next = await client.query(
+      "SELECT floor_number,room_number FROM room WHERE floor_number>=1 ORDER BY floor_number DESC,room_number DESC LIMIT 1",
+    );
+    let floor = 1;
+    let room = 1;
+    if (next.rowCount) {
+      floor = next.rows[0].floor_number;
+      room = next.rows[0].room_number + 1;
+      if (room > 500) {
+        floor++;
+        room = 1;
+      }
+    }
+    if (!next.rowCount || room === 1)
+      await client.query(
+        "INSERT INTO room(id,floor_number,room_number,template_id,name,capacity) VALUES($1,$2,0,$3,$4,20) ON CONFLICT (floor_number,room_number) DO NOTHING",
+        [
+          randomUUID(),
+          floor,
+          "templates/lobby_template/default",
+          `Floor ${floor} Lobby`,
+        ],
+      );
+    const created = await client.query(
+      "INSERT INTO room(id,floor_number,room_number,template_id,owner_user_id,name,capacity,is_apartment) VALUES($1,$2,$3,$4,$5,$6,20,true) RETURNING *",
+      [
+        randomUUID(),
+        floor,
+        room,
+        "templates/appartment_template/default",
+        user.id,
+        `${user.name}'s Apartment`,
+      ],
+    );
+    await client.query("COMMIT");
+    return created.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+app.get("/v1/appearance", async (request) => {
+  const user = await requireUser(request.headers.cookie);
+  const result = await pool.query(
+    "SELECT shirt_tint FROM avatar_appearance WHERE user_id=$1",
+    [user.id],
+  );
+  return { shirtTint: result.rows[0]?.shirt_tint ?? 0xefd6a2 };
+});
+app.put<{ Body: { shirtTint?: unknown } }>(
+  "/v1/appearance",
+  async (request, reply) => {
+    const user = await requireUser(request.headers.cookie);
+    const shirtTint = request.body?.shirtTint;
+    if (typeof shirtTint !== "number" || !allowedTints.has(shirtTint))
+      return reply.code(400).send({ code: "INVALID_APPEARANCE" });
+    await pool.query(
+      `INSERT INTO avatar_appearance(user_id,shirt_tint) VALUES($1,$2)
+       ON CONFLICT (user_id) DO UPDATE SET shirt_tint=EXCLUDED.shirt_tint,updated_at=now()`,
+      [user.id, shirtTint],
+    );
+    return { shirtTint };
+  },
+);
+app.get("/v1/social/friends", async (request) => {
+  const user = await requireUser(request.headers.cookie);
+  return { friends: await socialView(user.id) };
+});
+app.post<{ Params: { userId: string } }>(
+  "/v1/social/friends/:userId",
+  async (request, reply) => {
+    const user = await requireUser(request.headers.cookie);
+    const target = request.params.userId;
+    if (!target || target === user.id)
+      return reply.code(400).send({ code: "INVALID_FRIEND" });
+    const [low, high] = pair(user.id, target);
+    const existing = await pool.query(
+      "SELECT * FROM friendship WHERE user_low_id=$1 AND user_high_id=$2",
+      [low, high],
+    );
+    if (!existing.rowCount)
+      await pool.query(
+        "INSERT INTO friendship(user_low_id,user_high_id,requested_by_user_id,status) VALUES($1,$2,$3,'pending')",
+        [low, high, user.id],
+      );
+    else if (
+      existing.rows[0].status === "pending" &&
+      existing.rows[0].requested_by_user_id === target
+    )
+      await pool.query(
+        "UPDATE friendship SET status='accepted',updated_at=now() WHERE user_low_id=$1 AND user_high_id=$2",
+        [low, high],
+      );
+    return reply.code(201).send({ friends: await socialView(user.id) });
+  },
+);
+app.post<{ Params: { userId: string } }>(
+  "/v1/social/friends/:userId/accept",
+  async (request, reply) => {
+    const user = await requireUser(request.headers.cookie);
+    const [low, high] = pair(user.id, request.params.userId);
+    const result = await pool.query(
+      `UPDATE friendship SET status='accepted',updated_at=now()
+      WHERE user_low_id=$1 AND user_high_id=$2 AND status='pending' AND requested_by_user_id<>$3`,
+      [low, high, user.id],
+    );
+    if (!result.rowCount)
+      return reply.code(404).send({ code: "FRIEND_REQUEST_NOT_FOUND" });
+    return { friends: await socialView(user.id) };
+  },
+);
+app.put<{
+  Body: {
+    userId?: unknown;
+    name?: unknown;
+    roomId?: unknown;
+    address?: unknown;
+    online?: unknown;
+  };
+}>("/internal/presence", async (request, reply) => {
+  requireRealtime(request);
+  const body = request.body;
+  if (
+    typeof body?.userId !== "string" ||
+    typeof body.name !== "string" ||
+    typeof body.roomId !== "string" ||
+    typeof body.address !== "string" ||
+    typeof body.online !== "boolean"
+  )
+    return reply.code(400).send({ code: "INVALID_PRESENCE" });
+  await pool.query(
+    `INSERT INTO user_presence(user_id,display_name,room_id,room_address,online) VALUES($1,$2,$3,$4,$5)
+       ON CONFLICT (user_id) DO UPDATE SET display_name=EXCLUDED.display_name,room_id=EXCLUDED.room_id,room_address=EXCLUDED.room_address,online=EXCLUDED.online,updated_at=now()`,
+    [body.userId, body.name, body.roomId, body.address, body.online],
+  );
+  return { ok: true };
+});
+app.post<{ Body: { senderId?: unknown; recipientId?: unknown } }>(
+  "/internal/social/can-message",
+  async (request, reply) => {
+    requireRealtime(request);
+    const { senderId, recipientId } = request.body ?? {};
+    if (typeof senderId !== "string" || typeof recipientId !== "string")
+      return reply.code(400).send({ allowed: false });
+    const [low, high] = pair(senderId, recipientId);
+    const result = await pool.query(
+      "SELECT 1 FROM friendship WHERE user_low_id=$1 AND user_high_id=$2 AND status='accepted'",
+      [low, high],
+    );
+    return { allowed: Boolean(result.rowCount) };
+  },
+);
 app.get("/v1/rooms/entry", async (request) => {
   await requireUser(request.headers.cookie);
   return view(
@@ -59,7 +256,7 @@ app.get("/v1/rooms", async (request) => {
   return {
     rooms: (
       await pool.query(
-        "SELECT * FROM room WHERE NOT is_private OR owner_user_id=$1 ORDER BY floor_number,room_number",
+        "SELECT * FROM room WHERE (NOT is_private OR owner_user_id=$1) AND NOT is_apartment ORDER BY floor_number,room_number",
         [user.id],
       )
     ).rows.map(view),
@@ -68,8 +265,10 @@ app.get("/v1/rooms", async (request) => {
 app.get<{ Params: { destination: string } }>(
   "/v1/rooms/resolve/:destination",
   async (request, reply) => {
-    await requireUser(request.headers.cookie);
+    const user = await requireUser(request.headers.cookie);
     const destination = request.params.destination;
+    if (destination === "player_appartment")
+      return view(await allocateApartment(user));
     const address = /^F(\d{3})-R(\d{3})$/.exec(destination);
     const result = address
       ? await pool.query(
@@ -80,7 +279,10 @@ app.get<{ Params: { destination: string } }>(
           "SELECT * FROM room WHERE id::text=$1 OR (owner_user_id IS NULL AND template_id=$1) LIMIT 1",
           [destination],
         );
-    if (!result.rowCount)
+    if (
+      !result.rowCount ||
+      (result.rows[0].is_apartment && result.rows[0].owner_user_id !== user.id)
+    )
       return reply.code(404).send({ code: "ROOM_NOT_FOUND" });
     return view(result.rows[0]);
   },
@@ -156,7 +358,7 @@ app.post<{ Body: { name?: unknown; private?: unknown; password?: unknown } }>(
 app.post<{ Params: { address: string }; Body: { password?: unknown } }>(
   "/v1/rooms/:address/admission",
   async (request, reply) => {
-    await requireUser(request.headers.cookie);
+    const user = await requireUser(request.headers.cookie);
     const match = /^F(\d{3})-R(\d{3})$/.exec(request.params.address);
     if (!match) return reply.code(404).send({ code: "ROOM_NOT_FOUND" });
     const room = (
@@ -165,7 +367,8 @@ app.post<{ Params: { address: string }; Body: { password?: unknown } }>(
         [Number(match[1]), Number(match[2])],
       )
     ).rows[0];
-    if (!room) return reply.code(404).send({ code: "ROOM_NOT_FOUND" });
+    if (!room || (room.is_apartment && room.owner_user_id !== user.id))
+      return reply.code(404).send({ code: "ROOM_NOT_FOUND" });
     if (room.is_private) {
       const password =
         typeof request.body?.password === "string" ? request.body.password : "";

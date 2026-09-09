@@ -50,8 +50,8 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [x] Add persistent room records with immutable IDs and separate public floor/room addresses.
 - [x] Add concurrency-safe automatic Floor 1+ allocation with at most 500 addresses per floor.
 - [x] Add authenticated room creation, navigator basics and private-room entry enforcement.
-- [ ] Add friends/presence, online cross-room whispers and saved appearance.
-- [ ] Add the selected social provider after the provider decision is made.
+- [ ] Complete the final focused browser rerun for mentions, reactions, friends/presence, cross-room DMs, apartments and combined-shell fullscreen. Appearance persistence and database migration coverage pass.
+- [ ] Add selected OAuth/SSO providers after provider selection, credentials, callback policy and beta-gate verification behavior are decided; the existing identity-owned Better Auth account linkage schema requires no preemptive fields.
 
 ## Release tooling follow-up
 

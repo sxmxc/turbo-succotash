@@ -7,6 +7,11 @@
 - Elevators open the directory/address flow. Doors resolve their authored destination and enter at an authored named spawn. Missing requested spawn names safely fall back to a map spawn.
 - Private-room passwords are salted scrypt hashes owned and verified by API; safe room descriptors never expose password material.
 
+## 2026-09-09 — Deferred multi-provider sign-in
+
+- Panverse Plaza will support multiple OAuth/SSO providers, but provider selection, credentials, callback policy and beta-gate verification remain deferred.
+- Better Auth's existing identity-owned `account` table already records the provider ID, provider account ID, local user ID, token/expiry and scope data required for linked external identities. Do not create parallel application tables or speculative columns before a provider integration is selected.
+
 ## 2026-09-08 — Advanced Chat v3 UI
 
 - Release 0.2.4 uses exactly pinned `@advanced-chat/components` 3.0.0-rc.3 by explicit owner decision, as an exception to the normal stable-only dependency policy. Adopting the documented v3 rewrite now avoids integrating legacy v2 and migrating later.

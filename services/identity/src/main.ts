@@ -37,7 +37,7 @@ const signupSchema = z.object({
   betaKey: z.string().max(128).optional(),
 });
 const attempts = new Map<string, { count: number; resetAt: number }>();
-function rateLimited(key: string, limit = 8) {
+function rateLimited(key: string, limit = 30) {
   const now = Date.now();
   const existing = attempts.get(key);
   const item =
@@ -168,7 +168,7 @@ app.patch("/identity/admin/registration", async (req, reply) => {
 app.all("/identity/auth/*", async (req, reply) => {
   if (
     req.url.endsWith("/sign-in/email") &&
-    rateLimited(`login:${clientIp(req)}`, 12)
+    rateLimited(`login:${clientIp(req)}`, 30)
   )
     return reply.code(429).send({ code: "RATE_LIMITED" });
   return relayAuth(req, reply);

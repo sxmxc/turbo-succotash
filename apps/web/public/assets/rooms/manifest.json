@@ -114,7 +114,7 @@
           "kind": "door",
           "name": "appartment_exit",
           "displayLabel": "Lobby 0",
-          "destination": "lobby_0",
+          "destination": "floor_0_lobby",
           "destinationSpawn": "default_door_spawn",
           "x": 224,
           "y": 64,

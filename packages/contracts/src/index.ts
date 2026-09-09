@@ -30,3 +30,24 @@ export const roomChatEventSchema = z.object({
   channel: z.literal("room"),
   text: z.string().min(1).max(280),
 });
+export const directMessageCommandSchema = z.object({
+  clientRequestId: z.string().min(1).max(80),
+  recipientId: z.string().min(1),
+  text: z.string().trim().min(1).max(280),
+});
+export const directMessageEventSchema = z.object({
+  serverMessageId: z.string().uuid(),
+  clientRequestId: z.string().min(1).max(80),
+  senderId: z.string().min(1),
+  senderName: z.string().min(1).max(40),
+  recipientId: z.string().min(1),
+  timestamp: z.iso.datetime(),
+  channel: z.literal("direct"),
+  text: z.string().min(1).max(280),
+});
+export const messageReactionCommandSchema = z.object({
+  messageId: z.string().uuid(),
+  emoji: z.string().min(1).max(16),
+  active: z.boolean(),
+  recipientId: z.string().min(1).optional(),
+});

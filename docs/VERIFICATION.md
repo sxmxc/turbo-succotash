@@ -1,5 +1,7 @@
 # Bootstrap verification — 2026-09-07
 
+Latest Milestone 2 social/direct-message implementation: `npm run typecheck`, `npm test` (14 tests), `npm run lint`, `npm run build`, `npm run format:check`, and `git diff --check` passed. `npm run test:database` is pending because the pre-existing local `.env` lacks the newly required `REALTIME_INTERNAL_TOKEN`; add a fresh 32-byte value, then rebuild/restart Compose and run database/browser checks.
+
 Environment: Linux amd64, Docker 29.8.0, Compose 5.5.1. Commands use Node 24.20.0 and npm 12.0.2. This host initially had Node 25, so the verified LTS distribution was extracted into `/tmp/social-node` and npm installed into `/tmp/social-npm` (outside the repository). For this session, commands used `PATH=/tmp/social-npm/bin:/tmp/social-node/node-v24.20.0-linux-x64/bin:$PATH`; normal setup uses `.nvmrc`.
 
 | Command                                                            | Observed result                                                                                                                                                             |
@@ -141,3 +143,9 @@ Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Mi
 - Focused browser regressions passed against the rebuilt stack: desktop game-shell/camera/panel reachability (1/1), desktop camera-aware elevator interaction (1/1), and mobile game-shell/panel reachability (1/1). The initial complete suite exhausted the documented shared authentication limiter after earlier runs; focused verification was used after the normal test-service reset rather than weakening that limiter.
 - The web client now has a fixed 720 × 480 Phaser logical viewport and uses Tiled dimensions only as camera bounds. The main camera follows the replicated local player with a deadzone; pointer regression helpers convert world targets through the camera scroll. This changes no HTTP/realtime protocol, dependency, database, migration or server-authoritative movement behavior. No tag, publication or remote deployment was performed.
 - Refinement: TypeScript, lint and formatting checks passed after connecting a `ResizeObserver` to Phaser's FIT ScaleManager. The rebuilt Compose web service passed the focused desktop shell browser case, which now asserts that the canvas fills a desktop stage (>900px CSS width) and that the compact drag grip remains movable and keyboard-reachable. No contract behavior changed.
+
+## Milestone 2 social/fullscreen follow-up — 2026-09-09
+
+- `npm run typecheck` and `npm run build`: passed. `npm run test:database`: passed earlier in this change against migrations 001–006.
+- Rebuilt/restarted Compose successfully; all services became healthy. Focused appearance persistence passed. The expanded two-session check then found Advanced Chat displaying the transported mention token literally; the adapter was corrected to transport readable `@Name` text. Final focused rerun is pending.
+- Fullscreen now targets the outer Vue/Phaser play layout through Phaser ScaleManager. Room/DM reactions are live-only; receipt icons are omitted for room messages and retained for sent DMs.

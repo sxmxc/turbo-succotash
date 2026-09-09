@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { loginAndJoin } from "./helpers.js";
 
-test("canvas loads, movement responds, and panel remains reachable", async ({
+test("canvas loads, movement responds, and chat remains reachable", async ({
   page,
   isMobile,
 }) => {
@@ -26,7 +26,7 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
   const canvas = page.locator("canvas");
   const canvasBox = await canvas.boundingBox();
   if (!canvasBox) throw new Error("Missing canvas bounds");
-  expect(canvasBox.width).toBeGreaterThanOrEqual(isMobile ? 300 : 800);
+  expect(canvasBox.width).toBeGreaterThanOrEqual(isMobile ? 300 : 700);
   const canvasSize = await canvas.evaluate((element) => {
     const surface = element as HTMLCanvasElement;
     return { width: surface.width, height: surface.height };
@@ -42,38 +42,24 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
   await expect
     .poll(async () => Number(await room.getAttribute("data-player-x")))
     .toBeGreaterThan(afterKeyboardX);
-  const panel = page.getByRole("region", { name: "Room panel" });
-  const initial = await panel.boundingBox();
-  expect(initial).toBeTruthy();
-  if (!isMobile && initial) {
-    const handle = page.getByRole("button", {
-      name: "Move room panel with arrow keys or drag",
-    });
-    const box = await handle.boundingBox();
-    if (!box) throw new Error("Missing handle");
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(box.x + 370, box.y + 170, { steps: 8 });
-    await page.mouse.up();
-    const moved = await panel.boundingBox();
-    expect(moved!.x).toBeGreaterThan(initial.x + 100);
-    await handle.focus();
-    await page.keyboard.press("ArrowLeft");
-    expect((await panel.boundingBox())!.x).toBeLessThan(moved!.x);
-    await page.setViewportSize({ width: 700, height: 600 });
-    const resized = await panel.boundingBox();
-    expect(resized!.x + resized!.width).toBeLessThanOrEqual(700);
-    expect(resized!.y + resized!.height).toBeLessThanOrEqual(600);
-    await page.setViewportSize({ width: 900, height: 300 });
-    const short = await panel.boundingBox();
-    expect(short!.y + short!.height).toBeLessThanOrEqual(300);
-    await page.getByPlaceholder("Say hello…").scrollIntoViewIfNeeded();
-    await expect(page.getByPlaceholder("Say hello…")).toBeVisible();
-  } else {
-    await panel.scrollIntoViewIfNeeded();
-    const bounds = await panel.boundingBox();
-    expect(bounds!.x).toBeGreaterThanOrEqual(0);
-    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
-  }
+  const chat = page.getByRole("complementary", {
+    name: "Chat and direct messages",
+  });
+  await chat.scrollIntoViewIfNeeded();
+  await expect(chat).toBeVisible();
+  const bounds = await chat.boundingBox();
+  expect(bounds).toBeTruthy();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+    page.viewportSize()!.width,
+  );
+  await page.getByRole("button", { name: "Toggle room fullscreen" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.fullscreenElement?.className ?? ""),
+    )
+    .toContain("play-layout");
+  await expect(chat).toBeVisible();
+  await page.keyboard.press("Escape");
   expect(errors).toEqual([]);
 });

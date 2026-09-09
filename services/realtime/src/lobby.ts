@@ -6,6 +6,8 @@ import {
   movementTargetSchema as targetSchema,
   protocolVersion,
   roomChatCommandSchema as chatSchema,
+  directMessageCommandSchema as directMessageSchema,
+  messageReactionCommandSchema as reactionSchema,
 } from "../../../packages/contracts/src/index.js";
 import {
   generatedRooms,
@@ -34,6 +36,7 @@ export type LobbyState = SchemaType<typeof LobbyState>;
 type Authenticated = {
   user: { id: string; name: string };
   room: { id: string; address: string; templateId: string; capacity: number };
+  cookie: string;
 };
 type Intent = {
   dx: number;
@@ -42,8 +45,13 @@ type Intent = {
   updatedAt: number;
 };
 const allowedTints = new Set([0xefd6a2, 0xaadbc4, 0xc3b3e5]);
+const onlineClients = new Map<string, Set<Client>>();
 
-export function createGameRoom(identityUrl: string, apiUrl: string) {
+export function createGameRoom(
+  identityUrl: string,
+  apiUrl: string,
+  internalToken: string,
+) {
   return class LobbyRoom extends Room<{ state: LobbyState }> {
     maxClients = 20;
     autoDispose = true;
@@ -96,7 +104,7 @@ export function createGameRoom(identityUrl: string, apiUrl: string) {
       if (!admission.ok) return false;
       const room = (await admission.json()) as Authenticated["room"];
       return generatedRooms[room.templateId]
-        ? { user: { id: data.user.id, name: data.user.name }, room }
+        ? { user: { id: data.user.id, name: data.user.name }, room, cookie }
         : false;
     }
 
@@ -152,6 +160,78 @@ export function createGameRoom(identityUrl: string, apiUrl: string) {
           text: parsed.data.text,
         });
       });
+      this.onMessage("direct-message", async (client, message) => {
+        const parsed = directMessageSchema.safeParse(message);
+        if (!parsed.success || !this.allowChat(client.sessionId)) return;
+        const sender = this.state.players.get(client.sessionId);
+        if (!sender) return;
+        const allowed = await fetch(`${apiUrl}/internal/social/can-message`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-realtime-internal-token": internalToken,
+          },
+          body: JSON.stringify({
+            senderId: sender.userId,
+            recipientId: parsed.data.recipientId,
+          }),
+          signal: AbortSignal.timeout(1800),
+        });
+        if (
+          !allowed.ok ||
+          !((await allowed.json()) as { allowed?: boolean }).allowed
+        )
+          return;
+        const recipients = onlineClients.get(parsed.data.recipientId);
+        if (!recipients?.size) return;
+        const event = {
+          serverMessageId: randomUUID(),
+          clientRequestId: parsed.data.clientRequestId,
+          senderId: sender.userId,
+          senderName: sender.name,
+          recipientId: parsed.data.recipientId,
+          timestamp: new Date().toISOString(),
+          channel: "direct" as const,
+          text: parsed.data.text,
+        };
+        client.send("direct-message", event);
+        for (const recipient of recipients)
+          recipient.send("direct-message", event);
+      });
+      this.onMessage("message-reaction", async (client, message) => {
+        const parsed = reactionSchema.safeParse(message);
+        const sender = this.state.players.get(client.sessionId);
+        if (!parsed.success || !sender) return;
+        const event = {
+          messageId: parsed.data.messageId,
+          emoji: parsed.data.emoji,
+          userId: sender.userId,
+          active: parsed.data.active,
+        };
+        if (!parsed.data.recipientId)
+          return this.broadcast("message-reaction", event);
+        const allowed = await fetch(`${apiUrl}/internal/social/can-message`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-realtime-internal-token": internalToken,
+          },
+          body: JSON.stringify({
+            senderId: sender.userId,
+            recipientId: parsed.data.recipientId,
+          }),
+          signal: AbortSignal.timeout(1800),
+        });
+        if (
+          !allowed.ok ||
+          !((await allowed.json()) as { allowed?: boolean }).allowed
+        )
+          return;
+        client.send("message-reaction", event);
+        for (const recipient of onlineClients.get(parsed.data.recipientId) ??
+          [])
+          recipient.send("message-reaction", event);
+      });
     }
 
     onJoin(client: Client, options: { shirtTint?: unknown; spawn?: unknown }) {
@@ -180,6 +260,24 @@ export function createGameRoom(identityUrl: string, apiUrl: string) {
             : 0xefd6a2,
       });
       this.state.players.set(client.sessionId, player);
+      const sessions = onlineClients.get(auth.user.id) ?? new Set<Client>();
+      sessions.add(client);
+      onlineClients.set(auth.user.id, sessions);
+      void fetch(`${apiUrl}/internal/presence`, {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          "x-realtime-internal-token": internalToken,
+        },
+        body: JSON.stringify({
+          userId: auth.user.id,
+          name: auth.user.name,
+          roomId: auth.room.id,
+          address: auth.room.address,
+          online: true,
+        }),
+        signal: AbortSignal.timeout(1800),
+      });
     }
 
     onLeave(client: Client) {
@@ -187,6 +285,27 @@ export function createGameRoom(identityUrl: string, apiUrl: string) {
       this.intents.delete(client.sessionId);
       this.chatWindows.delete(client.sessionId);
       this.requestIds.delete(client.sessionId);
+      const auth = client.auth as Authenticated;
+      const sessions = onlineClients.get(auth.user.id);
+      sessions?.delete(client);
+      if (!sessions?.size) {
+        onlineClients.delete(auth.user.id);
+        void fetch(`${apiUrl}/internal/presence`, {
+          method: "PUT",
+          headers: {
+            "content-type": "application/json",
+            "x-realtime-internal-token": internalToken,
+          },
+          body: JSON.stringify({
+            userId: auth.user.id,
+            name: auth.user.name,
+            roomId: auth.room.id,
+            address: auth.room.address,
+            online: false,
+          }),
+          signal: AbortSignal.timeout(1800),
+        });
+      }
     }
 
     private allowChat(sessionId: string) {

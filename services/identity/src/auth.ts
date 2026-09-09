@@ -13,8 +13,8 @@ export function createAuth(pool: pg.Pool, origin: string, secret: string) {
     emailAndPassword: { enabled: true, disableSignUp: true },
     rateLimit: {
       customRules: {
-        "/sign-in/email": { window: 60, max: 12 },
-        "/identity/auth/sign-in/email": { window: 60, max: 12 },
+        "/sign-in/email": { window: 60, max: 30 },
+        "/identity/auth/sign-in/email": { window: 60, max: 30 },
       },
     },
     socialProviders: {},

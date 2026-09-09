@@ -31,14 +31,22 @@ const realtime = new Server({
 realtime
   .define(
     "room",
-    createGameRoom(config.IDENTITY_INTERNAL_URL, config.API_INTERNAL_URL),
+    createGameRoom(
+      config.IDENTITY_INTERNAL_URL,
+      config.API_INTERNAL_URL,
+      config.REALTIME_INTERNAL_TOKEN,
+    ),
   )
   .filterBy(["address"]);
 // Protocol 2 clients joined the singleton `lobby` room without an address.
 // Keep that route as a Floor 0 compatibility alias throughout the 0.2.x line.
 realtime.define(
   "lobby",
-  createGameRoom(config.IDENTITY_INTERNAL_URL, config.API_INTERNAL_URL),
+  createGameRoom(
+    config.IDENTITY_INTERNAL_URL,
+    config.API_INTERNAL_URL,
+    config.REALTIME_INTERNAL_TOKEN,
+  ),
 );
 realtime.router = createRouter({
   health: createEndpoint("/healthz", { method: "GET" }, async () =>

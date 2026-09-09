@@ -67,14 +67,14 @@ test("elevator creates a room and navigates back to Floor 0", async ({
   await page.getByLabel("Room name").fill(roomName);
   await page.getByRole("button", { name: "Create and enter" }).click();
   await expect(page.locator(".room-label")).toContainText(roomName);
-  await expect(page.locator("canvas")).toHaveJSProperty("width", 720);
-  await expect(room).toHaveAttribute("data-camera-scroll-x", "-120");
-  await expect(room).toHaveAttribute("data-camera-scroll-y", "-80");
+  await expect(page.locator("canvas")).toHaveJSProperty("width", 800);
+  await expect(room).toHaveAttribute("data-camera-scroll-x", "-160");
+  await expect(room).toHaveAttribute("data-camera-scroll-y", "-140");
 
   await moveTo(240, 286, "1");
   await page.getByRole("button", { name: /F000-R000 · Floor 0 Lobby/ }).click();
   await expect(page.locator(".room-label")).toContainText("F000-R000");
-  await expect(page.locator("canvas")).toHaveJSProperty("width", 720);
+  await expect(page.locator("canvas")).toHaveJSProperty("width", 800);
 });
 
 test("room allocation is concurrent and private admission is enforced", async ({

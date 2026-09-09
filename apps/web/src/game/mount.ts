@@ -37,6 +37,8 @@ export function mountRoom(
   onMove: (dx: number, dy: number) => void,
   onInteract: (interaction: RoomInteraction) => void,
 ): RoomView {
+  const fullscreenTarget =
+    parent.closest<HTMLElement>(".play-layout") ?? parent;
   let players: RoomPlayer[] = [];
   let localSessionId = "";
   let bubbles: Record<string, string> = {};
@@ -397,7 +399,7 @@ export function mountRoom(
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
-      fullscreenTarget: parent,
+      fullscreenTarget,
       expandParent: false,
     },
     input: { activePointers: 2 },

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
 import RoomCanvas from "./components/RoomCanvas.vue";
-import FloatingPanel from "./components/FloatingPanel.vue";
 import RoomChat from "./components/RoomChat.vue";
 import type { RoomInteraction } from "./game/tiledRoom";
 import {
   connectRoom,
   type ChatEvent,
+  type DirectMessageEvent,
+  type MessageReactionEvent,
   type RoomConnection,
   type RoomDescriptor,
   type RoomPlayer,
@@ -25,12 +26,25 @@ const name = ref("");
 const password = ref("");
 const betaKey = ref("");
 const shirtTint = ref(0xefd6a2);
+const appearanceStatus = ref("");
 const players = ref<RoomPlayer[]>([]);
 const connection = ref<RoomConnection>();
 const connectionStatus = ref<"Offline" | "Connecting" | "Connected" | "Failed">(
   "Offline",
 );
 const messages = ref<ChatEvent[]>([]);
+const directMessages = ref<DirectMessageEvent[]>([]);
+const messageReactions = ref<Record<string, Record<string, string[]>>>({});
+const friends = ref<
+  {
+    userId: string;
+    name: string;
+    status: "pending" | "accepted";
+    requestedByUserId: string;
+    online: boolean;
+    roomAddress?: string;
+  }[]
+>([]);
 const bubbles = ref<Record<string, string>>({});
 const interaction = ref<RoomInteraction>();
 const currentRoom = ref<RoomDescriptor>();
@@ -86,6 +100,21 @@ async function loadSession() {
   });
   const data = response.ok ? await response.json() : null;
   user.value = data?.user;
+  if (user.value) {
+    const appearance = await jsonRequest("/api/v1/appearance");
+    shirtTint.value = appearance.shirtTint;
+    const social = await jsonRequest("/api/v1/social/friends");
+    friends.value = social.friends;
+  }
+}
+async function refreshFriends() {
+  if (!user.value) return;
+  try {
+    const social = await jsonRequest("/api/v1/social/friends");
+    friends.value = social.friends;
+  } catch {
+    // A transient refresh failure must not interrupt an active room session.
+  }
 }
 async function submitAuth() {
   error.value = "";
@@ -150,6 +179,8 @@ async function joinDestination(
       shirtTint.value,
       (next) => (players.value = next),
       receiveChat,
+      receiveDirectMessage,
+      receiveReaction,
     );
     currentRoom.value = room;
     connection.value = nextConnection;
@@ -225,23 +256,86 @@ async function createRoom() {
 }
 function receiveChat(message: ChatEvent) {
   messages.value = [...messages.value.slice(-99), message];
-  bubbles.value = { ...bubbles.value, [message.senderId]: message.text };
+  const bubbleText = message.text.replace(
+    /<@([^>]+)>/g,
+    (_token, userId: string) =>
+      `@${
+        players.value.find((player) => player.userId === userId)?.name ??
+        (user.value?.id === userId ? user.value.name : "someone")
+      }`,
+  );
+  bubbles.value = { ...bubbles.value, [message.senderId]: bubbleText };
   window.setTimeout(() => {
-    if (bubbles.value[message.senderId] === message.text) {
+    if (bubbles.value[message.senderId] === bubbleText) {
       const next = { ...bubbles.value };
       delete next[message.senderId];
       bubbles.value = next;
     }
   }, 4500);
 }
+function receiveDirectMessage(message: DirectMessageEvent) {
+  directMessages.value = [...directMessages.value.slice(-99), message];
+}
+function receiveReaction(reaction: MessageReactionEvent) {
+  const current = messageReactions.value[reaction.messageId] ?? {};
+  const users = current[reaction.emoji] ?? [];
+  const nextUsers = reaction.active
+    ? [...new Set([...users, reaction.userId])]
+    : users.filter((userId) => userId !== reaction.userId);
+  messageReactions.value = {
+    ...messageReactions.value,
+    [reaction.messageId]: { ...current, [reaction.emoji]: nextUsers },
+  };
+}
 function sendChat(text: string) {
   connection.value?.sendChat(text);
+}
+function sendDirectMessage(recipientId: string, text: string) {
+  connection.value?.sendDirectMessage(recipientId, text);
+}
+function sendReaction(
+  messageId: string,
+  emoji: string,
+  active: boolean,
+  recipientId?: string,
+) {
+  connection.value?.sendReaction(messageId, emoji, active, recipientId);
+}
+async function saveAppearance() {
+  appearanceStatus.value = "";
+  error.value = "";
+  try {
+    await jsonRequest("/api/v1/appearance", {
+      method: "PUT",
+      body: JSON.stringify({ shirtTint: shirtTint.value }),
+    });
+    appearanceStatus.value = "Appearance saved.";
+  } catch (caught) {
+    error.value = readable(
+      caught instanceof Error ? caught.message : "Could not save appearance.",
+    );
+  }
+}
+async function requestFriend(userId: string) {
+  const social = await jsonRequest(
+    `/api/v1/social/friends/${encodeURIComponent(userId)}`,
+    { method: "POST" },
+  );
+  friends.value = social.friends;
+}
+async function acceptFriend(userId: string) {
+  const social = await jsonRequest(
+    `/api/v1/social/friends/${encodeURIComponent(userId)}/accept`,
+    { method: "POST" },
+  );
+  friends.value = social.friends;
 }
 async function logout() {
   await connection.value?.leave();
   connection.value = undefined;
   players.value = [];
   messages.value = [];
+  directMessages.value = [];
   bubbles.value = {};
   interaction.value = undefined;
   connectionStatus.value = "Offline";
@@ -283,68 +377,77 @@ onMounted(async () => {
     </header>
 
     <section v-if="!connection" class="intro">
-      <p class="eyebrow">{{ currentRoom?.name ?? "Plaza Lobby" }}</p>
-      <p v-if="user">
-        Signed in as {{ user.name }}. Choose an avatar color, then join.
-      </p>
-      <p v-else>Sign in to enter the shared room.</p>
+      <h1>{{ currentRoom?.name ?? "Plaza Login" }}</h1>
+      <p v-if="user">Signed in as {{ user.name }}. Choose an avatar color.</p>
     </section>
 
     <template v-if="user && connection">
-      <section class="game-shell" aria-label="Panverse Plaza room">
-        <div class="game-toolbar">
-          <div class="room-identity">
-            <span class="eyebrow">{{ currentRoom?.address }}</span>
-            <strong>{{ currentRoom?.name }}</strong>
-          </div>
-          <span class="room-presence">{{
-            failed
-              ? "Assets failed to load"
-              : ready
-                ? `${players.length} online now`
-                : "Loading room…"
-          }}</span>
-          <button
-            class="fullscreen-button"
-            type="button"
-            aria-label="Toggle room fullscreen"
-            @click="roomCanvas?.toggleFullscreen()"
-          >
-            Fullscreen
-          </button>
-        </div>
-        <div class="room-frame">
-          <p v-if="failed" class="room-status" role="alert">
-            Character assets failed to load. Reload to retry.
-          </p>
-          <p v-else-if="ready" class="room-status" role="status">Scene ready</p>
-          <RoomCanvas
-            ref="roomCanvas"
-            :key="currentRoom?.templateId"
-            :template-id="currentRoom?.templateId ?? 'floor_0_lobby'"
+      <section class="play-layout">
+        <aside class="chat-dock" aria-label="Chat and direct messages">
+          <RoomChat
+            :current-user="user"
             :players="players"
-            :local-session-id="connection.sessionId"
-            :bubbles="bubbles"
-            @ready="ready = true"
-            @error="failed = true"
-            @move="(dx, dy) => connection?.sendMove(dx, dy)"
-            @move-to="(x, y) => connection?.moveTo(x, y)"
-            @interact="openInteraction"
+            :messages="messages"
+            :direct-messages="directMessages"
+            :friends="friends"
+            :reactions="messageReactions"
+            @send="sendChat"
+            @send-direct="sendDirectMessage"
+            @request-friend="requestFriend"
+            @accept-friend="acceptFriend"
+            @react="sendReaction"
+            @refresh-social="refreshFriends"
           />
-          <div class="room-caption">
-            <span>ARROW KEYS / WASD · CLICK OR TAP TO MOVE</span>
-            <span>EXPLORE THE ROOM</span>
+        </aside>
+        <section class="game-shell" aria-label="Panverse Plaza room">
+          <div class="game-toolbar">
+            <div class="room-identity room-label">
+              <span class="eyebrow">{{ currentRoom?.address }}</span>
+              <strong>{{ currentRoom?.name }}</strong>
+            </div>
+            <span class="room-presence">{{
+              failed
+                ? "Assets failed to load"
+                : ready
+                  ? `${players.length} online now`
+                  : "Loading room…"
+            }}</span>
+            <button
+              class="fullscreen-button"
+              type="button"
+              aria-label="Toggle room fullscreen"
+              @click="roomCanvas?.toggleFullscreen()"
+            >
+              Fullscreen
+            </button>
           </div>
-        </div>
+          <div class="room-frame">
+            <p v-if="failed" class="room-status" role="alert">
+              Character assets failed to load. Reload to retry.
+            </p>
+            <p v-else-if="ready" class="room-status" role="status">
+              Scene ready
+            </p>
+            <RoomCanvas
+              ref="roomCanvas"
+              :key="currentRoom?.templateId"
+              :template-id="currentRoom?.templateId ?? 'floor_0_lobby'"
+              :players="players"
+              :local-session-id="connection.sessionId"
+              :bubbles="bubbles"
+              @ready="ready = true"
+              @error="failed = true"
+              @move="(dx, dy) => connection?.sendMove(dx, dy)"
+              @move-to="(x, y) => connection?.moveTo(x, y)"
+              @interact="openInteraction"
+            />
+            <div class="room-caption">
+              <span>ARROW KEYS / WASD · CLICK OR TAP TO MOVE</span>
+              <span>EXPLORE THE ROOM</span>
+            </div>
+          </div>
+        </section>
       </section>
-      <FloatingPanel class="room-chat-panel" title="Room chat" collapsible bare>
-        <RoomChat
-          :current-user="user"
-          :players="players"
-          :messages="messages"
-          @send="sendChat"
-        />
-      </FloatingPanel>
       <section
         v-if="interaction"
         ref="interactionPanel"
@@ -455,33 +558,35 @@ onMounted(async () => {
           <button type="submit">
             {{ mode === "login" ? "Sign in" : "Create account" }}
           </button>
+          <button
+            class="text-button"
+            type="button"
+            @click="
+              mode = mode === 'login' ? 'register' : 'login';
+              error = '';
+            "
+          >
+            {{
+              mode === "login"
+                ? "Need an account? Register"
+                : "Already registered? Sign in"
+            }}
+          </button>
         </form>
         <p v-if="error" class="form-error" role="alert">{{ error }}</p>
-        <button
-          class="text-button"
-          type="button"
-          @click="
-            mode = mode === 'login' ? 'register' : 'login';
-            error = '';
-          "
-        >
-          {{
-            mode === "login"
-              ? "Need an account? Register"
-              : "Already registered? Sign in"
-          }}
-        </button>
       </template>
       <template v-else>
         <span class="tag">AVATAR CHOICE</span>
         <h2>Hello, {{ user.name }}.</h2>
-        <p>Choose your shirt color for this visit.</p>
+        <p>Choose and save your shirt color.</p>
         <label for="accent">Shirt color</label>
         <select id="accent" v-model="shirtTint">
           <option :value="0xefd6a2">Warm sand</option>
           <option :value="0xaadbc4">Garden mint</option>
           <option :value="0xc3b3e5">Soft lilac</option>
         </select>
+        <button type="button" @click="saveAppearance">Save appearance</button>
+        <p v-if="appearanceStatus" role="status">{{ appearanceStatus }}</p>
         <button type="button" @click="joinRoom">Enter the Lobby</button>
         <p v-if="error" class="form-error" role="alert">{{ error }}</p>
         <button class="text-button" type="button" @click="logout">

@@ -45,7 +45,7 @@ try {
         "SELECT count(*)::int AS n FROM application.schema_migrations",
       )
     ).rows[0].n,
-    4,
+    6,
   );
   assert.deepEqual(
     (
@@ -144,7 +144,7 @@ try {
     await db.query("RESET ROLE");
   }
   await writeFile(
-    `${dir}/application/005_upgrade.sql`,
+    `${dir}/application/007_upgrade.sql`,
     "ALTER TABLE bootstrap ADD COLUMN note text;",
   );
   await migrate(url.toString(), dir);
@@ -157,7 +157,7 @@ try {
     "upgrade preserved data",
   );
   await writeFile(
-    `${dir}/application/006_failure.sql`,
+    `${dir}/application/008_failure.sql`,
     "CREATE TABLE rolled_back(id int); SELECT definitely_not_a_function();",
   );
   await assert.rejects(migrate(url.toString(), dir));
@@ -175,7 +175,7 @@ try {
         "SELECT count(*)::int AS n FROM application.schema_migrations",
       )
     ).rows[0].n,
-    5,
+    7,
   );
   await writeFile(`${dir}/application/001_bootstrap.sql`, "SELECT 1;");
   await assert.rejects(migrate(url.toString(), dir), /checksum mismatch/);

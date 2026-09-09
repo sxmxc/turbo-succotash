@@ -88,7 +88,7 @@
  <objectgroup id="7" name="Door Objects">
   <object id="1" name="appartment_exit" type="door" x="224" y="64" width="32" height="64">
    <properties>
-    <property name="destination" value="lobby_0"/>
+    <property name="destination" value="floor_0_lobby"/>
     <property name="destination_spawn" value="default_door_spawn"/>
     <property name="display_label" value="Lobby 0"/>
    </properties>
