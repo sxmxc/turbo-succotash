@@ -51,6 +51,12 @@ watch(
 onBeforeUnmount(() => {
   view?.destroy();
 });
+
+function toggleFullscreen() {
+  view?.toggleFullscreen();
+}
+
+defineExpose({ toggleFullscreen });
 </script>
 <template>
   <div

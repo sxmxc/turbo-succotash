@@ -1,8 +1,20 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    collapsible?: boolean;
+    bare?: boolean;
+  }>(),
+  { title: "Room notes", collapsible: false, bare: false },
+);
 const panel = ref<HTMLElement>();
 const x = ref(24),
   y = ref(116);
+const collapsed = ref(false);
+const toggleLabel = computed(() =>
+  collapsed.value ? `Open ${props.title}` : `Minimize ${props.title}`,
+);
 let drag: { id: number; dx: number; dy: number } | undefined;
 function clamp() {
   if (!panel.value) return;
@@ -53,6 +65,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", clamp));
   <section
     ref="panel"
     class="floating-panel"
+    :class="{ 'is-collapsed': collapsed, 'is-bare': bare }"
     :style="{ left: x + 'px', top: y + 'px' }"
     aria-label="Room panel"
   >
@@ -66,8 +79,22 @@ onBeforeUnmount(() => window.removeEventListener("resize", clamp));
       @lostpointercapture="stop"
       @keydown="key"
     >
-      ✥ <span>Room notes</span><span class="muted">Drag to move</span>
+      <template v-if="bare">⠿</template>
+      <template v-else>
+        ✥ <span>{{ title }}</span
+        ><span class="muted">Drag to move</span>
+      </template>
     </button>
-    <div class="panel-content"><slot /></div>
+    <button
+      v-if="collapsible"
+      class="panel-toggle"
+      type="button"
+      :aria-label="toggleLabel"
+      :aria-expanded="!collapsed"
+      @click="collapsed = !collapsed"
+    >
+      {{ collapsed ? "Open" : "Hide" }}
+    </button>
+    <div v-show="!collapsed" class="panel-content"><slot /></div>
   </section>
 </template>

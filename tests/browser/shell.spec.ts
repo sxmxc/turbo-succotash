@@ -26,13 +26,18 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
   const canvas = page.locator("canvas");
   const canvasBox = await canvas.boundingBox();
   if (!canvasBox) throw new Error("Missing canvas bounds");
+  expect(canvasBox.width).toBeGreaterThanOrEqual(isMobile ? 300 : 800);
   const canvasSize = await canvas.evaluate((element) => {
     const surface = element as HTMLCanvasElement;
     return { width: surface.width, height: surface.height };
   });
+  const scrollX = Number(await room.getAttribute("data-camera-scroll-x"));
+  const scrollY = Number(await room.getAttribute("data-camera-scroll-y"));
   await page.mouse.click(
-    canvasBox.x + ((afterKeyboardX + 24) / canvasSize.width) * canvasBox.width,
-    canvasBox.y + (afterKeyboardY / canvasSize.height) * canvasBox.height,
+    canvasBox.x +
+      ((afterKeyboardX + 24 - scrollX) / canvasSize.width) * canvasBox.width,
+    canvasBox.y +
+      ((afterKeyboardY - scrollY) / canvasSize.height) * canvasBox.height,
   );
   await expect
     .poll(async () => Number(await room.getAttribute("data-player-x")))
@@ -46,7 +51,7 @@ test("canvas loads, movement responds, and panel remains reachable", async ({
     });
     const box = await handle.boundingBox();
     if (!box) throw new Error("Missing handle");
-    await page.mouse.move(box.x + 70, box.y + 15);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.move(box.x + 370, box.y + 170, { steps: 8 });
     await page.mouse.up();

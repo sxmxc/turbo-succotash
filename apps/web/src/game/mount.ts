@@ -20,7 +20,13 @@ export interface RoomView {
   destroy(): void;
   setPlayers(players: RoomPlayer[], localSessionId: string): void;
   setBubbles(bubbles: Record<string, string>): void;
+  toggleFullscreen(): void;
 }
+
+// This is a viewport size, not a room size. Tiled dimensions remain the
+// authoritative world bounds, allowing larger rooms to scroll under the same
+// player-scale and UI layout.
+const viewport = { width: 800, height: 600 };
 
 export function mountRoom(
   parent: HTMLElement,
@@ -55,6 +61,7 @@ export function mountRoom(
   let lastIntent = { dx: 0, dy: 0, sentAt: 0 };
   let activeScene: Phaser.Scene | undefined;
   let interactionPrompt: Phaser.GameObjects.Text | undefined;
+  let followedEntity: Phaser.GameObjects.Container | undefined;
 
   function rememberScene(scene: Phaser.Scene) {
     activeScene = scene;
@@ -239,6 +246,31 @@ export function mountRoom(
         .setVisible(Boolean(bubble));
     }
     parent.dataset.renderedPlayerCount = String(entities.size);
+    const localEntity = entities.get(localSessionId);
+    if (scene && localEntity) {
+      const camera = scene.cameras.main;
+      const roomFitsViewport =
+        tiledLobby &&
+        tiledLobby.width <= viewport.width &&
+        tiledLobby.height <= viewport.height;
+      if (roomFitsViewport) {
+        camera
+          .removeBounds()
+          .stopFollow()
+          .setScroll(
+            (tiledLobby.width - viewport.width) / 2,
+            (tiledLobby.height - viewport.height) / 2,
+          );
+        followedEntity = undefined;
+      } else if (followedEntity !== localEntity.container) {
+        if (tiledLobby)
+          camera.setBounds(0, 0, tiledLobby.width, tiledLobby.height);
+        camera.startFollow(localEntity.container, true, 0.16, 0.16);
+        followedEntity = localEntity.container;
+      }
+      parent.dataset.cameraScrollX = String(Math.round(camera.scrollX));
+      parent.dataset.cameraScrollY = String(Math.round(camera.scrollY));
+    }
     synchronizeInteractionPrompt();
   }
 
@@ -265,6 +297,10 @@ export function mountRoom(
             tiledLobby,
             createRoom(this, tiledLobby),
           );
+          this.cameras.main
+            .setBounds(0, 0, tiledLobby.width, tiledLobby.height)
+            .setDeadzone(260, 170)
+            .setBackgroundColor("#322125");
         } catch {
           onError();
           return;
@@ -340,26 +376,47 @@ export function mountRoom(
     }
     update(time: number) {
       pollMovement(time);
+      parent.dataset.cameraScrollX = String(
+        Math.round(this.cameras.main.scrollX),
+      );
+      parent.dataset.cameraScrollY = String(
+        Math.round(this.cameras.main.scrollY),
+      );
     }
   }
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
-    width: tiledLobby?.width ?? 480,
-    height: tiledLobby?.height ?? 312,
+    dom: { createContainer: true },
+    width: viewport.width,
+    height: viewport.height,
     pixelArt: true,
-    backgroundColor: "#192b32",
+    backgroundColor: "#322125",
     scene: LobbyScene,
-    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      fullscreenTarget: parent,
+      expandParent: false,
+    },
     input: { activePointers: 2 },
     audio: { noAudio: true },
     banner: false,
   });
+  const synchronizeDisplaySize = () => {
+    if (!parent.clientWidth || !parent.clientHeight) return;
+    game.scale.setParentSize(parent.clientWidth, parent.clientHeight).refresh();
+  };
+  const displayObserver = new ResizeObserver(synchronizeDisplaySize);
+  displayObserver.observe(parent);
+  requestAnimationFrame(synchronizeDisplaySize);
   return {
     destroy: () => {
       activeScene = undefined;
       interactionPrompt = undefined;
+      followedEntity = undefined;
+      displayObserver.disconnect();
       game.destroy(true);
     },
     setPlayers: (nextPlayers, nextLocalSessionId) => {
@@ -371,5 +428,6 @@ export function mountRoom(
       bubbles = nextBubbles;
       synchronize();
     },
+    toggleFullscreen: () => game.scale.toggleFullscreen(),
   };
 }

@@ -74,10 +74,7 @@ function sendMessage(payload: { content: string }) {
 
 <template>
   <div class="room-chat">
-    <p class="room-chat-note">
-      Messages are live-only. Nothing from before you joined is shown.
-    </p>
-    <Layout height="380px" theme="dark">
+    <Layout height="clamp(220px, 38dvh, 340px)" theme="dark">
       <Chat
         :current-user="{ id: currentUser.id }"
         :chat="chat"

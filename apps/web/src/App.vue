@@ -41,6 +41,7 @@ const newRoomName = ref("");
 const newRoomPrivate = ref(false);
 const newRoomPassword = ref("");
 const interactionPanel = ref<HTMLElement>();
+const roomCanvas = ref<InstanceType<typeof RoomCanvas>>();
 const version = __BUILD_VERSION__;
 const commit = __BUILD_COMMIT__;
 watch(interaction, async (value) => {
@@ -267,12 +268,21 @@ onMounted(async () => {
     <header>
       <a href="/" class="brand"
         ><span class="brand-mark">▦</span> Panverse Plaza</a
-      ><span class="server-connection"
-        >Server <i /> {{ connectionStatus }}</span
+      ><span class="header-actions"
+        ><span class="server-connection"
+          >Server <i /> {{ connectionStatus }}</span
+        ><button
+          v-if="user && connection"
+          class="header-sign-out text-button"
+          type="button"
+          @click="logout"
+        >
+          Sign out
+        </button></span
       >
     </header>
 
-    <section class="intro">
+    <section v-if="!connection" class="intro">
       <p class="eyebrow">{{ currentRoom?.name ?? "Plaza Lobby" }}</p>
       <p v-if="user">
         Signed in as {{ user.name }}. Choose an avatar color, then join.
@@ -281,46 +291,59 @@ onMounted(async () => {
     </section>
 
     <template v-if="user && connection">
-      <div class="room-frame">
-        <div class="room-label">
-          <span>{{ currentRoom?.address }} · {{ currentRoom?.name }}</span
-          ><span>{{
+      <section class="game-shell" aria-label="Panverse Plaza room">
+        <div class="game-toolbar">
+          <div class="room-identity">
+            <span class="eyebrow">{{ currentRoom?.address }}</span>
+            <strong>{{ currentRoom?.name }}</strong>
+          </div>
+          <span class="room-presence">{{
             failed
               ? "Assets failed to load"
               : ready
                 ? `${players.length} online now`
-                : "Loading…"
+                : "Loading room…"
           }}</span>
+          <button
+            class="fullscreen-button"
+            type="button"
+            aria-label="Toggle room fullscreen"
+            @click="roomCanvas?.toggleFullscreen()"
+          >
+            Fullscreen
+          </button>
         </div>
-        <p v-if="failed" class="room-status" role="alert">
-          Character assets failed to load. Reload to retry.
-        </p>
-        <p v-else-if="ready" class="room-status" role="status">Scene ready</p>
-        <RoomCanvas
-          :key="currentRoom?.templateId"
-          :template-id="currentRoom?.templateId ?? 'floor_0_lobby'"
-          :players="players"
-          :local-session-id="connection.sessionId"
-          :bubbles="bubbles"
-          @ready="ready = true"
-          @error="failed = true"
-          @move="(dx, dy) => connection?.sendMove(dx, dy)"
-          @move-to="(x, y) => connection?.moveTo(x, y)"
-          @interact="openInteraction"
-        />
-        <div class="room-caption">ARROW KEYS / WASD · CLICK OR TAP TO MOVE</div>
-      </div>
-      <FloatingPanel class="room-chat-panel">
-        <span class="tag">LIVE ROOM CHAT</span>
+        <div class="room-frame">
+          <p v-if="failed" class="room-status" role="alert">
+            Character assets failed to load. Reload to retry.
+          </p>
+          <p v-else-if="ready" class="room-status" role="status">Scene ready</p>
+          <RoomCanvas
+            ref="roomCanvas"
+            :key="currentRoom?.templateId"
+            :template-id="currentRoom?.templateId ?? 'floor_0_lobby'"
+            :players="players"
+            :local-session-id="connection.sessionId"
+            :bubbles="bubbles"
+            @ready="ready = true"
+            @error="failed = true"
+            @move="(dx, dy) => connection?.sendMove(dx, dy)"
+            @move-to="(x, y) => connection?.moveTo(x, y)"
+            @interact="openInteraction"
+          />
+          <div class="room-caption">
+            <span>ARROW KEYS / WASD · CLICK OR TAP TO MOVE</span>
+            <span>EXPLORE THE ROOM</span>
+          </div>
+        </div>
+      </section>
+      <FloatingPanel class="room-chat-panel" title="Room chat" collapsible bare>
         <RoomChat
           :current-user="user"
           :players="players"
           :messages="messages"
           @send="sendChat"
         />
-        <button class="text-button" type="button" @click="logout">
-          Sign out
-        </button>
       </FloatingPanel>
       <section
         v-if="interaction"

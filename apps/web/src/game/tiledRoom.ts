@@ -61,6 +61,7 @@ export function createRoom(scene: Phaser.Scene, room: RoomAsset) {
     gameObject.setDepth(layer.depth);
   }
   scene.cameras.main.setBounds(0, 0, room.width, room.height);
+  scene.cameras.main.setRoundPixels(true);
   return map;
 }
 

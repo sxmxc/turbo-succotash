@@ -44,6 +44,7 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 
 ## Milestone 2 — Rooms and social features (started)
 
+- [x] Make the room view a fixed, responsive Phaser gameplay stage with a bounded local-player camera, fullscreen control and dockable game-overlay chat.
 - [x] Add reusable local Tiled rectangle interactions; authored elevator objects show a proximity prompt and accessible local dialog.
 - [x] Establish nested, empty-safe Tiled starter-template source directories without changing the unique `floor_0_lobby`.
 - [x] Add persistent room records with immutable IDs and separate public floor/room addresses.

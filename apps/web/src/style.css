@@ -37,10 +37,10 @@ a:focus-visible {
 main {
   min-height: 100dvh;
   padding: 0 5vw;
-  overflow: hidden;
+  overflow-x: clip;
 }
 header {
-  height: 84px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -77,6 +77,15 @@ header {
   background: #b6d99c;
   border-radius: 50%;
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-sign-out {
+  color: #b3c2b8;
+  font-size: 11px;
+}
 .intro {
   text-align: center;
   padding: 40px 0 24px;
@@ -97,12 +106,52 @@ h1 {
   font-size: 13px;
   color: #a3b8ae;
 }
+.game-shell {
+  width: min(960px, 100%);
+  margin: clamp(16px, 3vh, 32px) auto 40px;
+}
+.game-toolbar {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px 10px 18px;
+  background: #162b31;
+  border: 1px solid #54716d77;
+  border-bottom: 0;
+  box-shadow: 0 24px 80px #0004;
+}
+.room-identity {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.room-identity strong {
+  overflow: hidden;
+  color: #f3f0e5;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.room-presence {
+  margin-left: auto;
+  color: #b8dca0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.fullscreen-button {
+  margin: 0 !important;
+  padding: 7px 10px !important;
+  border: 1px solid #91aaa144 !important;
+  background: #ffffff0c !important;
+  color: #d9e5d7 !important;
+  font-size: 10px;
+}
 .room-frame {
-  max-width: 960px;
-  margin: auto;
-  border: 1px solid #71827455;
+  position: relative;
+  border: 1px solid #54716d77;
   background: #192b32;
-  box-shadow: 0 24px 80px #0003;
+  box-shadow: 0 24px 80px #0004;
 }
 .room-label,
 .room-caption {
@@ -115,34 +164,43 @@ h1 {
 }
 .room-canvas {
   width: 100%;
+  height: min(62dvh, 600px);
   overflow: hidden;
+  background: #192b32;
 }
 .room-canvas canvas {
   image-rendering: pixelated;
 }
+.room-canvas:fullscreen {
+  width: 100vw;
+  height: 100dvh;
+  aspect-ratio: auto;
+  background: #0b171b;
+}
 .interaction-popup {
   position: fixed;
   z-index: 20;
-  width: min(300px, calc(100vw - 32px));
+  width: min(440px, calc(100vw - 32px));
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  padding: 18px;
-  background: #f0eee4;
-  color: #273934;
-  border: 1px solid #ffffff60;
-  box-shadow: 0 14px 45px #0007;
+  padding: 22px;
+  background: #171b27;
+  color: #edf0fa;
+  border: 1px solid #69738d;
+  box-shadow: 0 24px 70px #000b;
   max-height: calc(100dvh - 32px);
   overflow: auto;
 }
 .interaction-popup .tag {
-  color: #6c775c;
+  color: #b9adf0;
 }
 .interaction-popup h2 {
-  margin: 10px 0;
+  margin: 6px 0 18px;
+  color: #f5f1e7;
 }
 .interaction-popup p {
-  color: #58685d;
+  color: #c2cadf;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -151,22 +209,47 @@ h1 {
   margin: 12px 0 6px;
   font-size: 12px;
 }
+.interaction-popup input {
+  background: #242b3a;
+  color: #edf0fa;
+  border-color: #6f7894;
+}
+.interaction-popup h3 {
+  margin: 22px 0 0;
+  color: #f5f1e7;
+  font-size: 16px;
+}
 .interaction-popup input[type="checkbox"] {
   width: auto;
   margin-right: 6px;
 }
 .room-directory {
-  margin: 12px 0;
+  max-height: 220px;
+  margin: 16px 0;
   padding: 0;
   list-style: none;
+  overflow: auto;
+  border-block: 1px solid #ffffff14;
+}
+.room-directory li {
+  border-bottom: 1px solid #ffffff0d;
+}
+.room-directory .text-button {
+  width: 100%;
+  padding: 11px 2px;
+  color: #cfd9ff;
+  text-align: left;
+  text-decoration: none;
+}
+.room-directory .text-button:hover {
+  color: #fff7d8;
+  background: #ffffff09;
 }
 .room-caption {
   border-top: 1px solid #ffffff10;
   font-size: 9px;
 }
 .floating-panel {
-  max-height: calc(100dvh - 16px);
-  overflow: auto;
   position: fixed;
   z-index: 10;
   width: 300px;
@@ -189,6 +272,23 @@ h1 {
   touch-action: none;
   font-size: 12px;
   color: inherit;
+}
+.panel-toggle {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 10px;
+  width: auto;
+  height: 28px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 .panel-handle:active {
   cursor: grabbing;
@@ -254,9 +354,55 @@ button:not(.panel-handle):not(.text-button) {
 }
 .floating-panel.room-chat-panel {
   width: min(390px, calc(100vw - 16px));
+  background: #171b27;
+  color: #edf0fa;
+  border-color: #69738d88;
+  box-shadow: 0 18px 54px #0009;
+}
+.floating-panel.room-chat-panel.is-bare {
+  padding-top: 34px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.room-chat-panel.is-bare .panel-handle {
+  position: absolute;
+  z-index: 12;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  background: #171b27;
+  border: 1px solid #69738d88;
+  color: #aeb7d7;
+  cursor: grab;
+}
+.room-chat-panel.is-bare .panel-toggle {
+  z-index: 12;
+  top: 0;
+  right: 0;
+  height: 30px;
+  padding-inline: 10px !important;
+  background: #171b27 !important;
+  border: 1px solid #69738d88 !important;
+  color: #aeb7d7 !important;
+}
+.room-chat-panel.is-bare .panel-content {
+  padding: 0;
 }
 .room-chat-panel .panel-content {
   padding: 16px 0 10px;
+}
+.room-chat-panel .panel-handle {
+  border-bottom-color: #ffffff18;
+  color: #edf0fa;
+}
+.room-chat-panel .muted,
+.room-chat-panel .panel-content > .tag {
+  color: #aeb7d7;
 }
 .room-chat-panel .panel-content > .tag,
 .room-chat-panel .panel-content > .text-button {
@@ -272,21 +418,53 @@ button:not(.panel-handle):not(.text-button) {
 }
 .room-chat {
   margin-top: 8px;
-  --chat-container-border: 1px solid #263c3420;
+  position: relative;
+  --chat-container-border: 1px solid #646d88;
   --chat-container-border-radius: 0;
   --chat-container-box-shadow: none;
-  --chat-header-bg-color: #e5e1d4;
-  --chat-header-color-name: #273934;
-  --chat-content-bg-color: #f7f4eb;
-  --chat-footer-bg-color: #e5e1d4;
-  --chat-bg-color-input: #fffdf7;
-  --chat-border-style-input: 1px solid #71827455;
-  --chat-color: #273934;
-  --chat-color-button: #f4f1e7;
-  --chat-bg-color-button: #29473f;
-  --chat-message-bg-color: #dedbd0;
-  --chat-message-bg-color-me: #b9d8ca;
-  --chat-room-color-username: #354e46;
+  --chat-header-bg-color: #202534;
+  --chat-header-color-name: #f1f2f8;
+  --chat-content-bg-color: #171b27;
+  --chat-footer-bg-color: #202534;
+  --chat-bg-color-input: #2a3040;
+  --chat-border-style-input: 1px solid #70799a99;
+  --chat-color: #e8ebf5;
+  --chat-color-button: #171b27;
+  --chat-bg-color-button: #c7b7ff;
+  --chat-message-bg-color: #2a3040;
+  --chat-message-bg-color-me: #314958;
+  --chat-room-color-username: #dfe4f4;
+  --chat-message-color: #edf0fa;
+  --chat-message-color-username: #d7dfff;
+  --chat-message-color-timestamp: #aeb7d7;
+  --chat-border-color-input-selected: #bba7ff;
+  --chat-icon-color-emoji: #c7b7ff;
+  --chat-icon-color-send: #171b27;
+  --chat-color-placeholder: #aeb7d7;
+}
+/* The picker is intentionally allowed to rise above the chat card. Message
+   history remains the only scrollable region inside Advanced Chat. */
+.room-chat .acc-card-window,
+.room-chat .acc-chat-root {
+  overflow: visible;
+  border-radius: 0 !important;
+}
+.room-chat emoji-picker {
+  width: min(320px, calc(100vw - 32px));
+  height: min(300px, calc(100dvh - 130px));
+}
+.room-chat .acc-picker-shell {
+  z-index: 50 !important;
+}
+@media (min-width: 641px) and (max-height: 420px) {
+  .room-chat-panel .panel-content > .tag,
+  .room-chat-panel .room-chat-note,
+  .room-chat-panel .text-button {
+    display: none;
+  }
+  .room-chat-panel .panel-content {
+    padding-bottom: 0;
+  }
 }
 .panel-content .small {
   font-size: 10px;
@@ -318,15 +496,21 @@ code {
     font-size: 9px;
     gap: 6px;
   }
+  .header-actions {
+    gap: 8px;
+  }
+  .header-sign-out {
+    font-size: 9px;
+  }
   .intro {
     padding: 24px 0 18px;
   }
   .room-canvas {
-    height: 250px;
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
   .floating-panel {
     position: relative;
-    max-height: none;
     overflow: visible;
     left: auto !important;
     top: auto !important;
@@ -346,6 +530,27 @@ code {
   }
   .panel-content p {
     margin-bottom: 8px;
+  }
+  .game-shell {
+    width: calc(100% + 32px);
+    margin: 0 -16px 18px;
+  }
+  .game-toolbar {
+    min-height: 48px;
+    padding: 8px 12px;
+  }
+  .room-presence {
+    font-size: 9px;
+  }
+  .fullscreen-button {
+    font-size: 0;
+  }
+  .fullscreen-button::after {
+    content: "⛶";
+    font-size: 16px;
+  }
+  .floating-panel.room-chat-panel {
+    width: 100%;
   }
   footer {
     gap: 12px;
