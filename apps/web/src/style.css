@@ -22,9 +22,10 @@
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;  
+  min-height: 100dvh;
 }
-html,body {
+html,
+body {
   padding: 0;
   height: 100%;
   margin: 0;
