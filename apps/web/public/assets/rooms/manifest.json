@@ -43,6 +43,18 @@
           "name": "Detail Decoration",
           "depth": 6
         }
+      ],
+      "interactions": [
+        {
+          "id": "3",
+          "kind": "elevator",
+          "name": "elevator",
+          "displayLabel": "Elevator",
+          "x": 640,
+          "y": 160,
+          "width": 64,
+          "height": 64
+        }
       ]
     },
     {
@@ -70,6 +82,58 @@
         {
           "name": "Doors",
           "depth": 2
+        }
+      ],
+      "interactions": [
+        {
+          "id": "3",
+          "kind": "elevator",
+          "name": "elevator",
+          "displayLabel": "Elevator",
+          "x": 448,
+          "y": 160,
+          "width": 64,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "id": "templates/small_room_template/default",
+      "mapKey": "room:templates/small_room_template/default:map",
+      "mapUrl": "/assets/rooms/templates/small_room_template/default/map.json",
+      "width": 480,
+      "height": 320,
+      "tilesets": [
+        {
+          "name": "castle-inside",
+          "key": "room:templates/small_room_template/default:tileset:castle-inside",
+          "url": "/assets/rooms/templates/small_room_template/default/tilesets/castle-inside.png"
+        }
+      ],
+      "layers": [
+        {
+          "name": "Background Solid",
+          "depth": 0
+        },
+        {
+          "name": "Floors and Walls",
+          "depth": 1
+        },
+        {
+          "name": "Doors",
+          "depth": 2
+        }
+      ],
+      "interactions": [
+        {
+          "id": "1",
+          "kind": "elevator",
+          "name": "elevator",
+          "displayLabel": "Elevator",
+          "x": 224,
+          "y": 278,
+          "width": 32,
+          "height": 8
         }
       ]
     }

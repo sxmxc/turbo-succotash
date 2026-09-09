@@ -63,6 +63,7 @@ services:
       target: api
     environment:
       API_DATABASE_URL: postgresql://application:${API_DB_PASSWORD}@postgres:5432/social
+      IDENTITY_INTERNAL_URL: http://identity:3001
     depends_on:
       migrate: { condition: service_completed_successfully }
     healthcheck:

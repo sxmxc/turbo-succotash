@@ -2,7 +2,11 @@ import { test, expect, type Page } from "@playwright/test";
 
 const adminHeaders = { "x-admin-token": process.env.ADMIN_API_TOKEN ?? "" };
 const authHeaders = {
-  origin: new URL(process.env.SMOKE_URL ?? "http://localhost:8080").origin,
+  origin: new URL(
+    process.env.SMOKE_URL ??
+      process.env.PUBLIC_ORIGIN ??
+      "http://localhost:8080",
+  ).origin,
 };
 const password = "correct horse battery staple";
 

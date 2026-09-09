@@ -31,6 +31,17 @@ export type RoomConnection = {
   leave(): Promise<void>;
 };
 
+export type RoomDescriptor = {
+  id: string;
+  floor: number;
+  room: number;
+  address: string;
+  templateId: string;
+  name: string;
+  private: boolean;
+  capacity: number;
+};
+
 function clientRequestId() {
   if (typeof globalThis.crypto?.randomUUID === "function")
     return globalThis.crypto.randomUUID();
@@ -46,15 +57,35 @@ export async function connectLobby(
   onPlayers: (players: RoomPlayer[]) => void,
   onChat: (message: ChatEvent) => void,
 ): Promise<RoomConnection> {
+  return connectRoom(
+    {
+      address: "F000-R000",
+      password: undefined,
+      spawn: "default_elevator_spawn",
+    },
+    shirtTint,
+    onPlayers,
+    onChat,
+  );
+}
+
+export async function connectRoom(
+  destination: { address: string; password?: string; spawn?: string },
+  shirtTint: number,
+  onPlayers: (players: RoomPlayer[]) => void,
+  onChat: (message: ChatEvent) => void,
+): Promise<RoomConnection> {
   const client = new Client({
     hostname: window.location.hostname,
     port: Number(window.location.port) || undefined,
     secure: window.location.protocol === "https:",
     pathname: "/realtime",
   });
-  const room: Room = await client.joinOrCreate("lobby", {
+  const roomName = destination.address === "F000-R000" ? "lobby" : "room";
+  const room: Room = await client.joinOrCreate(roomName, {
     shirtTint,
     protocol: protocolVersion,
+    ...destination,
   });
   const synchronizedPlayers = new Map<string, SynchronizedPlayer>();
   const publishPlayers = () =>

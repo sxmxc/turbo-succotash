@@ -1,10 +1,10 @@
 # Durable context
 
-Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.4 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
+Panverse Plaza is a self-hosted browser social game. [Design revision 6](../docs/PANVERSE_PLAZA_DESIGN.md) is the product authority. Software is 0.2.5 independently of document revisions. Milestones 0 and 1 are complete; Milestone 2 is active.
 
 One npm workspace repository with Vue/Phaser web, identity, API, realtime and migration images. Vue owns DOM UI; Phaser owns game rendering/input/animation/scale through `mountRoom`; realtime owns authoritative live state and collision. Identity owns Better Auth password accounts, sessions and atomic beta gating. PostgreSQL uses separate identity/application roles and schemas.
 
-The current playable slice is one authenticated Colyseus lobby: LPC avatar layers, Tiled map, keyboard/click movement, environment collision, presence, live-only room chat and speech bubbles. `scripts/tiled-rooms.mjs` turns source TMX/TSX/PNG into Phaser assets and generated shared room data. The unique source lobby layout ID is `floor_0_lobby`. Collision comes primarily from tile-attached Tiled objectgroups with class/type `collision`; spawn remains a map point object.
+The playable slice begins in the authenticated Floor 0 lobby and supports persistent user-room creation, directory/address navigation, private-room admission, and movement/chat within independently partitioned Colyseus room instances. `scripts/tiled-rooms.mjs` turns source TMX/TSX/PNG into Phaser assets and generated shared room data. The unique source lobby layout ID is `floor_0_lobby`. Collision comes primarily from tile-attached Tiled objectgroups with class/type `collision`; named spawn point objects are authoritative navigation targets.
 
 Lobby chat presentation uses exactly pinned Advanced Chat v3 RC `Layout` plus standalone `Chat` behind `RoomChat.vue`. This owner-approved prerelease exception avoids the legacy v2 API. The adapter only projects current users and accepted live messages; Colyseus retains transport/lifecycle ownership, and files, rich formatting, links, reactions, replies, edits and history loading remain disabled until supported end to end.
 
@@ -12,7 +12,7 @@ Lobby chat presentation uses exactly pinned Advanced Chat v3 RC `Layout` plus st
 
 Phaser core currently covers the needed scene lifecycle, Loader/Tilemap APIs, keyboard/pointer input, Containers, animations and ScaleManager. The Rex catalog was reviewed as an extension source, but no plugin is justified for this slice; adopted plugins must solve a concrete missing capability, be license-compatible, pinned and documented.
 
-Future confirmed architecture: persistent rooms use immutable internal IDs separate from public floor/room addresses; API owns room records/allocation and realtime owns running instances. Floor 0 is official, user rooms auto-allocate from Floor 1, and a floor has at most 500 registered addresses. Apartments, discovery, store/economy, curated creator marketplace, visible backend system bots and layered moderation are roadmap items, not present schemas/services.
+Persistent rooms use immutable internal IDs separate from public floor/room addresses; API owns room records/allocation and admission while realtime owns running instances. Floor 0 is official, user rooms auto-allocate from Floor 1, every floor reserves R000 for its system lobby, and user addresses run from R001 through R500. Apartments, broader discovery, store/economy, curated creator marketplace, visible backend system bots and layered moderation remain roadmap items.
 
 Git remote is GitHub `sxmxc/turbo-succotash`. Compose is the working deployment target; Kubernetes and remote deployment are later integration work. See [setup](../README.md), [Tiled pipeline](../docs/TILED_ROOMS.md), [Phaser approach](../docs/PHASER.md), [decisions](decisions.md) and [verification](../docs/VERIFICATION.md).
 

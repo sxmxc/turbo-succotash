@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="13" nextobjectid="4">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="13">
  <editorsettings>
   <export target="floor-0-lobby.json" format="json"/>
  </editorsettings>
@@ -149,7 +149,11 @@
 </data>
  </layer>
  <objectgroup id="12" name="Door Objects">
-  <object id="3" name="elevator" type="elevator" x="640" y="160" width="64" height="64"/>
+  <object id="3" name="elevator" type="elevator" x="640" y="160" width="64" height="64">
+   <properties>
+    <property name="display_label" value="Elevator"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer id="8" name="Detail Decoration" width="30" height="20">
   <data encoding="csv">
@@ -175,8 +179,11 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="9" name="Object Layer 1">
+ <objectgroup id="9" name="Spawn Layer">
   <object id="2" name="default_door_spawn" type="spawn" x="480" y="544">
+   <point/>
+  </object>
+  <object id="12" name="default_elevator_spawn" type="spawn" x="672" y="256">
    <point/>
   </object>
  </objectgroup>

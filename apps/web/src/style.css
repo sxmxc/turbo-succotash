@@ -120,6 +120,46 @@ h1 {
 .room-canvas canvas {
   image-rendering: pixelated;
 }
+.interaction-popup {
+  position: fixed;
+  z-index: 20;
+  width: min(300px, calc(100vw - 32px));
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px;
+  background: #f0eee4;
+  color: #273934;
+  border: 1px solid #ffffff60;
+  box-shadow: 0 14px 45px #0007;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+.interaction-popup .tag {
+  color: #6c775c;
+}
+.interaction-popup h2 {
+  margin: 10px 0;
+}
+.interaction-popup p {
+  color: #58685d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.interaction-popup label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 12px;
+}
+.interaction-popup input[type="checkbox"] {
+  width: auto;
+  margin-right: 6px;
+}
+.room-directory {
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
 .room-caption {
   border-top: 1px solid #ffffff10;
   font-size: 9px;

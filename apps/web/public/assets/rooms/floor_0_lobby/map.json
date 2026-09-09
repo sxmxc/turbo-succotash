@@ -3690,6 +3690,13 @@
           "height": 64,
           "id": 3,
           "name": "elevator",
+          "properties": [
+            {
+              "name": "display_label",
+              "type": "string",
+              "value": "Elevator"
+            }
+          ],
           "rotation": 0,
           "type": "elevator",
           "visible": true,
@@ -4320,7 +4327,7 @@
     {
       "draworder": "topdown",
       "id": 9,
-      "name": "Object Layer 1",
+      "name": "Spawn Layer",
       "objects": [
         {
           "height": 0,
@@ -4333,6 +4340,18 @@
           "width": 0,
           "x": 480,
           "y": 544
+        },
+        {
+          "height": 0,
+          "id": 12,
+          "name": "default_elevator_spawn",
+          "point": true,
+          "rotation": 0,
+          "type": "spawn",
+          "visible": true,
+          "width": 0,
+          "x": 672,
+          "y": 256
         }
       ],
       "opacity": 1,
@@ -4342,8 +4361,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 13,
-  "nextobjectid": 4,
+  "nextlayerid": 14,
+  "nextobjectid": 13,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.8.2",

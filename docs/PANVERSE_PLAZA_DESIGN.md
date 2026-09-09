@@ -32,7 +32,7 @@ Confirmed:
 - Leveling system required; capacity values, level thresholds and earning rules are open.
 - Self-hosted, modular and containerized. Local development first, Docker testing next, Kubernetes later.
 - Semantic Versioning for software releases. CI/CD established during bootstrap and maintained throughout development.
-- Persistent rooms have an immutable internal room ID. Their public floor/room address is a separate mutable field, displayed in a form such as `F003-R287`.
+- Persistent rooms have an immutable internal room ID. Their public floor/room address is a separate mutable field, displayed in a form such as `F003-R287`. Every floor lobby is room R000; user-created rooms use R001 through R500.
 - A floor holds at most 500 registered room addresses. User rooms begin on Floor 1 and are allocated automatically; Floor 0 is reserved for official destinations.
 - Every account has a personal apartment. Apartment customization and in-world access to account settings are later features; essential settings must remain reachable outside the game world.
 - Later discovery includes directory/search, bookmarks, events, featured rooms, occupancy, and friend presence without revealing protected-room access.

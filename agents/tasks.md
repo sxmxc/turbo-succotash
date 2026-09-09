@@ -44,10 +44,11 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 
 ## Milestone 2 — Rooms and social features (started)
 
+- [x] Add reusable local Tiled rectangle interactions; authored elevator objects show a proximity prompt and accessible local dialog.
 - [x] Establish nested, empty-safe Tiled starter-template source directories without changing the unique `floor_0_lobby`.
-- [ ] Add persistent room records with immutable IDs and separate public floor/room addresses.
-- [ ] Add concurrency-safe automatic Floor 1+ allocation with at most 500 addresses per floor.
-- [ ] Add authenticated room creation, navigator basics and private-room entry enforcement.
+- [x] Add persistent room records with immutable IDs and separate public floor/room addresses.
+- [x] Add concurrency-safe automatic Floor 1+ allocation with at most 500 addresses per floor.
+- [x] Add authenticated room creation, navigator basics and private-room entry enforcement.
 - [ ] Add friends/presence, online cross-room whispers and saved appearance.
 - [ ] Add the selected social provider after the provider decision is made.
 
@@ -61,6 +62,8 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [ ] Create and publish `v0.2.3` only after separate explicit approval.
 - [x] Prepare version `0.2.4` with the owner-approved Advanced Chat v3 RC standalone room-chat UI.
 - [ ] Create and publish `v0.2.4` only after separate explicit approval.
+- [x] Prepare version `0.2.5` with persistent room allocation, admission, elevators and direct-door navigation.
+- [ ] Create and publish `v0.2.5` only after separate explicit approval.
 
 ## Future roadmap — record now, implement when required
 

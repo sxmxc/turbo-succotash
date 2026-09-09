@@ -34,6 +34,7 @@ const schemas = {
   api: base.extend({
     API_PORT: port.default(3002),
     API_DATABASE_URL: database,
+    IDENTITY_INTERNAL_URL: origin,
   }),
   identity: base.extend({
     IDENTITY_PORT: port.default(3001),

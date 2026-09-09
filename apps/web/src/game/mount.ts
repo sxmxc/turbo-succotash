@@ -8,8 +8,13 @@ import {
   type Direction,
 } from "./appearance";
 import type { RoomPlayer } from "../realtime";
-import { lobbyTemplateId } from "../../../../packages/room-data/src/index";
-import { createRoom, preloadRoom, roomAsset } from "./tiledRoom";
+import {
+  createRoom,
+  preloadRoom,
+  roomAsset,
+  roomInteractions,
+  type RoomInteraction,
+} from "./tiledRoom";
 
 export interface RoomView {
   destroy(): void;
@@ -19,10 +24,12 @@ export interface RoomView {
 
 export function mountRoom(
   parent: HTMLElement,
+  templateId: string,
   onReady: () => void,
   onError: () => void,
   onMoveTo: (x: number, y: number) => void,
   onMove: (dx: number, dy: number) => void,
+  onInteract: (interaction: RoomInteraction) => void,
 ): RoomView {
   let players: RoomPlayer[] = [];
   let localSessionId = "";
@@ -40,12 +47,14 @@ export function mountRoom(
       motion: string;
     }
   >();
-  const tiledLobby = roomAsset(lobbyTemplateId);
+  const tiledLobby = roomAsset(templateId);
+  let interactions: RoomInteraction[] = tiledLobby?.interactions ?? [];
   let cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
   let wasdKeys:
     Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key> | undefined;
   let lastIntent = { dx: 0, dy: 0, sentAt: 0 };
   let activeScene: Phaser.Scene | undefined;
+  let interactionPrompt: Phaser.GameObjects.Text | undefined;
 
   function rememberScene(scene: Phaser.Scene) {
     activeScene = scene;
@@ -58,6 +67,46 @@ export function mountRoom(
         "input, textarea, select, button, [contenteditable=true]",
       ),
     );
+  }
+
+  function activeInteraction() {
+    const localPlayer = players.find(
+      (player) => player.sessionId === localSessionId,
+    );
+    if (!localPlayer) return undefined;
+    return interactions.find((interaction) => {
+      const nearestX = Phaser.Math.Clamp(
+        localPlayer.x,
+        interaction.x,
+        interaction.x + interaction.width,
+      );
+      const nearestY = Phaser.Math.Clamp(
+        localPlayer.y,
+        interaction.y,
+        interaction.y + interaction.height,
+      );
+      return (
+        Phaser.Math.Distance.Between(
+          localPlayer.x,
+          localPlayer.y,
+          nearestX,
+          nearestY,
+        ) <= 16
+      );
+    });
+  }
+
+  function synchronizeInteractionPrompt() {
+    const interaction = activeInteraction();
+    if (interaction) parent.dataset.activeInteraction = interaction.id;
+    else delete parent.dataset.activeInteraction;
+    interactionPrompt
+      ?.setText(
+        interaction
+          ? `E · ${(interaction.displayLabel ?? interaction.name).toUpperCase()}`
+          : "",
+      )
+      .setVisible(Boolean(interaction));
   }
 
   function pollMovement(time: number) {
@@ -190,6 +239,7 @@ export function mountRoom(
         .setVisible(Boolean(bubble));
     }
     parent.dataset.renderedPlayerCount = String(entities.size);
+    synchronizeInteractionPrompt();
   }
 
   class LobbyScene extends Phaser.Scene {
@@ -211,7 +261,10 @@ export function mountRoom(
       registerAnimations(this);
       if (tiledLobby) {
         try {
-          createRoom(this, tiledLobby);
+          interactions = roomInteractions(
+            tiledLobby,
+            createRoom(this, tiledLobby),
+          );
         } catch {
           onError();
           return;
@@ -266,6 +319,22 @@ export function mountRoom(
       this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
         if (pointer.primaryDown) onMoveTo(pointer.worldX, pointer.worldY);
       });
+      interactionPrompt = this.add
+        .text(8, 8, "", {
+          fontFamily: "sans-serif",
+          fontSize: "11px",
+          color: "#263934",
+          backgroundColor: "#f4f0e4e8",
+          padding: { x: 7, y: 5 },
+        })
+        .setDepth(2000)
+        .setScrollFactor(0)
+        .setVisible(false);
+      keyboard.on("keydown-E", () => {
+        if (keyboardBlocked()) return;
+        const interaction = activeInteraction();
+        if (interaction) onInteract(interaction);
+      });
       synchronize();
       onReady();
     }
@@ -290,6 +359,7 @@ export function mountRoom(
   return {
     destroy: () => {
       activeScene = undefined;
+      interactionPrompt = undefined;
       game.destroy(true);
     },
     setPlayers: (nextPlayers, nextLocalSessionId) => {

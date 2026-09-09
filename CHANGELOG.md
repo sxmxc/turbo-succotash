@@ -4,6 +4,10 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-09-09
+
+Milestone 2 adds persistent rooms with immutable IDs and public `F###-R###` addresses, concurrency-safe Floor 1+ allocation, server-enforced authenticated/private admission, reusable elevator and direct-door interactions, named destination spawns, a room directory/address navigator, and public/private room creation. Every floor lobby is R000 and user rooms allocate from R001 through R500. New Colyseus instances are partitioned by address and use the admitted room template. Application migrations `002` through `004` are required. Protocol 2 compatibility is retained through the existing `lobby` route, which remains a Floor 0 alias for coordinated 0.2.x clients.
+
 ## [0.2.4] - 2026-09-08
 
 The lobby chat now uses the Advanced Chat v3 `Layout` and standalone `Chat` composition inside Panverse Plaza's existing draggable panel. A narrow Vue adapter projects live Colyseus events into the component while keeping transport, bounded in-memory delivery, authorization, message IDs, timestamps and speech bubbles under the existing owners. Unsupported files, formatting, links, reactions, replies, edits and history pagination remain disabled. The owner explicitly approved the exactly pinned `@advanced-chat/components` 3.0.0-rc.3 prerelease to adopt the documented v3 API directly and avoid a later v2 migration. No HTTP, realtime protocol, database or migration changes; coordinated protocol 2 compatibility is unchanged.

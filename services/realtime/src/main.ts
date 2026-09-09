@@ -11,7 +11,7 @@ import {
   dependencyReady,
   shutdown,
 } from "../../../packages/service-runtime/src/server.js";
-import { createLobbyRoom } from "./lobby.js";
+import { createGameRoom } from "./lobby.js";
 
 const config = configFor("realtime");
 
@@ -28,7 +28,18 @@ const realtime = new Server({
   greet: false,
 });
 
-realtime.define("lobby", createLobbyRoom(config.IDENTITY_INTERNAL_URL));
+realtime
+  .define(
+    "room",
+    createGameRoom(config.IDENTITY_INTERNAL_URL, config.API_INTERNAL_URL),
+  )
+  .filterBy(["address"]);
+// Protocol 2 clients joined the singleton `lobby` room without an address.
+// Keep that route as a Floor 0 compatibility alias throughout the 0.2.x line.
+realtime.define(
+  "lobby",
+  createGameRoom(config.IDENTITY_INTERNAL_URL, config.API_INTERNAL_URL),
+);
 realtime.router = createRouter({
   health: createEndpoint("/healthz", { method: "GET" }, async () =>
     Response.json(diagnostic("realtime", "ok")),

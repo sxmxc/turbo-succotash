@@ -50,6 +50,23 @@ function propertyValue(properties, name) {
   return properties?.find((property) => property.name === name)?.value;
 }
 
+function requiredStringProperty(roomId, object, name) {
+  const value = propertyValue(object.properties, name);
+  if (typeof value !== "string" || !value.trim())
+    fail(`${roomId}: ${objectKind(object)} "${object.name}" needs ${name}`);
+  return value;
+}
+
+function optionalStringProperty(roomId, object, name, fallback) {
+  const value = propertyValue(object.properties, name);
+  if (value === undefined) return fallback;
+  if (typeof value !== "string" || !value.trim())
+    fail(
+      `${roomId}: ${objectKind(object)} "${object.name}" has invalid ${name}`,
+    );
+  return value;
+}
+
 function rectangleObstacle(roomId, object, offsetX = 0, offsetY = 0) {
   if (
     object.ellipse ||
@@ -68,6 +85,49 @@ function rectangleObstacle(roomId, object, offsetX = 0, offsetY = 0) {
   return {
     x: offsetX + object.x,
     y: offsetY + object.y,
+    width: object.width,
+    height: object.height,
+  };
+}
+
+function interactionRectangle(roomId, object) {
+  if (
+    object.ellipse ||
+    object.gid ||
+    object.polygon ||
+    object.polyline ||
+    object.rotation ||
+    !Number.isFinite(object.x) ||
+    !Number.isFinite(object.y) ||
+    !Number.isFinite(object.width) ||
+    !Number.isFinite(object.height) ||
+    object.width <= 0 ||
+    object.height <= 0
+  )
+    fail(`${roomId}: interaction objects must be axis-aligned rectangles`);
+  const kind = objectKind(object);
+  return {
+    id: String(object.id),
+    kind,
+    name: object.name || kind,
+    displayLabel: optionalStringProperty(
+      roomId,
+      object,
+      "display_label",
+      object.name || kind,
+    ),
+    ...(kind === "door"
+      ? {
+          destination: requiredStringProperty(roomId, object, "destination"),
+          destinationSpawn: requiredStringProperty(
+            roomId,
+            object,
+            "destination_spawn",
+          ),
+        }
+      : {}),
+    x: object.x,
+    y: object.y,
     width: object.width,
     height: object.height,
   };
@@ -172,9 +232,20 @@ export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
   ];
   const spawns = gameplayObjects
     .filter((object) => objectKind(object) === "spawn")
-    .map((object) => ({ x: object.x, y: object.y }));
+    .map((object) => {
+      if (!object.point || !object.name)
+        fail(`${roomId}: spawns must be named point objects`);
+      return { name: object.name, x: object.x, y: object.y };
+    });
   if (!spawns.length)
     fail(`${roomId}: add at least one point object with class "spawn"`);
+  if (new Set(spawns.map((spawn) => spawn.name)).size !== spawns.length)
+    fail(`${roomId}: spawn object names must be unique`);
+  const interactions = gameplayObjects
+    .filter(
+      (object) => !["", "collision", "spawn"].includes(objectKind(object)),
+    )
+    .map((object) => interactionRectangle(roomId, object));
 
   const width = map.width * map.tilewidth;
   const height = map.height * map.tileheight;
@@ -191,6 +262,7 @@ export function packageTiledMap(roomId, map, exportedMapPath, roomOutput) {
       height,
       tilesets,
       layers: tileLayers,
+      interactions,
     },
     server: {
       width,

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { mountRoom, type RoomView } from "../game/mount";
+import type { RoomInteraction } from "../game/tiledRoom";
 import type { RoomPlayer } from "../realtime";
 
 const props = defineProps<{
+  templateId: string;
   players: RoomPlayer[];
   localSessionId: string;
   bubbles: Record<string, string>;
@@ -13,6 +15,7 @@ const emit = defineEmits<{
   error: [];
   move: [dx: number, dy: number];
   moveTo: [x: number, y: number];
+  interact: [interaction: RoomInteraction];
 }>();
 const host = ref<HTMLDivElement>();
 const localPlayer = computed(() =>
@@ -24,6 +27,7 @@ onMounted(() => {
   if (host.value)
     view = mountRoom(
       host.value,
+      props.templateId,
       () => {
         view?.setPlayers(props.players, props.localSessionId);
         emit("ready");
@@ -31,6 +35,7 @@ onMounted(() => {
       () => emit("error"),
       (x, y) => emit("moveTo", x, y),
       (dx, dy) => emit("move", dx, dy),
+      (interaction) => emit("interact", interaction),
     );
 });
 watch(

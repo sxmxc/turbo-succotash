@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import RoomCanvas from "./components/RoomCanvas.vue";
 import FloatingPanel from "./components/FloatingPanel.vue";
 import RoomChat from "./components/RoomChat.vue";
+import type { RoomInteraction } from "./game/tiledRoom";
 import {
-  connectLobby,
+  connectRoom,
   type ChatEvent,
   type RoomConnection,
+  type RoomDescriptor,
   type RoomPlayer,
 } from "./realtime";
 
@@ -30,8 +32,22 @@ const connectionStatus = ref<"Offline" | "Connecting" | "Connected" | "Failed">(
 );
 const messages = ref<ChatEvent[]>([]);
 const bubbles = ref<Record<string, string>>({});
+const interaction = ref<RoomInteraction>();
+const currentRoom = ref<RoomDescriptor>();
+const directoryRooms = ref<RoomDescriptor[]>([]);
+const destinationAddress = ref("");
+const destinationPassword = ref("");
+const newRoomName = ref("");
+const newRoomPrivate = ref(false);
+const newRoomPassword = ref("");
+const interactionPanel = ref<HTMLElement>();
 const version = __BUILD_VERSION__;
 const commit = __BUILD_COMMIT__;
+watch(interaction, async (value) => {
+  if (!value) return;
+  await nextTick();
+  interactionPanel.value?.querySelector<HTMLElement>("input, button")?.focus();
+});
 
 async function jsonRequest(path: string, init?: Parameters<typeof fetch>[1]) {
   const response = await fetch(path, {
@@ -57,6 +73,9 @@ function readable(message: string) {
     EMAIL_IN_USE: "An account already uses that email.",
     RATE_LIMITED: "Too many attempts. Please wait a minute.",
     INVALID_SIGNUP: "Check your name, email, and password.",
+    INVALID_ROOM: "Enter a room name and a password of at least 8 characters.",
+    ROOM_NOT_FOUND: "That room address was not found.",
+    ROOM_PASSWORD_INVALID: "That room password was not accepted.",
   };
   return labels[message] ?? message;
 }
@@ -100,19 +119,107 @@ async function submitAuth() {
 }
 async function joinRoom() {
   if (!user.value || connection.value) return;
+  try {
+    const entry = (await jsonRequest("/api/v1/rooms/entry")) as RoomDescriptor;
+    await joinDestination(entry, "default_elevator_spawn");
+  } catch (caught) {
+    connectionStatus.value = "Failed";
+    error.value = readable(
+      caught instanceof Error ? caught.message : "Could not enter the lobby.",
+    );
+  }
+}
+async function joinDestination(
+  room: RoomDescriptor,
+  spawn?: string,
+  password?: string,
+) {
   connectionStatus.value = "Connecting";
   error.value = "";
   try {
-    connection.value = await connectLobby(
+    const previous = connection.value;
+    connection.value = undefined;
+    await previous?.leave();
+    players.value = [];
+    messages.value = [];
+    bubbles.value = {};
+    ready.value = false;
+    const nextConnection = await connectRoom(
+      { address: room.address, password, spawn },
       shirtTint.value,
       (next) => (players.value = next),
       receiveChat,
     );
+    currentRoom.value = room;
+    connection.value = nextConnection;
     connectionStatus.value = "Connected";
   } catch (caught) {
     connectionStatus.value = "Failed";
     error.value =
       caught instanceof Error ? caught.message : "Could not join the room.";
+  }
+}
+async function openInteraction(next: RoomInteraction) {
+  try {
+    interaction.value = next;
+    if (next.kind === "elevator") {
+      const result = await jsonRequest("/api/v1/rooms");
+      directoryRooms.value = result.rooms;
+    } else if (next.kind === "door" && next.destination) {
+      const room = (await jsonRequest(
+        `/api/v1/rooms/resolve/${encodeURIComponent(next.destination)}`,
+      )) as RoomDescriptor;
+      await joinDestination(room, next.destinationSpawn);
+      interaction.value = undefined;
+    }
+  } catch (caught) {
+    error.value = readable(
+      caught instanceof Error ? caught.message : "Could not use interaction.",
+    );
+  }
+}
+async function enterAddress(room?: RoomDescriptor) {
+  try {
+    const address = room?.address ?? destinationAddress.value.toUpperCase();
+    if (!address) return;
+    const admitted = (await jsonRequest(
+      `/api/v1/rooms/${encodeURIComponent(address)}/admission`,
+      {
+        method: "POST",
+        body: JSON.stringify({ password: destinationPassword.value }),
+      },
+    )) as RoomDescriptor;
+    await joinDestination(
+      admitted,
+      admitted.templateId === "floor_0_lobby" ||
+        admitted.templateId.includes("/lobby_template/")
+        ? "default_elevator_spawn"
+        : "default_room_spawn",
+      destinationPassword.value,
+    );
+    interaction.value = undefined;
+  } catch (caught) {
+    error.value = readable(
+      caught instanceof Error ? caught.message : "Could not enter room.",
+    );
+  }
+}
+async function createRoom() {
+  try {
+    const room = (await jsonRequest("/api/v1/rooms", {
+      method: "POST",
+      body: JSON.stringify({
+        name: newRoomName.value,
+        private: newRoomPrivate.value,
+        password: newRoomPassword.value,
+      }),
+    })) as RoomDescriptor;
+    await joinDestination(room, "default_room_spawn", newRoomPassword.value);
+    interaction.value = undefined;
+  } catch (caught) {
+    error.value = readable(
+      caught instanceof Error ? caught.message : "Could not create room.",
+    );
   }
 }
 function receiveChat(message: ChatEvent) {
@@ -135,7 +242,9 @@ async function logout() {
   players.value = [];
   messages.value = [];
   bubbles.value = {};
+  interaction.value = undefined;
   connectionStatus.value = "Offline";
+  currentRoom.value = undefined;
   await jsonRequest("/identity/auth/sign-out", { method: "POST" });
   user.value = undefined;
 }
@@ -164,7 +273,7 @@ onMounted(async () => {
     </header>
 
     <section class="intro">
-      <p class="eyebrow">Plaza Lobby</p>
+      <p class="eyebrow">{{ currentRoom?.name ?? "Plaza Lobby" }}</p>
       <p v-if="user">
         Signed in as {{ user.name }}. Choose an avatar color, then join.
       </p>
@@ -174,7 +283,7 @@ onMounted(async () => {
     <template v-if="user && connection">
       <div class="room-frame">
         <div class="room-label">
-          <span>01 / LOBBY · DEVELOPMENT CAPACITY 20</span
+          <span>{{ currentRoom?.address }} · {{ currentRoom?.name }}</span
           ><span>{{
             failed
               ? "Assets failed to load"
@@ -188,6 +297,8 @@ onMounted(async () => {
         </p>
         <p v-else-if="ready" class="room-status" role="status">Scene ready</p>
         <RoomCanvas
+          :key="currentRoom?.templateId"
+          :template-id="currentRoom?.templateId ?? 'floor_0_lobby'"
           :players="players"
           :local-session-id="connection.sessionId"
           :bubbles="bubbles"
@@ -195,6 +306,7 @@ onMounted(async () => {
           @error="failed = true"
           @move="(dx, dy) => connection?.sendMove(dx, dy)"
           @move-to="(x, y) => connection?.moveTo(x, y)"
+          @interact="openInteraction"
         />
         <div class="room-caption">ARROW KEYS / WASD · CLICK OR TAP TO MOVE</div>
       </div>
@@ -210,6 +322,66 @@ onMounted(async () => {
           Sign out
         </button>
       </FloatingPanel>
+      <section
+        v-if="interaction"
+        ref="interactionPanel"
+        class="interaction-popup"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="`interaction-${interaction.id}`"
+        @keydown.esc="interaction = undefined"
+      >
+        <span class="tag">INTERACTION</span>
+        <h2 :id="`interaction-${interaction.id}`">
+          {{ interaction.displayLabel ?? interaction.name }}
+        </h2>
+        <template v-if="interaction.kind === 'elevator'">
+          <label for="destination-address">Room address</label>
+          <input
+            id="destination-address"
+            v-model="destinationAddress"
+            placeholder="F001-R001"
+          />
+          <label for="destination-password">Password (private rooms)</label>
+          <input
+            id="destination-password"
+            v-model="destinationPassword"
+            type="password"
+          />
+          <button type="button" @click="enterAddress()">Go to address</button>
+          <ul class="room-directory">
+            <li v-for="room in directoryRooms" :key="room.id">
+              <button
+                type="button"
+                class="text-button"
+                @click="enterAddress(room)"
+              >
+                {{ room.address }} · {{ room.name }}
+              </button>
+            </li>
+          </ul>
+          <h3>Create a room</h3>
+          <label for="new-room-name">Room name</label>
+          <input id="new-room-name" v-model="newRoomName" maxlength="80" />
+          <label
+            ><input v-model="newRoomPrivate" type="checkbox" /> Private
+            room</label
+          >
+          <input
+            v-if="newRoomPrivate"
+            v-model="newRoomPassword"
+            type="password"
+            minlength="8"
+            placeholder="Room password"
+          />
+          <button type="button" @click="createRoom">Create and enter</button>
+        </template>
+        <p v-else>
+          Direct door navigation is ready when a destination is authored.
+        </p>
+        <p v-if="error" class="form-error" role="alert">{{ error }}</p>
+        <button type="button" @click="interaction = undefined">Close</button>
+      </section>
     </template>
 
     <FloatingPanel v-else-if="!loading">

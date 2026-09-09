@@ -45,7 +45,15 @@ try {
         "SELECT count(*)::int AS n FROM application.schema_migrations",
       )
     ).rows[0].n,
-    1,
+    4,
+  );
+  assert.deepEqual(
+    (
+      await db.query(
+        "SELECT floor_number,room_number,name FROM application.room ORDER BY floor_number,room_number",
+      )
+    ).rows,
+    [{ floor_number: 0, room_number: 0, name: "Floor 0 Lobby" }],
   );
   const identityPool = new pg.Pool({
     connectionString: url.toString(),
@@ -136,7 +144,7 @@ try {
     await db.query("RESET ROLE");
   }
   await writeFile(
-    `${dir}/application/002_upgrade.sql`,
+    `${dir}/application/005_upgrade.sql`,
     "ALTER TABLE bootstrap ADD COLUMN note text;",
   );
   await migrate(url.toString(), dir);
@@ -149,7 +157,7 @@ try {
     "upgrade preserved data",
   );
   await writeFile(
-    `${dir}/application/003_failure.sql`,
+    `${dir}/application/006_failure.sql`,
     "CREATE TABLE rolled_back(id int); SELECT definitely_not_a_function();",
   );
   await assert.rejects(migrate(url.toString(), dir));
@@ -167,7 +175,7 @@ try {
         "SELECT count(*)::int AS n FROM application.schema_migrations",
       )
     ).rows[0].n,
-    2,
+    5,
   );
   await writeFile(`${dir}/application/001_bootstrap.sql`, "SELECT 1;");
   await assert.rejects(migrate(url.toString(), dir), /checksum mismatch/);

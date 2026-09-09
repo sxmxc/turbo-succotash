@@ -55,7 +55,32 @@ function exportedMap(image: string) {
       {
         type: "objectgroup",
         name: "Gameplay",
-        objects: [{ class: "spawn", point: true, x: 24, y: 32 }],
+        objects: [
+          { class: "spawn", name: "entry", point: true, x: 24, y: 32 },
+          {
+            id: 8,
+            type: "elevator",
+            name: "Elevator",
+            x: 32,
+            y: 0,
+            width: 16,
+            height: 32,
+          },
+          {
+            id: 9,
+            class: "door",
+            name: "Exit",
+            x: 48,
+            y: 0,
+            width: 16,
+            height: 32,
+            properties: [
+              { name: "display_label", value: "Lobby" },
+              { name: "destination", value: "floor_0_lobby" },
+              { name: "destination_spawn", value: "default_door_spawn" },
+            ],
+          },
+        ],
       },
     ],
   };
@@ -79,7 +104,31 @@ test("packages Tiled JSON and PNG data for Phaser and realtime", () => {
       right: 64,
       bottom: 48,
     });
-    assert.deepEqual(result.server.spawns, [{ x: 24, y: 32 }]);
+    assert.deepEqual(result.server.spawns, [{ name: "entry", x: 24, y: 32 }]);
+    assert.deepEqual(result.web.interactions, [
+      {
+        id: "8",
+        kind: "elevator",
+        name: "Elevator",
+        displayLabel: "Elevator",
+        x: 32,
+        y: 0,
+        width: 16,
+        height: 32,
+      },
+      {
+        id: "9",
+        kind: "door",
+        name: "Exit",
+        displayLabel: "Lobby",
+        destination: "floor_0_lobby",
+        destinationSpawn: "default_door_spawn",
+        x: 48,
+        y: 0,
+        width: 16,
+        height: 32,
+      },
+    ]);
     assert.deepEqual(result.server.obstacles, [
       { x: 16, y: 16, width: 16, height: 16 },
     ]);

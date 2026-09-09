@@ -7,7 +7,12 @@ import {
   protocolVersion,
   roomChatCommandSchema as chatSchema,
 } from "../../../packages/contracts/src/index.js";
-import { moveWithCollision, roomLayout } from "./world.js";
+import {
+  generatedRooms,
+  moveWithCollision,
+  roomLayout,
+  type RoomLayout,
+} from "./world.js";
 
 export const PlayerState = schema(
   {
@@ -26,7 +31,10 @@ export type PlayerState = SchemaType<typeof PlayerState>;
 export const LobbyState = schema({ players: t.map(PlayerState) }, "LobbyState");
 export type LobbyState = SchemaType<typeof LobbyState>;
 
-type Authenticated = { user: { id: string; name: string } };
+type Authenticated = {
+  user: { id: string; name: string };
+  room: { id: string; address: string; templateId: string; capacity: number };
+};
 type Intent = {
   dx: number;
   dy: number;
@@ -35,13 +43,14 @@ type Intent = {
 };
 const allowedTints = new Set([0xefd6a2, 0xaadbc4, 0xc3b3e5]);
 
-export function createLobbyRoom(identityUrl: string) {
+export function createGameRoom(identityUrl: string, apiUrl: string) {
   return class LobbyRoom extends Room<{ state: LobbyState }> {
     maxClients = 20;
-    autoDispose = false;
+    autoDispose = true;
     private intents = new Map<string, Intent>();
     private chatWindows = new Map<string, number[]>();
     private requestIds = new Map<string, Set<string>>();
+    private layout: RoomLayout = roomLayout;
 
     static async onAuth(
       _token: string,
@@ -54,6 +63,10 @@ export function createLobbyRoom(identityUrl: string) {
         (options as { protocol?: unknown }).protocol !== protocolVersion
       )
         return false;
+      const address =
+        typeof (options as { address?: unknown }).address === "string"
+          ? (options as { address: string }).address
+          : "F000-R000";
       const cookie = context.headers.get("cookie");
       if (!cookie) return false;
       const response = await fetch(`${identityUrl}/identity/auth/get-session`, {
@@ -64,9 +77,26 @@ export function createLobbyRoom(identityUrl: string) {
       const data = (await response.json()) as {
         user?: { id?: unknown; name?: unknown };
       };
-      return typeof data.user?.id === "string" &&
-        typeof data.user.name === "string"
-        ? { user: { id: data.user.id, name: data.user.name } }
+      if (
+        typeof data.user?.id !== "string" ||
+        typeof data.user.name !== "string"
+      )
+        return false;
+      const admission = await fetch(
+        `${apiUrl}/v1/rooms/${encodeURIComponent(address)}/admission`,
+        {
+          method: "POST",
+          headers: { cookie, "content-type": "application/json" },
+          body: JSON.stringify({
+            password: (options as { password?: unknown }).password,
+          }),
+          signal: AbortSignal.timeout(1800),
+        },
+      );
+      if (!admission.ok) return false;
+      const room = (await admission.json()) as Authenticated["room"];
+      return generatedRooms[room.templateId]
+        ? { user: { id: data.user.id, name: data.user.name }, room }
         : false;
     }
 
@@ -91,12 +121,12 @@ export function createLobbyRoom(identityUrl: string) {
           dy: 0,
           target: {
             x: Math.max(
-              roomLayout.bounds.left,
-              Math.min(roomLayout.bounds.right, parsed.data.x),
+              this.layout.bounds.left,
+              Math.min(this.layout.bounds.right, parsed.data.x),
             ),
             y: Math.max(
-              roomLayout.bounds.top,
-              Math.min(roomLayout.bounds.bottom, parsed.data.y),
+              this.layout.bounds.top,
+              Math.min(this.layout.bounds.bottom, parsed.data.y),
             ),
           },
           updatedAt: Date.now(),
@@ -124,10 +154,20 @@ export function createLobbyRoom(identityUrl: string) {
       });
     }
 
-    onJoin(client: Client, options: { shirtTint?: unknown }) {
+    onJoin(client: Client, options: { shirtTint?: unknown; spawn?: unknown }) {
       const auth = client.auth as Authenticated;
+      this.layout = generatedRooms[auth.room.templateId] ?? roomLayout;
+      this.maxClients = auth.room.capacity;
+      this.setMetadata({
+        roomId: auth.room.id,
+        address: auth.room.address,
+        templateId: auth.room.templateId,
+      });
       const index = this.state.players.size;
-      const spawn = roomLayout.spawns[index % roomLayout.spawns.length]!;
+      const spawn =
+        this.layout.spawns.find(
+          (entry) => "name" in entry && entry.name === options.spawn,
+        ) ?? this.layout.spawns[index % this.layout.spawns.length]!;
       const player = new PlayerState().assign({
         userId: auth.user.id,
         name: auth.user.name,
@@ -186,6 +226,7 @@ export function createLobbyRoom(identityUrl: string) {
           player,
           { x: dx * speed, y: dy * speed },
           Math.min(deltaMs, 100) / 1000,
+          this.layout,
         );
         player.x = next.x;
         player.y = next.y;

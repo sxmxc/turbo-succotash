@@ -1,5 +1,12 @@
 # Decisions
 
+## 2026-09-09 — Room allocation and navigation
+
+- Application API owns persistent room IDs, public addresses, concurrency-safe allocation and admission. Realtime admits through that API and partitions live Colyseus instances by address; clients never select layouts or coordinates directly.
+- `F000-R000` is the initial entry and protocol-2 `lobby` compatibility destination. Every floor reserves R000 for its system lobby and allocates user rooms from R001 through R500.
+- Elevators open the directory/address flow. Doors resolve their authored destination and enter at an authored named spawn. Missing requested spawn names safely fall back to a map spawn.
+- Private-room passwords are salted scrypt hashes owned and verified by API; safe room descriptors never expose password material.
+
 ## 2026-09-08 — Advanced Chat v3 UI
 
 - Release 0.2.4 uses exactly pinned `@advanced-chat/components` 3.0.0-rc.3 by explicit owner decision, as an exception to the normal stable-only dependency policy. Adopting the documented v3 rewrite now avoids integrating legacy v2 and migrating later.

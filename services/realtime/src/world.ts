@@ -3,7 +3,7 @@ import {
   roomLayouts,
 } from "../../../packages/room-data/src/index.js";
 
-interface RoomLayout {
+export interface RoomLayout {
   width: number;
   height: number;
   bounds: { left: number; top: number; right: number; bottom: number };
@@ -30,28 +30,28 @@ const placeholderRoomLayout = {
   playerFootprint: { width: 20, height: 10 },
 } as const;
 
-const generatedRooms = roomLayouts as Record<string, RoomLayout>;
+export const generatedRooms = roomLayouts as Record<string, RoomLayout>;
 export const roomLayout =
   generatedRooms[lobbyTemplateId] ?? placeholderRoomLayout;
 
 export type Position = { x: number; y: number };
 
-export function canOccupy(position: Position) {
-  const halfWidth = roomLayout.playerFootprint.width / 2;
+export function canOccupy(position: Position, layout = roomLayout) {
+  const halfWidth = layout.playerFootprint.width / 2;
   const rect = {
     left: position.x - halfWidth,
     right: position.x + halfWidth,
-    top: position.y - roomLayout.playerFootprint.height,
+    top: position.y - layout.playerFootprint.height,
     bottom: position.y,
   };
   if (
-    rect.left < roomLayout.bounds.left ||
-    rect.right > roomLayout.bounds.right ||
-    rect.top < roomLayout.bounds.top ||
-    rect.bottom > roomLayout.bounds.bottom
+    rect.left < layout.bounds.left ||
+    rect.right > layout.bounds.right ||
+    rect.top < layout.bounds.top ||
+    rect.bottom > layout.bounds.bottom
   )
     return false;
-  return !roomLayout.obstacles.some(
+  return !layout.obstacles.some(
     (obstacle) =>
       rect.left < obstacle.x + obstacle.width &&
       rect.right > obstacle.x &&
@@ -64,6 +64,7 @@ export function moveWithCollision(
   position: Position,
   velocity: Position,
   deltaSeconds: number,
+  layout = roomLayout,
 ) {
   const next = { x: position.x, y: position.y };
   const distance = Math.hypot(velocity.x, velocity.y) * deltaSeconds;
@@ -71,9 +72,9 @@ export function moveWithCollision(
   const stepSeconds = deltaSeconds / steps;
   for (let step = 0; step < steps; step++) {
     const x = { x: next.x + velocity.x * stepSeconds, y: next.y };
-    if (canOccupy(x)) next.x = x.x;
+    if (canOccupy(x, layout)) next.x = x.x;
     const y = { x: next.x, y: next.y + velocity.y * stepSeconds };
-    if (canOccupy(y)) next.y = y.y;
+    if (canOccupy(y, layout)) next.y = y.y;
   }
   return next;
 }

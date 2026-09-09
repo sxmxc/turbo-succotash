@@ -1435,8 +1435,14 @@ export const roomLayouts = {
     ],
     "spawns": [
       {
+        "name": "default_door_spawn",
         "x": 480,
         "y": 544
+      },
+      {
+        "name": "default_elevator_spawn",
+        "x": 672,
+        "y": 256
       }
     ],
     "playerFootprint": {
@@ -2603,8 +2609,379 @@ export const roomLayouts = {
     ],
     "spawns": [
       {
+        "name": "default_door_spawn",
         "x": 480,
         "y": 544
+      },
+      {
+        "name": "default_elevator_spawn",
+        "x": 480,
+        "y": 256
+      }
+    ],
+    "playerFootprint": {
+      "width": 20,
+      "height": 10
+    }
+  },
+  "templates/small_room_template/default": {
+    "width": 480,
+    "height": 320,
+    "bounds": {
+      "left": 0,
+      "top": 0,
+      "right": 480,
+      "bottom": 320
+    },
+    "obstacles": [
+      {
+        "x": 21,
+        "y": 32,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 32,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 64,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 32,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 64,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 96,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 128,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 160,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 192,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 224,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 256,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 288,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 320,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 352,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 384,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 416,
+        "y": 64,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 64,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 96,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 32,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 96,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 128,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 160,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 192,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 224,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 256,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 288,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 320,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 352,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 384,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 416,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 96,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 128,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 128,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 160,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 160,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 192,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 192,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 224,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 224,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 256,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 448,
+        "y": 256,
+        "width": 11,
+        "height": 32
+      },
+      {
+        "x": 21,
+        "y": 288,
+        "width": 11,
+        "height": 11
+      },
+      {
+        "x": 32,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 64,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 96,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 128,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 160,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 192,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 224,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 256,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 288,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 320,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 352,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 384,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 416,
+        "y": 288,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 448,
+        "y": 288,
+        "width": 11,
+        "height": 11
+      }
+    ],
+    "spawns": [
+      {
+        "name": "default_room_spawn",
+        "x": 240,
+        "y": 240
       }
     ],
     "playerFootprint": {
