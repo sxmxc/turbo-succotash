@@ -112,10 +112,6 @@ h1 {
   font-size: 13px;
   color: #a3b8ae;
 }
-.game-shell {
-  width: min(960px, 100%);
-  margin: clamp(16px, 3vh, 32px) auto 40px;
-}
 .play-layout {
   display: flex;
   flex-direction: row;
@@ -615,7 +611,7 @@ code {
     margin-bottom: 8px;
   }
   .game-shell {
-    width: calc(100% + 32px);
+    width: min(960px, 100%);
     margin: 0 -16px 18px;
     flex: 1;
   }
