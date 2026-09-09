@@ -377,8 +377,6 @@ button:not(.panel-handle):not(.text-button) {
   cursor: pointer;
 }
 .auth-form button {
-  display: block;
-  padding: 30px;
   max-width: 400px;
 }
 .text-button {
