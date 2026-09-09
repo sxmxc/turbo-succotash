@@ -29,162 +29,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 64,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
         "x": 896,
         "y": 64,
         "width": 11,
@@ -194,162 +38,6 @@ export const roomLayouts = {
         "x": 53,
         "y": 96,
         "width": 11,
-        "height": 32
-      },
-      {
-        "x": 64,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 96,
-        "width": 32,
         "height": 32
       },
       {
@@ -365,162 +53,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 64,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
         "x": 896,
         "y": 128,
         "width": 11,
@@ -530,162 +62,6 @@ export const roomLayouts = {
         "x": 53,
         "y": 160,
         "width": 11,
-        "height": 32
-      },
-      {
-        "x": 64,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 160,
-        "width": 32,
         "height": 32
       },
       {
@@ -698,6 +74,12 @@ export const roomLayouts = {
         "x": 53,
         "y": 192,
         "width": 11,
+        "height": 32
+      },
+      {
+        "x": 64,
+        "y": 192,
+        "width": 32,
         "height": 32
       },
       {
@@ -989,12 +371,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 53,
-        "y": 576,
-        "width": 11,
-        "height": 11
-      },
-      {
         "x": 64,
         "y": 576,
         "width": 32,
@@ -1157,177 +533,57 @@ export const roomLayouts = {
         "height": 11
       },
       {
-        "x": 225,
-        "y": 176,
-        "width": 31,
-        "height": 16
+        "x": 240,
+        "y": 170,
+        "width": 16,
+        "height": 22
       },
       {
         "x": 256,
-        "y": 176,
+        "y": 170,
         "width": 32,
-        "height": 16
+        "height": 22
       },
       {
         "x": 288,
-        "y": 176,
-        "width": 31,
-        "height": 16
+        "y": 170,
+        "width": 16,
+        "height": 22
       },
       {
-        "x": 226,
+        "x": 240,
         "y": 192,
-        "width": 30,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 192,
-        "width": 32,
+        "width": 16,
         "height": 32
       },
       {
         "x": 288,
         "y": 192,
-        "width": 30,
+        "width": 16,
         "height": 32
       },
       {
-        "x": 226,
+        "x": 236,
         "y": 224,
-        "width": 30,
-        "height": 24
+        "width": 20,
+        "height": 16
       },
       {
         "x": 256,
         "y": 224,
         "width": 32,
-        "height": 24
+        "height": 16
       },
       {
         "x": 288,
         "y": 224,
-        "width": 30,
-        "height": 24
-      },
-      {
-        "x": 416,
-        "y": 97,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 448,
-        "y": 97,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 480,
-        "y": 97,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 512,
-        "y": 97,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 416,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 160,
-        "width": 18,
-        "height": 20
-      },
-      {
-        "x": 416,
-        "y": 160,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 448,
-        "y": 160,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 480,
-        "y": 160,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 512,
-        "y": 160,
-        "width": 32,
-        "height": 31
-      },
-      {
-        "x": 96,
-        "y": 200,
-        "width": 32,
-        "height": 24
-      },
-      {
-        "x": 128,
-        "y": 200,
-        "width": 32,
-        "height": 24
-      },
-      {
-        "x": 327,
-        "y": 192,
-        "width": 18,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 200,
-        "width": 32,
-        "height": 24
-      },
-      {
-        "x": 832,
-        "y": 200,
-        "width": 32,
-        "height": 24
-      },
-      {
-        "x": 96,
-        "y": 224,
-        "width": 32,
+        "width": 20,
         "height": 16
       },
       {
-        "x": 128,
+        "x": 288,
         "y": 224,
-        "width": 32,
+        "width": 20,
         "height": 16
       },
       {
@@ -1335,36 +591,6 @@ export const roomLayouts = {
         "y": 224,
         "width": 32,
         "height": 32
-      },
-      {
-        "x": 327,
-        "y": 224,
-        "width": 18,
-        "height": 19
-      },
-      {
-        "x": 440,
-        "y": 241,
-        "width": 8,
-        "height": 12
-      },
-      {
-        "x": 448,
-        "y": 241,
-        "width": 32,
-        "height": 15
-      },
-      {
-        "x": 480,
-        "y": 241,
-        "width": 32,
-        "height": 15
-      },
-      {
-        "x": 512,
-        "y": 241,
-        "width": 8,
-        "height": 12
       },
       {
         "x": 768,
@@ -1436,13 +662,210 @@ export const roomLayouts = {
     "spawns": [
       {
         "name": "default_door_spawn",
-        "x": 480,
-        "y": 544
+        "x": 624,
+        "y": 240
       },
       {
         "name": "default_elevator_spawn",
-        "x": 672,
+        "x": 736,
         "y": 256
+      }
+    ],
+    "playerFootprint": {
+      "width": 20,
+      "height": 10
+    }
+  },
+  "templates/appartment_template/default": {
+    "width": 480,
+    "height": 320,
+    "bounds": {
+      "left": 0,
+      "top": 0,
+      "right": 480,
+      "bottom": 320
+    },
+    "obstacles": [
+      {
+        "x": 32,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 64,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 96,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 128,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 160,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 192,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 224,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 256,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 288,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 320,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 352,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 384,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 416,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 32,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 64,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 96,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 128,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 160,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 192,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 224,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 256,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 288,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 320,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 352,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 384,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 416,
+        "y": 288,
+        "width": 32,
+        "height": 9
+      },
+      {
+        "x": 160,
+        "y": 85,
+        "width": 32,
+        "height": 11
+      },
+      {
+        "x": 160,
+        "y": 96,
+        "width": 32,
+        "height": 32
+      },
+      {
+        "x": 160,
+        "y": 128,
+        "width": 32,
+        "height": 26
+      }
+    ],
+    "spawns": [
+      {
+        "name": "default_appartment_door_spawn",
+        "x": 240,
+        "y": 144
       }
     ],
     "playerFootprint": {
@@ -1479,162 +902,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 64,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
         "x": 896,
         "y": 64,
         "width": 11,
@@ -1644,162 +911,6 @@ export const roomLayouts = {
         "x": 53,
         "y": 96,
         "width": 11,
-        "height": 32
-      },
-      {
-        "x": 64,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 96,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 96,
-        "width": 32,
         "height": 32
       },
       {
@@ -1815,162 +926,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 64,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 128,
-        "width": 32,
-        "height": 32
-      },
-      {
         "x": 896,
         "y": 128,
         "width": 11,
@@ -1980,162 +935,6 @@ export const roomLayouts = {
         "x": 53,
         "y": 160,
         "width": 11,
-        "height": 32
-      },
-      {
-        "x": 64,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 448,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 480,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 512,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 544,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 576,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 608,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 640,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 672,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 704,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 736,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 768,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 800,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 832,
-        "y": 160,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 864,
-        "y": 160,
-        "width": 32,
         "height": 32
       },
       {
@@ -2148,6 +947,12 @@ export const roomLayouts = {
         "x": 53,
         "y": 192,
         "width": 11,
+        "height": 32
+      },
+      {
+        "x": 64,
+        "y": 192,
+        "width": 32,
         "height": 32
       },
       {
@@ -2437,12 +1242,6 @@ export const roomLayouts = {
         "y": 544,
         "width": 11,
         "height": 32
-      },
-      {
-        "x": 53,
-        "y": 576,
-        "width": 11,
-        "height": 11
       },
       {
         "x": 64,
@@ -2653,84 +1452,6 @@ export const roomLayouts = {
         "height": 32
       },
       {
-        "x": 32,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 64,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 96,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 128,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 160,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 192,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 224,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 256,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 288,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 320,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 352,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 384,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
-        "x": 416,
-        "y": 64,
-        "width": 32,
-        "height": 32
-      },
-      {
         "x": 448,
         "y": 64,
         "width": 11,
@@ -2885,12 +1606,6 @@ export const roomLayouts = {
         "y": 256,
         "width": 11,
         "height": 32
-      },
-      {
-        "x": 21,
-        "y": 288,
-        "width": 11,
-        "height": 11
       },
       {
         "x": 32,

@@ -9,9 +9,9 @@
       "height": 640,
       "tilesets": [
         {
-          "name": "castle-inside",
-          "key": "room:floor_0_lobby:tileset:castle-inside",
-          "url": "/assets/rooms/floor_0_lobby/tilesets/castle-inside.png"
+          "name": "default_room_interiors",
+          "key": "room:floor_0_lobby:tileset:default-room-interiors",
+          "url": "/assets/rooms/floor_0_lobby/tilesets/default-room-interiors.png"
         }
       ],
       "layers": [
@@ -50,9 +50,75 @@
           "kind": "elevator",
           "name": "elevator",
           "displayLabel": "Elevator",
-          "x": 640,
+          "x": 704,
           "y": 160,
           "width": 64,
+          "height": 64
+        },
+        {
+          "id": "13",
+          "kind": "door",
+          "name": "appartment_entrance",
+          "displayLabel": "Appartment",
+          "destination": "player_appartment",
+          "destinationSpawn": "default_appartment_door_spawn",
+          "x": 608,
+          "y": 160,
+          "width": 32,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "id": "templates/appartment_template/default",
+      "mapKey": "room:templates/appartment_template/default:map",
+      "mapUrl": "/assets/rooms/templates/appartment_template/default/map.json",
+      "width": 480,
+      "height": 320,
+      "tilesets": [
+        {
+          "name": "default_room_interiors",
+          "key": "room:templates/appartment_template/default:tileset:default-room-interiors",
+          "url": "/assets/rooms/templates/appartment_template/default/tilesets/default-room-interiors.png"
+        }
+      ],
+      "layers": [
+        {
+          "name": "Background Solid",
+          "depth": 0
+        },
+        {
+          "name": "Floors and Walls",
+          "depth": 1
+        },
+        {
+          "name": "Carpet",
+          "depth": 2
+        },
+        {
+          "name": "Placeables",
+          "depth": 3
+        },
+        {
+          "name": "Room Details",
+          "depth": 4
+        },
+        {
+          "name": "Doors",
+          "depth": 5
+        }
+      ],
+      "interactions": [
+        {
+          "id": "1",
+          "kind": "door",
+          "name": "appartment_exit",
+          "displayLabel": "Lobby 0",
+          "destination": "lobby_0",
+          "destinationSpawn": "default_door_spawn",
+          "x": 224,
+          "y": 64,
+          "width": 32,
           "height": 64
         }
       ]
@@ -65,9 +131,9 @@
       "height": 640,
       "tilesets": [
         {
-          "name": "castle-inside",
-          "key": "room:templates/lobby_template/default:tileset:castle-inside",
-          "url": "/assets/rooms/templates/lobby_template/default/tilesets/castle-inside.png"
+          "name": "default_room_interiors",
+          "key": "room:templates/lobby_template/default:tileset:default-room-interiors",
+          "url": "/assets/rooms/templates/lobby_template/default/tilesets/default-room-interiors.png"
         }
       ],
       "layers": [
@@ -105,9 +171,9 @@
       "height": 320,
       "tilesets": [
         {
-          "name": "castle-inside",
-          "key": "room:templates/small_room_template/default:tileset:castle-inside",
-          "url": "/assets/rooms/templates/small_room_template/default/tilesets/castle-inside.png"
+          "name": "default_room_interiors",
+          "key": "room:templates/small_room_template/default:tileset:default-room-interiors",
+          "url": "/assets/rooms/templates/small_room_template/default/tilesets/default-room-interiors.png"
         }
       ],
       "layers": [
