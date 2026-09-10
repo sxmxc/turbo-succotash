@@ -78,7 +78,16 @@ if (command === "validate") {
         manifest.version
     )
       throw new Error(`Manifest/image mismatch: ${service}`);
-    env[`${service.toUpperCase()}_IMAGE`] = image.ref;
+    // 1. Define a clean, text-based tracking tag for this specific version release
+    const releaseTagName = `panverse-plaza-${service}:v${manifest.version}`;
+
+    // 2. Explicitly tag the checked-out immutable image ID with our text label
+    // This maps the hex ID to a named tag string locally on the Docker daemon
+    execFileSync("docker", ["image", "tag", image.id, releaseTagName]);
+
+    // 3. Pass the clean text string name to Compose instead of the raw hex hash reference
+    env[`${service.toUpperCase()}_IMAGE`] = releaseTagName;
+    //env[`${service.toUpperCase()}_IMAGE`] = image.ref;
   }
   docker([...composeArgs, "up", "-d", "--no-build", "--wait", "postgres"], env);
   docker([...composeArgs, "run", "--rm", "--no-deps", "migrate"], env);
@@ -87,12 +96,12 @@ if (command === "validate") {
       ...composeArgs,
       "up",
       "-d",
-      "--no-deps",
       "--no-build",
       "--wait",
       "--wait-timeout",
       "120",
-      ...services.filter((s) => s !== "migrate"),
+      "--scale",
+      "migrate=0",
     ],
     env,
   );
