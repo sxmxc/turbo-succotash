@@ -2,7 +2,7 @@
 
 Release notes use one entry per root package version. Changes under Unreleased are not published. Mark breaking HTTP/realtime changes and supported version combinations explicitly.
 
-## [Unreleased]
+## [0.2.6] - 2026-09-09
 
 Milestone 2 social completion adds saved avatar appearance, explicit friendship requests and acceptance, heartbeat-expiring presence, owner-only personal apartments, and persistent direct messages for online or offline friends. Advanced Chat now exposes room and DM conversations with mentions, emoji, links, message reactions, previews, typing, unread counts and DM-only delivery/read receipts. Application migrations `005` through `007` are required. New HTTP/internal routes and optional realtime message types are additive; coordinated protocol 2 clients remain compatible. The uploaded Bold Pixels font is used for headings and the top-bar product name.
 
