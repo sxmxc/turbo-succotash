@@ -10,11 +10,11 @@ export async function loginAndJoin(
   await page.getByLabel("Email").fill(browserAccount.email);
   await page.getByLabel("Password").fill(browserAccount.password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  const greeting = page.getByRole("heading", { name: `Hello, ${browserAccount.name}.` });
+  const greeting = page.getByRole("heading", {
+    name: `Hello, ${browserAccount.name}.`,
+  });
   await greeting.waitFor();
-  await expect(
-    greeting,
-  ).toBeVisible();
+  await expect(greeting).toBeVisible();
   await page.getByLabel("Shirt color").selectOption({ label: shirt });
   await page.getByRole("button", { name: "Enter the Lobby" }).click();
   await expect(page.locator(".server-connection")).toContainText(/Connected/i);

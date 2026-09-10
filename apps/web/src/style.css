@@ -696,6 +696,9 @@ footer {
 code {
   font-size: 10px;
 }
+.acc-room-header {
+  border-radius: 0 !important;
+}
 @media (max-width: 640px) {
   main {
     padding: 0 16px;
@@ -772,8 +775,5 @@ code {
   }
   footer {
     gap: 12px;
-  }
-  .acc-room-header {
-    border-radius: none !important;
   }
 }
