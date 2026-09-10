@@ -141,6 +141,12 @@ h1 {
   overflow: auto;
   background: #122328;
 }
+.play-layout:fullscreen .game-shell {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  flex: 10;
+}
 .play-layout .game-shell {
   margin: 0;
 }
@@ -633,9 +639,6 @@ code {
     width: min(960px, 100%);
     margin: 0 -16px 18px;
     flex: 1;
-  }
-  .game-shell:fullscreen {
-    flex: 10;
   }
   .game-toolbar {
     min-height: 48px;
