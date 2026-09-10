@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import RoomCanvas from "./components/RoomCanvas.vue";
 import RoomChat from "./components/RoomChat.vue";
 import type { RoomInteraction } from "./game/tiledRoom";
@@ -8,9 +8,11 @@ import {
   type ChatEvent,
   type DirectMessageEvent,
   type MessageReactionEvent,
+  type MessageReadEvent,
   type RoomConnection,
   type RoomDescriptor,
   type RoomPlayer,
+  type TypingEvent,
 } from "./realtime";
 
 type SessionUser = { id: string; name: string; email: string };
@@ -35,6 +37,12 @@ const connectionStatus = ref<"Offline" | "Connecting" | "Connected" | "Failed">(
 const messages = ref<ChatEvent[]>([]);
 const directMessages = ref<DirectMessageEvent[]>([]);
 const messageReactions = ref<Record<string, Record<string, string[]>>>({});
+const directMessageStatuses = ref<
+  Record<string, "sent" | "delivered" | "read">
+>({});
+const typingByChat = ref<Record<string, { id: string; name: string }[]>>({});
+const typingTimers = new Map<string, number>();
+let socialRefreshTimer: number | undefined;
 const friends = ref<
   {
     userId: string;
@@ -105,6 +113,23 @@ async function loadSession() {
     shirtTint.value = appearance.shirtTint;
     const social = await jsonRequest("/api/v1/social/friends");
     friends.value = social.friends;
+    const history = (await jsonRequest("/api/v1/direct-messages")) as {
+      messages: DirectMessageEvent[];
+      reactions: Record<string, Record<string, string[]>>;
+    };
+    directMessages.value = history.messages;
+    messageReactions.value = {
+      ...messageReactions.value,
+      ...history.reactions,
+    };
+    directMessageStatuses.value = Object.fromEntries(
+      history.messages
+        .filter((message) => message.senderId === user.value?.id)
+        .map((message) => [
+          message.serverMessageId,
+          message.readAt ? "read" : message.deliveredAt ? "delivered" : "sent",
+        ]),
+    );
   }
 }
 async function refreshFriends() {
@@ -181,6 +206,8 @@ async function joinDestination(
       receiveChat,
       receiveDirectMessage,
       receiveReaction,
+      receiveTyping,
+      receiveMessageRead,
     );
     currentRoom.value = room;
     connection.value = nextConnection;
@@ -275,6 +302,15 @@ function receiveChat(message: ChatEvent) {
 }
 function receiveDirectMessage(message: DirectMessageEvent) {
   directMessages.value = [...directMessages.value.slice(-99), message];
+  if (message.senderId === user.value?.id)
+    directMessageStatuses.value = {
+      ...directMessageStatuses.value,
+      [message.serverMessageId]: message.readAt
+        ? "read"
+        : message.deliveredAt
+          ? "delivered"
+          : "sent",
+    };
 }
 function receiveReaction(reaction: MessageReactionEvent) {
   const current = messageReactions.value[reaction.messageId] ?? {};
@@ -285,6 +321,49 @@ function receiveReaction(reaction: MessageReactionEvent) {
   messageReactions.value = {
     ...messageReactions.value,
     [reaction.messageId]: { ...current, [reaction.emoji]: nextUsers },
+  };
+}
+function receiveTyping(event: TypingEvent) {
+  const chatId = event.channel === "room" ? "room" : `direct:${event.senderId}`;
+  const existing = typingByChat.value[chatId] ?? [];
+  typingByChat.value = {
+    ...typingByChat.value,
+    [chatId]: event.active
+      ? [
+          ...existing.filter((candidate) => candidate.id !== event.senderId),
+          { id: event.senderId, name: event.senderName },
+        ]
+      : existing.filter((candidate) => candidate.id !== event.senderId),
+  };
+  const previous = typingTimers.get(`${chatId}:${event.senderId}`);
+  if (previous) window.clearTimeout(previous);
+  if (event.active)
+    typingTimers.set(
+      `${chatId}:${event.senderId}`,
+      window.setTimeout(() => {
+        const current = typingByChat.value[chatId] ?? [];
+        typingByChat.value = {
+          ...typingByChat.value,
+          [chatId]: current.filter(
+            (candidate) => candidate.id !== event.senderId,
+          ),
+        };
+      }, 4000),
+    );
+}
+function receiveMessageRead(event: MessageReadEvent) {
+  directMessages.value = directMessages.value.map((message) =>
+    message.serverMessageId === event.messageId
+      ? {
+          ...message,
+          deliveredAt: message.deliveredAt ?? event.readAt,
+          readAt: event.readAt,
+        }
+      : message,
+  );
+  directMessageStatuses.value = {
+    ...directMessageStatuses.value,
+    [event.messageId]: "read",
   };
 }
 function sendChat(text: string) {
@@ -300,6 +379,12 @@ function sendReaction(
   recipientId?: string,
 ) {
   connection.value?.sendReaction(messageId, emoji, active, recipientId);
+}
+function sendTyping(active: boolean, recipientId?: string) {
+  connection.value?.sendTyping(active, recipientId);
+}
+function markMessageRead(messageId: string, senderId: string) {
+  connection.value?.markMessageRead(messageId, senderId);
 }
 async function saveAppearance() {
   appearanceStatus.value = "";
@@ -336,6 +421,9 @@ async function logout() {
   players.value = [];
   messages.value = [];
   directMessages.value = [];
+  directMessageStatuses.value = {};
+  messageReactions.value = {};
+  typingByChat.value = {};
   bubbles.value = {};
   interaction.value = undefined;
   connectionStatus.value = "Offline";
@@ -354,6 +442,13 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+  socialRefreshTimer = window.setInterval(() => {
+    if (user.value && connection.value) void refreshFriends();
+  }, 30_000);
+});
+onUnmounted(() => {
+  if (socialRefreshTimer) window.clearInterval(socialRefreshTimer);
+  for (const timer of typingTimers.values()) window.clearTimeout(timer);
 });
 </script>
 
@@ -391,11 +486,15 @@ onMounted(async () => {
             :direct-messages="directMessages"
             :friends="friends"
             :reactions="messageReactions"
+            :message-statuses="directMessageStatuses"
+            :typing-by-chat="typingByChat"
             @send="sendChat"
             @send-direct="sendDirectMessage"
             @request-friend="requestFriend"
             @accept-friend="acceptFriend"
             @react="sendReaction"
+            @typing="sendTyping"
+            @mark-read="markMessageRead"
             @refresh-social="refreshFriends"
           />
         </aside>

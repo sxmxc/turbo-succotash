@@ -23,12 +23,25 @@ export type ChatEvent = {
 export type DirectMessageEvent = Omit<ChatEvent, "channel"> & {
   recipientId: string;
   channel: "direct";
+  deliveredAt: string | null;
+  readAt: string | null;
 };
 export type MessageReactionEvent = {
   messageId: string;
   emoji: string;
   userId: string;
   active: boolean;
+};
+export type TypingEvent = {
+  senderId: string;
+  senderName: string;
+  channel: "room" | "direct";
+  active: boolean;
+};
+export type MessageReadEvent = {
+  messageId: string;
+  readerId: string;
+  readAt: string;
 };
 
 type SynchronizedPlayer = Omit<RoomPlayer, "sessionId">;
@@ -45,6 +58,8 @@ export type RoomConnection = {
     active: boolean,
     recipientId?: string,
   ): void;
+  sendTyping(active: boolean, recipientId?: string): void;
+  markMessageRead(messageId: string, senderId: string): void;
   leave(): Promise<void>;
 };
 
@@ -75,6 +90,8 @@ export async function connectLobby(
   onChat: (message: ChatEvent) => void,
   onDirectMessage: (message: DirectMessageEvent) => void = () => {},
   onReaction: (reaction: MessageReactionEvent) => void = () => {},
+  onTyping: (event: TypingEvent) => void = () => {},
+  onMessageRead: (event: MessageReadEvent) => void = () => {},
 ): Promise<RoomConnection> {
   return connectRoom(
     {
@@ -87,6 +104,8 @@ export async function connectLobby(
     onChat,
     onDirectMessage,
     onReaction,
+    onTyping,
+    onMessageRead,
   );
 }
 
@@ -97,6 +116,8 @@ export async function connectRoom(
   onChat: (message: ChatEvent) => void,
   onDirectMessage: (message: DirectMessageEvent) => void = () => {},
   onReaction: (reaction: MessageReactionEvent) => void = () => {},
+  onTyping: (event: TypingEvent) => void = () => {},
+  onMessageRead: (event: MessageReadEvent) => void = () => {},
 ): Promise<RoomConnection> {
   const client = new Client({
     hostname: window.location.hostname,
@@ -139,6 +160,8 @@ export async function connectRoom(
   room.onMessage("chat", onChat);
   room.onMessage("direct-message", onDirectMessage);
   room.onMessage("message-reaction", onReaction);
+  room.onMessage("typing", onTyping);
+  room.onMessage("message-read", onMessageRead);
   return {
     sessionId: room.sessionId,
     sendMove: (dx, dy) => room.send("move", { dx, dy }),
@@ -158,6 +181,13 @@ export async function connectRoom(
         active,
         ...(recipientId ? { recipientId } : {}),
       }),
+    sendTyping: (active, recipientId) =>
+      room.send("typing", {
+        active,
+        ...(recipientId ? { recipientId } : {}),
+      }),
+    markMessageRead: (messageId, senderId) =>
+      room.send("message-read", { messageId, senderId }),
     leave: async () => {
       await room.leave(true);
       onPlayers([]);

@@ -42,7 +42,7 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [x] Run the complete desktop/mobile browser suite, including two-session chat, typing suppression, no history and collision.
 - [x] Owner-facing external-origin play check and Milestone 1 sign-off.
 
-## Milestone 2 — Rooms and social features (started)
+## Milestone 2 — Rooms and social features (complete)
 
 - [x] Make the room view a fixed, responsive Phaser gameplay stage with a bounded local-player camera, fullscreen control and dockable game-overlay chat.
 - [x] Add reusable local Tiled rectangle interactions; authored elevator objects show a proximity prompt and accessible local dialog.
@@ -50,8 +50,7 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 - [x] Add persistent room records with immutable IDs and separate public floor/room addresses.
 - [x] Add concurrency-safe automatic Floor 1+ allocation with at most 500 addresses per floor.
 - [x] Add authenticated room creation, navigator basics and private-room entry enforcement.
-- [ ] Complete the final focused browser rerun for mentions, reactions, friends/presence, cross-room DMs, apartments and combined-shell fullscreen. Appearance persistence and database migration coverage pass.
-- [ ] Add selected OAuth/SSO providers after provider selection, credentials, callback policy and beta-gate verification behavior are decided; the existing identity-owned Better Auth account linkage schema requires no preemptive fields.
+- [x] Complete saved appearance, explicit friendship controls, expiring/heartbeat-backed presence, persistent online/offline DMs, unread/preview/typing/read state, message reactions, apartments and combined-shell fullscreen with focused browser and database coverage.
 
 ## Release tooling follow-up
 
@@ -68,6 +67,7 @@ Acceptance remains: two authenticated browser sessions join the same room, see m
 
 ## Future roadmap — record now, implement when required
 
+- [ ] Add selected OAuth/SSO providers after provider selection, credentials, callback policy and beta-gate verification behavior are decided; Better Auth's identity-owned account linkage schema already provides the generic fields.
 - [ ] Milestone 3: useful Floor 0 destinations, apartment/navigation foundations, discovery/bookmarks/events, blocks/reports, layered moderation, administrator controls, visible system bots and level permissions.
 - [ ] Milestone 4: apartment customization, official store/entitlements, reconnect and capacity validation, multi-realtime coordination.
 - [ ] Milestone 5: curated creator submissions, provenance/licensing, moderation, marketplace transactions and payouts.

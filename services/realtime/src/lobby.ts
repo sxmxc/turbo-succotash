@@ -7,7 +7,9 @@ import {
   protocolVersion,
   roomChatCommandSchema as chatSchema,
   directMessageCommandSchema as directMessageSchema,
+  messageReadCommandSchema as messageReadSchema,
   messageReactionCommandSchema as reactionSchema,
+  typingCommandSchema as typingSchema,
 } from "../../../packages/contracts/src/index.js";
 import {
   generatedRooms,
@@ -111,6 +113,10 @@ export function createGameRoom(
     onCreate() {
       this.state = new LobbyState();
       this.setTimestep((delta) => this.simulate(delta), 50);
+      this.clock.setInterval(() => {
+        for (const client of this.clients)
+          void this.writePresence(client.auth as Authenticated, true);
+      }, 15_000);
       this.onMessage("move", (client, message) => {
         const parsed = moveSchema.safeParse(message);
         if (!parsed.success) return;
@@ -165,37 +171,27 @@ export function createGameRoom(
         if (!parsed.success || !this.allowChat(client.sessionId)) return;
         const sender = this.state.players.get(client.sessionId);
         if (!sender) return;
-        const allowed = await fetch(`${apiUrl}/internal/social/can-message`, {
+        const recipients = onlineClients.get(parsed.data.recipientId);
+        const stored = await fetch(`${apiUrl}/internal/direct-messages`, {
           method: "POST",
           headers: {
             "content-type": "application/json",
             "x-realtime-internal-token": internalToken,
           },
           body: JSON.stringify({
+            clientRequestId: parsed.data.clientRequestId,
             senderId: sender.userId,
+            senderName: sender.name,
             recipientId: parsed.data.recipientId,
+            text: parsed.data.text,
+            delivered: Boolean(recipients?.size),
           }),
           signal: AbortSignal.timeout(1800),
-        });
-        if (
-          !allowed.ok ||
-          !((await allowed.json()) as { allowed?: boolean }).allowed
-        )
-          return;
-        const recipients = onlineClients.get(parsed.data.recipientId);
-        if (!recipients?.size) return;
-        const event = {
-          serverMessageId: randomUUID(),
-          clientRequestId: parsed.data.clientRequestId,
-          senderId: sender.userId,
-          senderName: sender.name,
-          recipientId: parsed.data.recipientId,
-          timestamp: new Date().toISOString(),
-          channel: "direct" as const,
-          text: parsed.data.text,
-        };
+        }).catch(() => undefined);
+        if (!stored?.ok) return;
+        const event = (await stored.json()) as { recipientId: string };
         client.send("direct-message", event);
-        for (const recipient of recipients)
+        for (const recipient of onlineClients.get(event.recipientId) ?? [])
           recipient.send("direct-message", event);
       });
       this.onMessage("message-reaction", async (client, message) => {
@@ -210,27 +206,73 @@ export function createGameRoom(
         };
         if (!parsed.data.recipientId)
           return this.broadcast("message-reaction", event);
-        const allowed = await fetch(`${apiUrl}/internal/social/can-message`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-realtime-internal-token": internalToken,
+        const stored = await fetch(
+          `${apiUrl}/internal/direct-messages/${encodeURIComponent(parsed.data.messageId)}/reaction`,
+          {
+            method: "PUT",
+            headers: {
+              "content-type": "application/json",
+              "x-realtime-internal-token": internalToken,
+            },
+            body: JSON.stringify({
+              userId: sender.userId,
+              emoji: parsed.data.emoji,
+              active: parsed.data.active,
+            }),
+            signal: AbortSignal.timeout(1800),
           },
-          body: JSON.stringify({
-            senderId: sender.userId,
-            recipientId: parsed.data.recipientId,
-          }),
-          signal: AbortSignal.timeout(1800),
-        });
-        if (
-          !allowed.ok ||
-          !((await allowed.json()) as { allowed?: boolean }).allowed
-        )
-          return;
+        ).catch(() => undefined);
+        if (!stored?.ok) return;
+        const persisted = (await stored.json()) as { recipientId: string };
         client.send("message-reaction", event);
+        for (const recipient of onlineClients.get(persisted.recipientId) ?? [])
+          recipient.send("message-reaction", event);
+      });
+      this.onMessage("typing", async (client, message) => {
+        const parsed = typingSchema.safeParse(message);
+        const sender = this.state.players.get(client.sessionId);
+        if (!parsed.success || !sender) return;
+        const event = {
+          senderId: sender.userId,
+          senderName: sender.name,
+          channel: parsed.data.recipientId
+            ? ("direct" as const)
+            : ("room" as const),
+          active: parsed.data.active,
+        };
+        if (!parsed.data.recipientId)
+          return this.broadcast("typing", event, { except: client });
+        if (!(await this.canDirect(sender.userId, parsed.data.recipientId)))
+          return;
         for (const recipient of onlineClients.get(parsed.data.recipientId) ??
           [])
-          recipient.send("message-reaction", event);
+          recipient.send("typing", event);
+      });
+      this.onMessage("message-read", async (client, message) => {
+        const parsed = messageReadSchema.safeParse(message);
+        const reader = this.state.players.get(client.sessionId);
+        if (!parsed.success || !reader) return;
+        const stored = await fetch(
+          `${apiUrl}/internal/direct-messages/${encodeURIComponent(parsed.data.messageId)}/read`,
+          {
+            method: "PUT",
+            headers: {
+              "content-type": "application/json",
+              "x-realtime-internal-token": internalToken,
+            },
+            body: JSON.stringify({ readerId: reader.userId }),
+            signal: AbortSignal.timeout(1800),
+          },
+        ).catch(() => undefined);
+        if (!stored?.ok) return;
+        const event = (await stored.json()) as {
+          messageId: string;
+          senderId: string;
+          readerId: string;
+          readAt: string;
+        };
+        for (const sender of onlineClients.get(event.senderId) ?? [])
+          sender.send("message-read", event);
       });
     }
 
@@ -263,21 +305,7 @@ export function createGameRoom(
       const sessions = onlineClients.get(auth.user.id) ?? new Set<Client>();
       sessions.add(client);
       onlineClients.set(auth.user.id, sessions);
-      void fetch(`${apiUrl}/internal/presence`, {
-        method: "PUT",
-        headers: {
-          "content-type": "application/json",
-          "x-realtime-internal-token": internalToken,
-        },
-        body: JSON.stringify({
-          userId: auth.user.id,
-          name: auth.user.name,
-          roomId: auth.room.id,
-          address: auth.room.address,
-          online: true,
-        }),
-        signal: AbortSignal.timeout(1800),
-      });
+      void this.writePresence(auth, true);
     }
 
     onLeave(client: Client) {
@@ -290,22 +318,26 @@ export function createGameRoom(
       sessions?.delete(client);
       if (!sessions?.size) {
         onlineClients.delete(auth.user.id);
-        void fetch(`${apiUrl}/internal/presence`, {
-          method: "PUT",
-          headers: {
-            "content-type": "application/json",
-            "x-realtime-internal-token": internalToken,
-          },
-          body: JSON.stringify({
-            userId: auth.user.id,
-            name: auth.user.name,
-            roomId: auth.room.id,
-            address: auth.room.address,
-            online: false,
-          }),
-          signal: AbortSignal.timeout(1800),
-        });
+        void this.writePresence(auth, false);
       }
+    }
+
+    private async writePresence(auth: Authenticated, online: boolean) {
+      await fetch(`${apiUrl}/internal/presence`, {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          "x-realtime-internal-token": internalToken,
+        },
+        body: JSON.stringify({
+          userId: auth.user.id,
+          name: auth.user.name,
+          roomId: auth.room.id,
+          address: auth.room.address,
+          online,
+        }),
+        signal: AbortSignal.timeout(1800),
+      }).catch(() => undefined);
     }
 
     private allowChat(sessionId: string) {
@@ -317,6 +349,26 @@ export function createGameRoom(
       window.push(now);
       this.chatWindows.set(sessionId, window);
       return true;
+    }
+
+    private async canDirect(senderId: string, recipientId: string) {
+      try {
+        const allowed = await fetch(`${apiUrl}/internal/social/can-message`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-realtime-internal-token": internalToken,
+          },
+          body: JSON.stringify({ senderId, recipientId }),
+          signal: AbortSignal.timeout(1800),
+        });
+        return (
+          allowed.ok &&
+          ((await allowed.json()) as { allowed?: boolean }).allowed === true
+        );
+      } catch {
+        return false;
+      }
     }
 
     private simulate(deltaMs: number) {

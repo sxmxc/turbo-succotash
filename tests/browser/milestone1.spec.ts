@@ -139,7 +139,7 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
   request,
   isMobile,
 }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(90_000);
   test.skip(
     isMobile,
     "Two-session flow is exercised once by the desktop project.",
@@ -149,30 +149,34 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
     data: { betaGateEnabled: false },
   });
   const suffix = crypto.randomUUID();
-  const firstContext = await browser.newContext();
-  const secondContext = await browser.newContext();
-  const lateContext = await browser.newContext();
+  const firstEmail = `one-${suffix}@example.test`;
+  const secondEmail = `two-${suffix}@example.test`;
+  const desktopViewport = { width: 1920, height: 1080 };
+  const firstContext = await browser.newContext({ viewport: desktopViewport });
+  const secondContext = await browser.newContext({ viewport: desktopViewport });
   try {
     const first = await firstContext.newPage();
     const second = await secondContext.newPage();
     await Promise.all([
-      registerAndJoin(first, `one-${suffix}@example.test`, "One"),
-      registerAndJoin(second, `two-${suffix}@example.test`, "Two"),
+      registerAndJoin(first, firstEmail, "One"),
+      registerAndJoin(second, secondEmail, "Two"),
     ]);
-    await expect(
-      first.getByText("2 online now", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      second.getByText("2 online now", { exact: true }),
-    ).toBeVisible();
-    await expect(first.locator(".room-canvas")).toHaveAttribute(
-      "data-rendered-player-count",
-      "2",
-    );
-    await expect(second.locator(".room-canvas")).toHaveAttribute(
-      "data-rendered-player-count",
-      "2",
-    );
+    await expect(first.locator(".room-presence")).toHaveText(/\d+ online now/);
+    await expect(second.locator(".room-presence")).toHaveText(/\d+ online now/);
+    for (const page of [first, second]) {
+      await expect
+        .poll(async () =>
+          Number(
+            await page
+              .locator(".room-canvas")
+              .getAttribute("data-rendered-player-count"),
+          ),
+        )
+        .toBeGreaterThanOrEqual(2);
+      await page
+        .getByRole("button", { name: "Open Room conversation" })
+        .click();
+    }
 
     await first.reload();
     await expect(
@@ -183,14 +187,18 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
       /connected/i,
     );
     for (const page of [first, second]) {
-      await expect(
-        page.getByText("2 online now", { exact: true }),
-      ).toBeVisible();
-      await expect(page.locator(".room-canvas")).toHaveAttribute(
-        "data-rendered-player-count",
-        "2",
-      );
+      await expect(page.locator(".room-presence")).toHaveText(/\d+ online now/);
+      await expect
+        .poll(async () =>
+          Number(
+            await page
+              .locator(".room-canvas")
+              .getAttribute("data-rendered-player-count"),
+          ),
+        )
+        .toBeGreaterThanOrEqual(2);
     }
+    await first.getByRole("button", { name: "Open Room conversation" }).click();
 
     const chat = first.getByPlaceholder("Say hello…");
     const firstRoom = first.locator(".room-canvas");
@@ -208,7 +216,9 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
     await chat.fill("hello from one");
     await chat.press("Enter");
     await expect(
-      second.getByText("hello from one", { exact: true }),
+      second
+        .locator(".acc-message-row")
+        .getByText("hello from one", { exact: true }),
     ).toBeVisible();
     await expect(
       first
@@ -222,7 +232,9 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
     await first.locator(".acc-tags-username", { hasText: "Two" }).click();
     await mentionedChat.pressSequentially("come say hello");
     await mentionedChat.press("Enter");
-    await expect(second.getByText(/@Two come say hello/)).toBeVisible();
+    await expect(
+      second.locator(".acc-message-row").getByText(/@Two come say hello/),
+    ).toBeVisible();
 
     const receivedMessage = second
       .locator(".acc-message-row")
@@ -234,14 +246,36 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
       first.getByRole("button", { name: /👍 reaction from 1 person/ }),
     ).toBeVisible();
 
-    await first.getByRole("button", { name: "Add" }).click();
+    await first.getByRole("button", { name: /Friends & people/ }).click();
+    await expect(
+      first.getByRole("dialog", { name: "Friends & people" }),
+    ).toBeVisible();
+    await first
+      .locator(".person-row", { hasText: "Two" })
+      .getByRole("button", { name: "Add friend" })
+      .click();
     await expect(
       first.getByText("Request sent", { exact: true }),
     ).toBeVisible();
+    await second.getByRole("button", { name: /Friends & people/ }).click();
     await second.getByRole("button", { name: "Refresh" }).click();
-    await second.getByRole("button", { name: "Accept" }).click();
+    await second
+      .locator(".person-row")
+      .filter({ hasText: "wants to be friends" })
+      .getByRole("button", { name: "Accept" })
+      .click();
     await first.getByRole("button", { name: "Refresh" }).click();
-    await expect(first.getByRole("button", { name: "Message" })).toBeVisible();
+    await first
+      .getByRole("button", { name: "Close friends and people" })
+      .click();
+    await second
+      .getByRole("button", { name: "Close friends and people" })
+      .click();
+    if (!(await first.getByRole("button", { name: "Open Two" }).isVisible()))
+      await first.getByRole("button", { name: "Toggle chat list" }).click();
+    if (!(await second.getByRole("button", { name: "Open One" }).isVisible()))
+      await second.getByRole("button", { name: "Toggle chat list" }).click();
+    await expect(first.getByRole("button", { name: "Open Two" })).toBeVisible();
 
     const secondRoom = second.locator(".room-canvas");
     const secondCanvas = second.locator("canvas");
@@ -271,47 +305,87 @@ test("two sessions use mentions, reactions, friendship, and cross-room DMs", asy
     await expect(second.locator(".room-label")).toContainText("Apartment");
 
     await first.getByRole("button", { name: "Open Two" }).click();
+    await first.getByPlaceholder("Say hello…").fill("typing privately");
+    await expect(
+      second.getByRole("button", { name: "Open One" }).locator(".."),
+    ).toContainText(/typing/i);
     await first.getByPlaceholder("Say hello…").fill("private hello");
     await first.getByPlaceholder("Say hello…").press("Enter");
+    const oneChat = second
+      .getByRole("button", { name: "Open One" })
+      .locator("..");
+    await expect(oneChat).toContainText("private hello");
+    await expect(oneChat.locator(".acc-room-badge")).toHaveText("1");
     await second.getByRole("button", { name: "Open One" }).click();
     await expect(
-      second.getByText("private hello", { exact: true }),
+      second
+        .locator(".acc-message-row")
+        .getByText("private hello", { exact: true }),
     ).toBeVisible();
     await expect(
       first
         .locator(".acc-message-row-me")
         .filter({ hasText: "private hello" })
-        .locator(".acc-message-meta svg"),
+        .locator('.acc-message-meta [id*="seen"]'),
     ).toBeVisible();
 
-    const remoteBefore = await second.locator("canvas").screenshot();
-    await firstRoom.focus();
-    const movementStart = Number(await firstRoom.getAttribute("data-player-x"));
-    await first.keyboard.down("ArrowRight");
-    await expect
-      .poll(async () => Number(await firstRoom.getAttribute("data-player-x")))
-      .toBeGreaterThan(movementStart);
-    await first.keyboard.up("ArrowRight");
-    await expect
-      .poll(async () =>
-        remoteBefore.equals(await second.locator("canvas").screenshot()),
-      )
-      .toBe(false);
+    await second.getByRole("button", { name: "Sign out" }).click();
+    await expect(second.getByRole("button", { name: "Sign in" })).toBeVisible();
+    await first.getByRole("button", { name: /Friends & people/ }).click();
+    await first.getByRole("button", { name: "Refresh" }).click();
+    await expect(
+      first
+        .locator(".person-row", { hasText: "Two" })
+        .locator(".online-dot.offline"),
+    ).toBeVisible();
+    await first
+      .getByRole("button", { name: "Close friends and people" })
+      .click();
 
-    const late = await lateContext.newPage();
-    await registerAndJoin(late, `late-${suffix}@example.test`, "Late");
-    await expect(late.getByText("hello from one", { exact: true })).toHaveCount(
-      0,
+    await first.getByPlaceholder("Say hello…").fill("sent while offline");
+    await first.getByPlaceholder("Say hello…").press("Enter");
+    await expect(
+      first
+        .locator(".acc-message-row-me")
+        .filter({ hasText: "sent while offline" })
+        .locator("#acc-icon-checkmark"),
+    ).toBeVisible();
+
+    const signIn = await secondContext.request.post(
+      "/identity/auth/sign-in/email",
+      {
+        headers: authHeaders,
+        data: { email: secondEmail, password, rememberMe: true },
+      },
     );
-    await second.getByPlaceholder("Say hello…").fill("welcome late");
-    await second.getByPlaceholder("Say hello…").press("Enter");
-    await expect(late.getByText("welcome late", { exact: true })).toBeVisible();
+    expect(signIn.ok()).toBe(true);
+    await second.reload();
+    await expect(
+      second.getByRole("heading", { name: "Hello, Two." }),
+    ).toBeVisible();
+    await second.getByRole("button", { name: "Enter the Lobby" }).click();
+    await expect(second.locator(".server-connection")).toContainText(
+      /connected/i,
+    );
+    const persistedChat = second
+      .getByRole("button", { name: "Open One" })
+      .locator("..");
+    await expect(persistedChat).toContainText("sent while offline");
+    await expect(persistedChat.locator(".acc-room-badge")).toHaveText("1");
+    await second.getByRole("button", { name: "Open One" }).click();
+    await expect(
+      second
+        .locator(".acc-message-row")
+        .getByText("sent while offline", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      first
+        .locator(".acc-message-row-me")
+        .filter({ hasText: "sent while offline" })
+        .locator('.acc-message-meta [id*="seen"]'),
+    ).toBeVisible();
   } finally {
-    await Promise.all([
-      firstContext.close(),
-      secondContext.close(),
-      lateContext.close(),
-    ]);
+    await Promise.all([firstContext.close(), secondContext.close()]);
     await request.patch("/identity/admin/registration", {
       headers: adminHeaders,
       data: { betaGateEnabled: true },

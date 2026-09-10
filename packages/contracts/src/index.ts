@@ -14,15 +14,15 @@ export const movementIntentSchema = z.object({
   dy: z.number().min(-1).max(1),
 });
 export const movementTargetSchema = z.object({
-  x: z.number().finite(),
-  y: z.number().finite(),
+  x: z.number(),
+  y: z.number(),
 });
 export const roomChatCommandSchema = z.object({
   clientRequestId: z.string().min(1).max(80),
   text: z.string().trim().min(1).max(280),
 });
 export const roomChatEventSchema = z.object({
-  serverMessageId: z.string().uuid(),
+  serverMessageId: z.uuid(),
   clientRequestId: z.string().min(1).max(80),
   senderId: z.string().min(1),
   senderName: z.string().min(1).max(40),
@@ -36,18 +36,28 @@ export const directMessageCommandSchema = z.object({
   text: z.string().trim().min(1).max(280),
 });
 export const directMessageEventSchema = z.object({
-  serverMessageId: z.string().uuid(),
+  serverMessageId: z.uuid(),
   clientRequestId: z.string().min(1).max(80),
   senderId: z.string().min(1),
   senderName: z.string().min(1).max(40),
   recipientId: z.string().min(1),
   timestamp: z.iso.datetime(),
+  deliveredAt: z.iso.datetime().nullable(),
+  readAt: z.iso.datetime().nullable(),
   channel: z.literal("direct"),
   text: z.string().min(1).max(280),
 });
 export const messageReactionCommandSchema = z.object({
-  messageId: z.string().uuid(),
+  messageId: z.uuid(),
   emoji: z.string().min(1).max(16),
   active: z.boolean(),
   recipientId: z.string().min(1).optional(),
+});
+export const typingCommandSchema = z.object({
+  active: z.boolean(),
+  recipientId: z.string().min(1).optional(),
+});
+export const messageReadCommandSchema = z.object({
+  messageId: z.uuid(),
+  senderId: z.string().min(1),
 });

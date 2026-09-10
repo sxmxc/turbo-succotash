@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   AdvancedChat,
   type ChatModel,
@@ -21,6 +21,8 @@ const props = defineProps<{
     online: boolean;
   }[];
   reactions: Record<string, Record<string, string[]>>;
+  messageStatuses: Record<string, "sent" | "delivered" | "read">;
+  typingByChat: Record<string, { id: string; name: string }[]>;
 }>();
 const emit = defineEmits<{
   send: [text: string];
@@ -34,8 +36,93 @@ const emit = defineEmits<{
     recipientId?: string,
   ];
   refreshSocial: [];
+  typing: [active: boolean, recipientId?: string];
+  markRead: [messageId: string, senderId: string];
 }>();
 const activeChatId = ref("room");
+const showPeople = ref(false);
+const unreadCounts = ref<Record<string, number>>({});
+const seenMessageIds = new Set<string>();
+const markedReadIds = new Set<string>();
+let typingChatId: string | undefined;
+
+function friendChatId(message: DirectMessageEvent) {
+  const userId =
+    message.senderId === props.currentUser.id
+      ? message.recipientId
+      : message.senderId;
+  return `direct:${userId}`;
+}
+function markDirectRead(friendId: string) {
+  for (const message of props.directMessages) {
+    if (
+      message.senderId === friendId &&
+      message.recipientId === props.currentUser.id &&
+      !message.readAt &&
+      !markedReadIds.has(message.serverMessageId)
+    ) {
+      markedReadIds.add(message.serverMessageId);
+      emit("markRead", message.serverMessageId, message.senderId);
+    }
+  }
+}
+function openChat(chat: ChatModel) {
+  const nextId = String(chat.id);
+  if (typingChatId) {
+    emit(
+      "typing",
+      false,
+      typingChatId === "room" ? undefined : typingChatId.slice(7),
+    );
+    typingChatId = undefined;
+  }
+  activeChatId.value = nextId;
+  unreadCounts.value = { ...unreadCounts.value, [nextId]: 0 };
+  if (nextId.startsWith("direct:")) markDirectRead(nextId.slice(7));
+}
+function typingMessage(value: string) {
+  const active = Boolean(value.trim());
+  if (active && typingChatId === activeChatId.value) return;
+  if (!active && typingChatId !== activeChatId.value) return;
+  typingChatId = active ? activeChatId.value : undefined;
+  emit(
+    "typing",
+    active,
+    activeChatId.value === "room" ? undefined : activeChatId.value.slice(7),
+  );
+}
+
+watch(
+  () => props.messages.at(-1),
+  (message) => {
+    if (!message || seenMessageIds.has(message.serverMessageId)) return;
+    seenMessageIds.add(message.serverMessageId);
+    if (
+      message.senderId !== props.currentUser.id &&
+      activeChatId.value !== "room"
+    )
+      unreadCounts.value = {
+        ...unreadCounts.value,
+        room: (unreadCounts.value.room ?? 0) + 1,
+      };
+  },
+);
+watch(
+  () => props.directMessages,
+  (messages) => {
+    const next = { ...unreadCounts.value };
+    for (const message of messages) {
+      if (seenMessageIds.has(message.serverMessageId)) continue;
+      seenMessageIds.add(message.serverMessageId);
+      if (message.senderId === props.currentUser.id || message.readAt) continue;
+      const chatId = friendChatId(message);
+      if (activeChatId.value === chatId) markDirectRead(message.senderId);
+      else next[chatId] = (next[chatId] ?? 0) + 1;
+    }
+    unreadCounts.value = next;
+  },
+  { immediate: true },
+);
 
 const users = computed<User[]>(() => {
   const current = new Map<string, User>();
@@ -60,34 +147,81 @@ const users = computed<User[]>(() => {
       });
     }
   }
+  for (const friend of props.friends) {
+    current.set(friend.userId, {
+      id: friend.userId,
+      name: friend.name,
+      status: { state: friend.online ? "online" : "offline" },
+    });
+  }
   return [...current.values()];
 });
+
+function messageUser(id: string, name: string): User {
+  return (
+    users.value.find((candidate) => candidate.id === id) ?? {
+      id,
+      name,
+      status: { state: "offline" },
+    }
+  );
+}
+function roomMessage(message: ChatEvent): MessageModel {
+  return {
+    id: message.serverMessageId,
+    sender: messageUser(message.senderId, message.senderName),
+    content: message.text,
+    createdAt: message.timestamp,
+    disableActions: true,
+    reactions: props.reactions[message.serverMessageId],
+  };
+}
+function directMessage(message: DirectMessageEvent): MessageModel {
+  return {
+    id: message.serverMessageId,
+    sender: messageUser(message.senderId, message.senderName),
+    content: message.text,
+    createdAt: message.timestamp,
+    status:
+      message.senderId === props.currentUser.id
+        ? (props.messageStatuses[message.serverMessageId] ?? "sent")
+        : undefined,
+    disableActions: true,
+    reactions: props.reactions[message.serverMessageId],
+  };
+}
 
 const roomChat = computed<ChatModel>(() => ({
   id: "room",
   name: "Room conversation",
   users: users.value,
+  unreadCount: unreadCounts.value.room,
+  lastMessage: props.messages.length
+    ? roomMessage(props.messages.at(-1)!)
+    : undefined,
+  typingUsers: props.typingByChat.room,
 }));
 const chats = computed<ChatModel[]>(() => [
   roomChat.value,
   ...props.friends
     .filter((friend) => friend.status === "accepted")
-    .map((friend): ChatModel => ({
-      id: `direct:${friend.userId}`,
-      name: friend.name,
-      users: [
-        {
-          id: friend.userId,
-          name: friend.name,
-          status: { state: friend.online ? "online" : "offline" },
-        },
-        {
-          id: props.currentUser.id,
-          name: props.currentUser.name,
-          status: { state: "online" },
-        },
-      ] as User[],
-    })),
+    .map((friend): ChatModel => {
+      const chatId = `direct:${friend.userId}`;
+      const latest = props.directMessages
+        .filter((message) => friendChatId(message) === chatId)
+        .at(-1);
+      return {
+        id: chatId,
+        name: friend.name,
+        users: [
+          messageUser(friend.userId, friend.name),
+          messageUser(props.currentUser.id, props.currentUser.name),
+        ],
+        unreadCount: unreadCounts.value[chatId],
+        lastMessage: latest ? directMessage(latest) : undefined,
+        typingUsers: props.typingByChat[chatId],
+      };
+    }),
 ]);
 const activeChat = computed(
   () =>
@@ -96,21 +230,7 @@ const activeChat = computed(
 );
 
 const chatMessages = computed<MessageModel[]>(() =>
-  props.messages.map((message) => ({
-    id: message.serverMessageId,
-    sender:
-      users.value.find((candidate) => candidate.id === message.senderId) ??
-      ({
-        id: message.senderId,
-        name: message.senderName,
-        status: { state: "offline" },
-      } satisfies User),
-    content: message.text,
-    createdAt: message.timestamp,
-    status: undefined,
-    disableActions: true,
-    reactions: props.reactions[message.serverMessageId],
-  })),
+  props.messages.map(roomMessage),
 );
 const activeMessages = computed<MessageModel[]>(() => {
   if (activeChatId.value === "room") return chatMessages.value;
@@ -120,20 +240,31 @@ const activeMessages = computed<MessageModel[]>(() => {
       (message) =>
         message.senderId === friendId || message.recipientId === friendId,
     )
-    .map((message) => ({
-      id: message.serverMessageId,
-      sender: users.value.find((user) => user.id === message.senderId) ?? {
-        id: message.senderId,
-        name: message.senderName,
-        status: { state: "offline" },
-      },
-      content: message.text,
-      createdAt: message.timestamp,
-      status: message.senderId === props.currentUser.id ? "read" : undefined,
-      disableActions: true,
-      reactions: props.reactions[message.serverMessageId],
-    }));
+    .map(directMessage);
 });
+const otherPlayers = computed(() =>
+  props.players.filter((player) => player.userId !== props.currentUser.id),
+);
+const incomingRequests = computed(() =>
+  props.friends.filter(
+    (friend) =>
+      friend.status === "pending" &&
+      friend.requestedByUserId !== props.currentUser.id,
+  ),
+);
+const acceptedFriends = computed(() =>
+  props.friends.filter((friend) => friend.status === "accepted"),
+);
+function friendFor(userId: string) {
+  return props.friends.find((friend) => friend.userId === userId);
+}
+function openDirect(userId: string) {
+  const chat = chats.value.find(
+    (candidate) => candidate.id === `direct:${userId}`,
+  );
+  if (chat) openChat(chat);
+  showPeople.value = false;
+}
 
 function sendMessage(payload: { content: string; mentionedUsers: User[] }) {
   const text = payload.content
@@ -147,14 +278,16 @@ function sendMessage(payload: { content: string; mentionedUsers: User[] }) {
   if (!text) return;
   if (activeChatId.value === "room") emit("send", text);
   else emit("sendDirect", activeChatId.value.slice("direct:".length), text);
+  typingMessage("");
 }
 function openUser(user: User) {
   if (user.id === props.currentUser.id) return;
   const friend = props.friends.find(
     (candidate) => candidate.userId === user.id,
   );
-  if (friend?.status === "accepted") activeChatId.value = `direct:${user.id}`;
-  else if (!friend) emit("requestFriend", user.id);
+  if (friend?.status === "accepted")
+    openChat(chats.value.find((chat) => chat.id === `direct:${user.id}`)!);
+  else showPeople.value = true;
 }
 function react(payload: { emoji: string; message: MessageModel }) {
   const active = !(payload.message.reactions?.[payload.emoji] ?? []).includes(
@@ -186,68 +319,122 @@ function react(payload: { emoji: string; message: MessageModel }) {
       :show-files="false"
       :show-emojis="true"
       :show-reaction-emojis="true"
-      :show-new-messages-divider="false"
+      :show-new-messages-divider="true"
       :text-formatting="{ markdown: false, linkify: true }"
       height="min(68dvh, 640px)"
       theme="dark"
-      @open-chat="(chat) => (activeChatId = String(chat.id))"
+      @open-chat="openChat"
+      @add-chat="showPeople = true"
       @click-user-tag="openUser"
       @send-message="sendMessage"
       @send-message-reaction="react"
+      @typing-message="typingMessage"
     />
-    <div class="people-list" aria-label="People in this room">
-      <div class="people-heading">
-        <strong>People here</strong>
+    <button
+      class="people-list people-launch"
+      type="button"
+      aria-haspopup="dialog"
+      @click="showPeople = true"
+    >
+      <strong>Friends & people</strong>
+      <span v-if="incomingRequests.length" class="people-badge">
+        {{ incomingRequests.length }} request<span
+          v-if="incomingRequests.length !== 1"
+          >s</span
+        >
+      </span>
+      <span v-else>{{ otherPlayers.length }} nearby</span>
+    </button>
+    <section
+      v-if="showPeople"
+      class="people-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="people-dialog-title"
+      @keydown.esc="showPeople = false"
+    >
+      <header class="people-dialog-header">
+        <h2 id="people-dialog-title">Friends & people</h2>
+        <button
+          type="button"
+          aria-label="Close friends and people"
+          @click="showPeople = false"
+        >
+          ×
+        </button>
+      </header>
+      <div class="people-dialog-actions">
+        <p>
+          Add players who are in this room, accept requests, or open a direct
+          message.
+        </p>
         <button type="button" @click="emit('refreshSocial')">Refresh</button>
       </div>
+      <h3 v-if="incomingRequests.length">Friend requests</h3>
       <div
-        v-for="player in players.filter(
-          (player) => player.userId !== currentUser.id,
-        )"
-        :key="player.userId"
+        v-for="friend in incomingRequests"
+        :key="`request:${friend.userId}`"
+        class="person-row"
       >
-        {{ player.name }}
+        <span
+          ><strong>{{ friend.name }}</strong
+          ><small> wants to be friends</small></span
+        >
+        <button type="button" @click="emit('acceptFriend', friend.userId)">
+          Accept
+        </button>
+      </div>
+      <h3>People in this room</h3>
+      <p v-if="!otherPlayers.length" class="people-empty">
+        No other players are here right now.
+      </p>
+      <div
+        v-for="player in otherPlayers"
+        :key="player.userId"
+        class="person-row"
+      >
+        <span><i class="online-dot" />{{ player.name }}</span>
         <button
-          v-if="!friends.some((friend) => friend.userId === player.userId)"
+          v-if="!friendFor(player.userId)"
           type="button"
           @click="emit('requestFriend', player.userId)"
         >
-          Add
+          Add friend
         </button>
         <span
           v-else-if="
-            friends.find((friend) => friend.userId === player.userId)
-              ?.status === 'pending' &&
-            friends.find((friend) => friend.userId === player.userId)
-              ?.requestedByUserId === currentUser.id
+            friendFor(player.userId)?.status === 'pending' &&
+            friendFor(player.userId)?.requestedByUserId === currentUser.id
           "
           class="friend-state"
+          >Request sent</span
         >
-          Request sent
-        </span>
         <button
-          v-else-if="
-            friends.find((friend) => friend.userId === player.userId)
-              ?.status === 'pending' &&
-            friends.find((friend) => friend.userId === player.userId)
-              ?.requestedByUserId !== currentUser.id
-          "
+          v-else-if="friendFor(player.userId)?.status === 'pending'"
           type="button"
           @click="emit('acceptFriend', player.userId)"
         >
           Accept
         </button>
-        <button
-          v-else-if="
-            friends.find((friend) => friend.userId === player.userId)
-              ?.status === 'accepted'
-          "
-          type="button"
-          @click="activeChatId = `direct:${player.userId}`"
-        >
+        <button v-else type="button" @click="openDirect(player.userId)">
           Message
         </button>
       </div>
-    </div>
+      <h3 v-if="acceptedFriends.length">Friends</h3>
+      <div
+        v-for="friend in acceptedFriends"
+        :key="`friend:${friend.userId}`"
+        class="person-row"
+      >
+        <span
+          ><i :class="['online-dot', { offline: !friend.online }]" />{{
+            friend.name
+          }}</span
+        >
+        <button type="button" @click="openDirect(friend.userId)">
+          Message
+        </button>
+      </div>
+    </section>
   </div>
 </template>

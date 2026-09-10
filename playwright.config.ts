@@ -4,6 +4,7 @@ export default defineConfig({
   globalSetup: "./tests/browser/global-setup.ts",
   workers: 1,
   use: {
+    actionTimeout: 10_000,
     baseURL:
       process.env.SMOKE_URL ||
       process.env.PUBLIC_ORIGIN ||

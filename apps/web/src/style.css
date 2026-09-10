@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "Bold Pixels";
+  src: url("/assets/fonts/BoldPixels.ttf") format("truetype");
+  font-display: swap;
+}
+
 .room-status {
   position: absolute;
   width: 1px;
@@ -11,10 +17,14 @@
 }
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: "Bold Pixels", ui-sans-serif, system-ui, sans-serif;
   color: #e5ebe3;
   background: #122328;
   font-synthesis: none;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
 }
 * {
   box-sizing: border-box;
@@ -65,9 +75,10 @@ floatingpanel {
   flex: 1;
 }
 .brand {
+  font-family: "Bold Pixels", ui-monospace, monospace;
   color: inherit;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 64px;
   font-weight: 650;
   display: flex;
   align-items: center;
@@ -81,9 +92,10 @@ floatingpanel {
   font-size: 9px;
   letter-spacing: 1.6px;
   color: #bfc9b9;
+  font-family: "Bold Pixels", ui-monospace, monospace;
 }
 .server-connection {
-  font-size: 12px;
+  font-size: 24px;
   color: #b3c2b8;
   display: flex;
   gap: 10px;
@@ -113,8 +125,12 @@ floatingpanel {
   letter-spacing: 3px;
   color: #dbc28b;
 }
+h1,
+h2,
+h3 {
+  font-family: "Bold Pixels", ui-monospace, monospace;
+}
 h1 {
-  font-family: Georgia, serif;
   font-size: clamp(34px, 4vw, 54px);
   font-weight: 400;
   line-height: 1.06;
@@ -530,6 +546,93 @@ button:not(
   color: #e8ebf5;
   font-size: 11px;
 }
+.people-launch {
+  width: 100%;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.people-launch > span {
+  color: #aeb7d7;
+}
+.people-badge {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #6d58db;
+  color: white !important;
+}
+.people-dialog {
+  position: absolute;
+  z-index: 60;
+  inset: 12px;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid #69738d;
+  background: #171b27;
+  color: #e8ebf5;
+  box-shadow: 0 18px 54px #000b;
+}
+.people-dialog-header {
+  height: auto;
+  padding-bottom: 12px;
+}
+.people-dialog-header h2,
+.people-dialog h3,
+.people-dialog p {
+  margin: 0;
+}
+.people-dialog-header h2 {
+  font-size: 18px;
+}
+.people-dialog-header button,
+.people-dialog-actions button,
+.person-row button {
+  width: auto;
+  margin: 0;
+  padding: 6px 9px;
+}
+.people-dialog-actions,
+.person-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.people-dialog-actions {
+  margin-bottom: 18px;
+  color: #aeb7d7;
+  font-size: 11px;
+}
+.people-dialog h3 {
+  padding: 12px 0 7px;
+  border-bottom: 1px solid #ffffff16;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.person-row {
+  min-height: 42px;
+  border-bottom: 1px solid #ffffff0d;
+  font-size: 12px;
+}
+.person-row small,
+.people-empty {
+  color: #aeb7d7;
+}
+.online-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #4ed39a;
+}
+.online-dot.offline {
+  background: #69738d;
+}
 .people-list > div {
   display: flex;
   align-items: center;
@@ -548,6 +651,10 @@ button:not(
 .room-chat .acc-chat-root {
   overflow: visible;
   border-radius: 0 !important;
+}
+.room-chat .acc-message-row:not(.acc-message-row-me) .acc-reactions-menu {
+  right: auto;
+  left: 0;
 }
 .room-chat emoji-picker {
   width: min(320px, calc(100vw - 32px));
@@ -583,7 +690,7 @@ footer {
   display: flex;
   justify-content: space-between;
   color: #80988e;
-  font-size: 10px;
+  font-size: 16px;
   padding: 24px 0;
 }
 code {

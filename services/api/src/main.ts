@@ -15,7 +15,7 @@ const config = configFor("api");
 const pool = databasePool(config.API_DATABASE_URL, "application");
 const app = buildServer(
   "api",
-  () => databaseReady(pool, "006"),
+  () => databaseReady(pool, "007"),
   config.LOG_LEVEL,
 );
 app.addHook("onClose", () => pool.end());
@@ -48,6 +48,28 @@ function view(row: Record<string, unknown>) {
 function pair(left: string, right: string) {
   return left < right ? ([left, right] as const) : ([right, left] as const);
 }
+function directMessageView(row: Record<string, unknown>) {
+  return {
+    serverMessageId: row.id,
+    clientRequestId: row.client_request_id,
+    senderId: row.sender_user_id,
+    senderName: row.sender_display_name,
+    recipientId: row.recipient_user_id,
+    timestamp: row.created_at,
+    deliveredAt: row.delivered_at,
+    readAt: row.read_at,
+    channel: "direct" as const,
+    text: row.content,
+  };
+}
+async function canMessage(senderId: string, recipientId: string) {
+  const [low, high] = pair(senderId, recipientId);
+  const result = await pool.query(
+    "SELECT 1 FROM friendship WHERE user_low_id=$1 AND user_high_id=$2 AND status='accepted'",
+    [low, high],
+  );
+  return Boolean(result.rowCount);
+}
 function requireRealtime(request: { headers: Record<string, unknown> }) {
   if (
     request.headers["x-realtime-internal-token"] !==
@@ -58,7 +80,9 @@ function requireRealtime(request: { headers: Record<string, unknown> }) {
 async function socialView(userId: string) {
   const result = await pool.query(
     `SELECT CASE WHEN user_low_id=$1 THEN user_high_id ELSE user_low_id END AS user_id,
-            status, requested_by_user_id, display_name, online, room_address
+            status, requested_by_user_id, display_name,
+            (online = true AND user_presence.updated_at > now() - interval '40 seconds') AS online,
+            room_address
        FROM friendship
        LEFT JOIN user_presence ON user_presence.user_id=CASE WHEN user_low_id=$1 THEN user_high_id ELSE user_low_id END
       WHERE user_low_id=$1 OR user_high_id=$1
@@ -157,6 +181,48 @@ app.get("/v1/social/friends", async (request) => {
   const user = await requireUser(request.headers.cookie);
   return { friends: await socialView(user.id) };
 });
+app.get("/v1/direct-messages", async (request) => {
+  const user = await requireUser(request.headers.cookie);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `UPDATE direct_message
+          SET delivered_at=COALESCE(delivered_at,now())
+        WHERE recipient_user_id=$1 AND delivered_at IS NULL`,
+      [user.id],
+    );
+    const result = await client.query(
+      `SELECT * FROM (
+         SELECT * FROM direct_message
+          WHERE sender_user_id=$1 OR recipient_user_id=$1
+          ORDER BY created_at DESC LIMIT 200
+       ) recent ORDER BY created_at`,
+      [user.id],
+    );
+    const ids = result.rows.map((row) => row.id);
+    const reactionRows = ids.length
+      ? (
+          await client.query(
+            "SELECT message_id,user_id,emoji FROM direct_message_reaction WHERE message_id=ANY($1::uuid[])",
+            [ids],
+          )
+        ).rows
+      : [];
+    await client.query("COMMIT");
+    const reactions: Record<string, Record<string, string[]>> = {};
+    for (const row of reactionRows) {
+      const message = (reactions[row.message_id] ??= {});
+      (message[row.emoji] ??= []).push(row.user_id);
+    }
+    return { messages: result.rows.map(directMessageView), reactions };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+});
 app.post<{ Params: { userId: string } }>(
   "/v1/social/friends/:userId",
   async (request, reply) => {
@@ -233,14 +299,119 @@ app.post<{ Body: { senderId?: unknown; recipientId?: unknown } }>(
     const { senderId, recipientId } = request.body ?? {};
     if (typeof senderId !== "string" || typeof recipientId !== "string")
       return reply.code(400).send({ allowed: false });
-    const [low, high] = pair(senderId, recipientId);
-    const result = await pool.query(
-      "SELECT 1 FROM friendship WHERE user_low_id=$1 AND user_high_id=$2 AND status='accepted'",
-      [low, high],
-    );
-    return { allowed: Boolean(result.rowCount) };
+    return { allowed: await canMessage(senderId, recipientId) };
   },
 );
+app.post<{
+  Body: {
+    clientRequestId?: unknown;
+    senderId?: unknown;
+    senderName?: unknown;
+    recipientId?: unknown;
+    text?: unknown;
+    delivered?: unknown;
+  };
+}>("/internal/direct-messages", async (request, reply) => {
+  requireRealtime(request);
+  const body = request.body ?? {};
+  if (
+    typeof body.clientRequestId !== "string" ||
+    body.clientRequestId.length < 1 ||
+    body.clientRequestId.length > 80 ||
+    typeof body.senderId !== "string" ||
+    typeof body.senderName !== "string" ||
+    body.senderName.length < 1 ||
+    body.senderName.length > 40 ||
+    typeof body.recipientId !== "string" ||
+    body.recipientId === body.senderId ||
+    typeof body.text !== "string" ||
+    body.text.trim().length < 1 ||
+    body.text.trim().length > 280 ||
+    typeof body.delivered !== "boolean"
+  )
+    return reply.code(400).send({ code: "INVALID_DIRECT_MESSAGE" });
+  if (!(await canMessage(body.senderId, body.recipientId)))
+    return reply.code(403).send({ code: "DIRECT_MESSAGE_NOT_ALLOWED" });
+  const result = await pool.query(
+    `INSERT INTO direct_message(
+       id,client_request_id,sender_user_id,sender_display_name,recipient_user_id,content,delivered_at
+     ) VALUES($1,$2,$3,$4,$5,$6,CASE WHEN $7 THEN now() ELSE NULL END)
+     ON CONFLICT (sender_user_id,client_request_id) DO UPDATE
+       SET client_request_id=EXCLUDED.client_request_id
+     RETURNING *`,
+    [
+      randomUUID(),
+      body.clientRequestId,
+      body.senderId,
+      body.senderName,
+      body.recipientId,
+      body.text.trim(),
+      body.delivered,
+    ],
+  );
+  return reply.code(201).send(directMessageView(result.rows[0]));
+});
+app.put<{ Params: { messageId: string }; Body: { readerId?: unknown } }>(
+  "/internal/direct-messages/:messageId/read",
+  async (request, reply) => {
+    requireRealtime(request);
+    if (typeof request.body?.readerId !== "string")
+      return reply.code(400).send({ code: "INVALID_READER" });
+    const result = await pool.query(
+      `UPDATE direct_message
+          SET delivered_at=COALESCE(delivered_at,now()),read_at=COALESCE(read_at,now())
+        WHERE id::text=$1 AND recipient_user_id=$2
+        RETURNING sender_user_id,read_at`,
+      [request.params.messageId, request.body.readerId],
+    );
+    if (!result.rowCount)
+      return reply.code(404).send({ code: "DIRECT_MESSAGE_NOT_FOUND" });
+    return {
+      messageId: request.params.messageId,
+      senderId: result.rows[0].sender_user_id,
+      readerId: request.body.readerId,
+      readAt: result.rows[0].read_at,
+    };
+  },
+);
+app.put<{
+  Params: { messageId: string };
+  Body: { userId?: unknown; emoji?: unknown; active?: unknown };
+}>("/internal/direct-messages/:messageId/reaction", async (request, reply) => {
+  requireRealtime(request);
+  const { userId, emoji, active } = request.body ?? {};
+  if (
+    typeof userId !== "string" ||
+    typeof emoji !== "string" ||
+    emoji.length < 1 ||
+    emoji.length > 16 ||
+    typeof active !== "boolean"
+  )
+    return reply.code(400).send({ code: "INVALID_REACTION" });
+  const participant = await pool.query(
+    "SELECT sender_user_id,recipient_user_id FROM direct_message WHERE id::text=$1 AND (sender_user_id=$2 OR recipient_user_id=$2)",
+    [request.params.messageId, userId],
+  );
+  if (!participant.rowCount)
+    return reply.code(404).send({ code: "DIRECT_MESSAGE_NOT_FOUND" });
+  if (active)
+    await pool.query(
+      "INSERT INTO direct_message_reaction(message_id,user_id,emoji) VALUES($1,$2,$3) ON CONFLICT DO NOTHING",
+      [request.params.messageId, userId, emoji],
+    );
+  else
+    await pool.query(
+      "DELETE FROM direct_message_reaction WHERE message_id::text=$1 AND user_id=$2 AND emoji=$3",
+      [request.params.messageId, userId, emoji],
+    );
+  return {
+    ok: true,
+    recipientId:
+      participant.rows[0].sender_user_id === userId
+        ? participant.rows[0].recipient_user_id
+        : participant.rows[0].sender_user_id,
+  };
+});
 app.get("/v1/rooms/entry", async (request) => {
   await requireUser(request.headers.cookie);
   return view(

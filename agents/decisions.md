@@ -1,5 +1,12 @@
 # Decisions
 
+## 2026-09-10 — Milestone 2 social and direct messages
+
+- API owns durable friendship, presence projections and direct-message history. Realtime derives the authenticated sender, persists authorized DMs through its internal API boundary, and delivers live events over the existing Colyseus connection; the browser does not create a second socket or persistence store.
+- Direct messages between accepted friends persist whether the recipient is online or offline. Delivery/read timestamps and DM reactions persist with the message; typing remains transient. Room conversation remains live-only.
+- Presence is renewed by a 15-second realtime heartbeat and treated as offline after 40 seconds without renewal, while graceful final-session leave records offline immediately. This prevents a crashed client or realtime process from leaving durable false-online state.
+- The full Advanced Chat composition owns the chat list, collapse behavior, unread counts, previews, typing labels, composer features and message reactions. This supersedes the earlier one-conversation standalone composition decision now that multiple DM conversations exist.
+
 ## 2026-09-09 — Room allocation and navigation
 
 - Application API owns persistent room IDs, public addresses, concurrency-safe allocation and admission. Realtime admits through that API and partitions live Colyseus instances by address; clients never select layouts or coordinates directly.

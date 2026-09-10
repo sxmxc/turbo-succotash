@@ -4,6 +4,8 @@ Release notes use one entry per root package version. Changes under Unreleased a
 
 ## [Unreleased]
 
+Milestone 2 social completion adds saved avatar appearance, explicit friendship requests and acceptance, heartbeat-expiring presence, owner-only personal apartments, and persistent direct messages for online or offline friends. Advanced Chat now exposes room and DM conversations with mentions, emoji, links, message reactions, previews, typing, unread counts and DM-only delivery/read receipts. Application migrations `005` through `007` are required. New HTTP/internal routes and optional realtime message types are additive; coordinated protocol 2 clients remain compatible. The uploaded Bold Pixels font is used for headings and the top-bar product name.
+
 ## [0.2.5] - 2026-09-09
 
 Milestone 2 adds persistent rooms with immutable IDs and public `F###-R###` addresses, concurrency-safe Floor 1+ allocation, server-enforced authenticated/private admission, reusable elevator and direct-door interactions, named destination spawns, a room directory/address navigator, and public/private room creation. Every floor lobby is R000 and user rooms allocate from R001 through R500. New Colyseus instances are partitioned by address and use the admitted room template. Application migrations `002` through `004` are required. Protocol 2 compatibility is retained through the existing `lobby` route, which remains a Floor 0 alias for coordinated 0.2.x clients.
