@@ -193,7 +193,7 @@ function directMessage(message: DirectMessageEvent): MessageModel {
 
 const roomChat = computed<ChatModel>(() => ({
   id: "room",
-  name: "Room conversation",
+  name: "Current Room Chat",
   users: users.value,
   unreadCount: unreadCounts.value.room,
   lastMessage: props.messages.length
