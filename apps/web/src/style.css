@@ -150,6 +150,12 @@ h1 {
 .play-layout .game-shell {
   margin: 0;
 }
+.play-layout:fullscreen .room-canvas {
+  height: 87dvh;
+}
+.play-layout:fullscreen .acc-card-window {
+  height: 68dvh;
+}
 .chat-dock {
   position: sticky;
   min-width: 0;
