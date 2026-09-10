@@ -128,7 +128,7 @@ floatingpanel {
 h1,
 h2,
 h3 {
-  font-family: "Bold Pixels", ui-monospace, monospace;
+  font-family: "Bold Pixels", ui-monospace, monospace !important;
 }
 h1 {
   font-size: clamp(34px, 4vw, 54px);

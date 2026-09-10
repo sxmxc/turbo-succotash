@@ -14,7 +14,7 @@ npm run smoke
 npm run test:database
 npm run test:dependencies
 npm run test:browser
-npm run release:check -- v0.2.5
+npm run release:check -- v0.2.6
 npm run release:manifest
 npm run deploy -- artifacts/release.json
 ```
