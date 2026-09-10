@@ -130,6 +130,7 @@ h1 {
   justify-content: center;
   align-items: start;
   gap: clamp(16px, 2vw, 32px);
+  flex: 1;
 }
 .play-layout:fullscreen {
   width: 100vw;
@@ -145,7 +146,6 @@ h1 {
 }
 .chat-dock {
   position: sticky;
-  top: 16px;
   min-width: 0;
   flex: 3;
 }
@@ -633,6 +633,9 @@ code {
     width: min(960px, 100%);
     margin: 0 -16px 18px;
     flex: 1;
+  }
+  .game-shell:fullscreen {
+    flex: 10;
   }
   .game-toolbar {
     min-height: 48px;

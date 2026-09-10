@@ -364,7 +364,7 @@ onMounted(async () => {
         ><span class="brand-mark">▦</span> Panverse Plaza</a
       ><span class="header-actions"
         ><span class="server-connection"
-          >Server <i /> {{ connectionStatus }}</span
+          >Server Status <i />{{ connectionStatus }}</span
         ><button
           v-if="user && connection"
           class="header-sign-out text-button"
