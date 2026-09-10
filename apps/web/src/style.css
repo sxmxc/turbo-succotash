@@ -147,6 +147,7 @@ h1 {
   align-items: start;
   gap: clamp(16px, 2vw, 32px);
   flex: 1;
+  margin-top: 32px;
 }
 .play-layout:fullscreen {
   width: 100vw;
@@ -167,10 +168,11 @@ h1 {
   margin: 0;
 }
 .play-layout:fullscreen .room-canvas {
-  height: 87dvh;
+  height: 90.5dvh;
+  padding: 0;
 }
 .play-layout:fullscreen .acc-card-window {
-  height: 68dvh;
+  height: 96dvh !important;
 }
 .chat-dock {
   position: sticky;
