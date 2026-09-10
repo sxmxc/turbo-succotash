@@ -699,6 +699,9 @@ code {
 .acc-room-header {
   border-radius: 0 !important;
 }
+.acc-room-item {
+  border-radius: 0 !important;
+}
 @media (max-width: 640px) {
   main {
     padding: 0 16px;
