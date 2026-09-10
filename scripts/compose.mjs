@@ -35,8 +35,6 @@ if (process.argv[1]?.endsWith("/compose.mjs")) {
         "--wait",
         "--wait-timeout",
         "120",
-        "--scale",
-        "migrate=0",
       ],
       env,
     );
