@@ -10,12 +10,14 @@ export async function loginAndJoin(
   await page.getByLabel("Email").fill(browserAccount.email);
   await page.getByLabel("Password").fill(browserAccount.password);
   await page.getByRole("button", { name: "Sign in" }).click();
+  const greeting = page.getByRole("heading", { name: `Hello, ${browserAccount.name}.` });
+  await greeting.waitFor();
   await expect(
-    page.getByRole("heading", { name: `Hello, ${browserAccount.name}.` }),
+    greeting,
   ).toBeVisible();
   await page.getByLabel("Shirt color").selectOption({ label: shirt });
   await page.getByRole("button", { name: "Enter the Lobby" }).click();
-  await expect(page.locator(".server-connection")).toContainText(/connected/i);
+  await expect(page.locator(".server-connection")).toContainText(/Connected/i);
   if (expectReady)
     await expect(page.getByText("Scene ready", { exact: true })).toBeVisible();
 }

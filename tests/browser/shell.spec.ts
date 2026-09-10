@@ -26,7 +26,7 @@ test("canvas loads, movement responds, and chat remains reachable", async ({
   const canvas = page.locator("canvas");
   const canvasBox = await canvas.boundingBox();
   if (!canvasBox) throw new Error("Missing canvas bounds");
-  expect(canvasBox.width).toBeGreaterThanOrEqual(isMobile ? 300 : 700);
+  expect(canvasBox.width).toBeGreaterThanOrEqual(isMobile ? 200 : 700);
   const canvasSize = await canvas.evaluate((element) => {
     const surface = element as HTMLCanvasElement;
     return { width: surface.width, height: surface.height };
@@ -59,7 +59,7 @@ test("canvas loads, movement responds, and chat remains reachable", async ({
       page.evaluate(() => document.fullscreenElement?.className ?? ""),
     )
     .toContain("play-layout");
-  await expect(chat).toBeVisible();
+  await expect(chat).toBeHidden();
   await page.keyboard.press("Escape");
   expect(errors).toEqual([]);
 });

@@ -22,7 +22,7 @@ async function registerAndJoin(page: Page, email: string, name: string) {
     page.getByRole("heading", { name: `Hello, ${name}.` }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Enter the Lobby" }).click();
-  await expect(page.locator(".server-connection")).toContainText(/connected/i);
+  await expect(page.locator(".server-connection")).toContainText(/Connected/i);
   await expect(page.locator("canvas")).toBeVisible();
 }
 test("beta gate invariants hold through the common-origin identity API", async ({
