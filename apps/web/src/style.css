@@ -368,9 +368,16 @@ input {
   width: 100%;
   color: #273934;
 }
-button:not(.panel-handle):not(.text-button):not(.acc-message-options):not(
-    .acc-svg-button
-  ) {
+button:not(
+  .panel-handle,
+  .text-button,
+  .acc-message-options,
+  .acc-svg-button,
+  .acc-room-open,
+  .acc-button-reaction,
+  .acc-reaction-me,
+  .acc-reaction-option
+) {
   border: 0;
   border-radius: 4px;
   background: #29473f;
