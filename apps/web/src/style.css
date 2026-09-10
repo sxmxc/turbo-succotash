@@ -154,7 +154,7 @@ h1 {
   height: 100vh;
   max-width: none;
   margin: 0;
-  padding: 16px;
+  padding: 0;
   overflow: auto;
   background: #122328;
 }
@@ -169,7 +169,6 @@ h1 {
 }
 .play-layout:fullscreen .room-canvas {
   height: 90.5dvh;
-  padding: 0;
 }
 .play-layout:fullscreen .acc-card-window {
   height: 96dvh !important;
