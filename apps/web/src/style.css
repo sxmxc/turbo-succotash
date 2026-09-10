@@ -773,4 +773,7 @@ code {
   footer {
     gap: 12px;
   }
+  .acc-room-header {
+    border-radius: none !important;
+  }
 }
