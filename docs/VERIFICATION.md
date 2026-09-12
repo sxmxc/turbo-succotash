@@ -1,6 +1,6 @@
 # Bootstrap verification — 2026-09-07
 
-Latest Milestone 2 social/direct-message implementation: `npm run typecheck`, `npm test` (14 tests), `npm run lint`, `npm run build`, `npm run format:check`, and `git diff --check` passed. `npm run test:database` is pending because the pre-existing local `.env` lacks the newly required `REALTIME_INTERNAL_TOKEN`; add a fresh 32-byte value, then rebuild/restart Compose and run database/browser checks.
+Milestone 2 is complete. Final verification on 2026-09-10 passed `npm run check` (including formatting, lint, type checks, 14 unit tests and the production build), migration-007 database integration, a healthy rebuilt Compose stack, and focused two-session browser acceptance for rooms, friendship, presence, apartments and persistent online/offline direct messages. See [Milestone 2 completion](#milestone-2-completion--2026-09-10) for the exact evidence.
 
 Environment: Linux amd64, Docker 29.8.0, Compose 5.5.1. Commands use Node 24.20.0 and npm 12.0.2. This host initially had Node 25, so the verified LTS distribution was extracted into `/tmp/social-node` and npm installed into `/tmp/social-npm` (outside the repository). For this session, commands used `PATH=/tmp/social-npm/bin:/tmp/social-node/node-v24.20.0-linux-x64/bin:$PATH`; normal setup uses `.nvmrc`.
 
@@ -147,7 +147,7 @@ Owner-facing external-origin play sign-off was accepted. Release 0.2.0 marked Mi
 ## Milestone 2 social/fullscreen follow-up — 2026-09-09
 
 - `npm run typecheck` and `npm run build`: passed. `npm run test:database`: passed earlier in this change against migrations 001–006.
-- Rebuilt/restarted Compose successfully; all services became healthy. Focused appearance persistence passed. The expanded two-session check then found Advanced Chat displaying the transported mention token literally; the adapter was corrected to transport readable `@Name` text. Final focused rerun is pending.
+- Rebuilt/restarted Compose successfully; all services became healthy. Focused appearance persistence passed. The expanded two-session check then found Advanced Chat displaying the transported mention token literally; the adapter was corrected to transport readable `@Name` text. This pending rerun was completed successfully in the 2026-09-10 closeout below.
 - Fullscreen now targets the outer Vue/Phaser play layout through Phaser ScaleManager. Room/DM reactions are live-only; receipt icons are omitted for room messages and retained for sent DMs.
 
 ## Milestone 2 completion — 2026-09-10

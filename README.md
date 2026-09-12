@@ -2,7 +2,7 @@
 
 # Panverse Plaza
 
-Milestones 0 and 1 are complete; the project is implementing Milestone 2 rooms and social features on top of the one-room playable slice from the [working design](docs/PANVERSE_PLAZA_DESIGN.md). Authenticated users can enter the Tiled lobby with layered LPC characters, move by arrows/WASD or click/tap, collide with the environment, see realtime presence, and use live-only room chat and speech bubbles. Vue owns DOM UI and Phaser owns the game surface. [LPC metadata/credits](docs/LPC_ASSETS.md), [Tiled authoring](docs/TILED_ROOMS.md), and [Phaser guardrails](docs/PHASER.md) describe those pipelines.
+Milestones 0 through 2 are complete; Milestone 3 controlled-alpha features are next in the [working design](docs/PANVERSE_PLAZA_DESIGN.md). Authenticated users can navigate persistent public and private rooms, enter their personal apartment, move with server-authoritative collision, see expiring realtime presence, manage friendships, use live-only room chat, and exchange persistent direct messages with online or offline friends. Vue owns DOM UI and Phaser owns the game surface. [LPC metadata/credits](docs/LPC_ASSETS.md), [Tiled authoring](docs/TILED_ROOMS.md), and [Phaser guardrails](docs/PHASER.md) describe those pipelines.
 
 ## Quick start
 
